@@ -1,0 +1,40 @@
+# Ambientes e caches Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Configuracoes locais e segredos
+.env
+.env.*
+!implantacao/ambiente.exemplo
+*.pem
+*.key
+
+# Dados gerados e gravacoes grandes
+dados/brutos/**
+dados/rotulados/**
+!dados/brutos/README.md
+!dados/rotulados/README.md
+artefatos/
+registros/
+*.log
+
+# Pesos serao adicionados conscientemente com Git LFS
+modelos/**/*.onnx
+modelos/**/*.tflite
+modelos/**/*.pt
+modelos/**/*.pth
+
+# Editores e sistema operacional
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

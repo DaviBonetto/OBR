@@ -1,0 +1,13 @@
+[plataforma]
+nome = "Raspberry Pi 5"
+arquitetura = "aarch64"
+
+[execucao]
+modo_simulacao = true
+iniciar_automaticamente = false
+perfil = "desenvolvimento"
+
+[desempenho]
+quadros_por_segundo_minimo = 25
+monitorar_temperatura = true
+monitorar_memoria = true

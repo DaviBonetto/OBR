@@ -1,0 +1,11 @@
+[servidor]
+habilitado = false
+endereco = "127.0.0.1"
+porta = 8080
+
+[video]
+quadros_por_segundo_maximo = 15
+qualidade_jpeg = 80
+
+[comandos]
+aceitar_comandos = false

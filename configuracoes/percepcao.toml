@@ -1,0 +1,23 @@
+[entrada]
+largura_modelo = 320
+altura_modelo = 192
+roi_x = 0.0
+roi_y = 0.30
+roi_largura = 1.0
+roi_altura = 0.70
+
+[linha]
+limiar_encontrada = 0.75
+limiar_incerta = 0.45
+idade_maxima_previsao_ms = 120
+segmentacao_principal = "ia"
+validacao_secundaria = "classica"
+
+[ponto_objetivo]
+distancia_reta_normalizada = 0.42
+distancia_curva_normalizada = 0.25
+
+[desempenho]
+quadros_por_segundo_alvo = 25
+inferencia_p95_max_ms = 20
+latencia_total_p95_max_ms = 40

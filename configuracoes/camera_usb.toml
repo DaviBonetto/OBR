@@ -1,0 +1,18 @@
+# Configuracao inicial. Os valores fisicos serao medidos na Fase 1.
+
+[dispositivo]
+origem = 0
+largura = 640
+altura = 480
+quadros_por_segundo = 30
+rotacao_graus = 0
+tamanho_buffer = 1
+
+[exposicao]
+modo = "automatico"
+quadros_aquecimento = 30
+
+[captura]
+formato_video = "mkv"
+registrar_manifesto = true
+registrar_eventos = true

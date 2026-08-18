@@ -1,0 +1,11 @@
+# Permanecera seguro ate a fase especifica de controle fisico.
+
+[seguranca]
+atuadores_habilitados = false
+modo_simulacao = true
+parada_emergencia_obrigatoria = true
+tempo_maximo_sem_telemetria_ms = 250
+
+[locomocao]
+velocidade_linear_inicial = 0.0
+velocidade_angular_inicial = 0.0

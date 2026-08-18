@@ -1,0 +1,8 @@
+[sistema]
+habilitado = false
+modo_simulacao = true
+
+[percepcao]
+detectar_zona = false
+detectar_vitimas = false
+detectar_saida = false

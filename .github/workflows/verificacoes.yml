@@ -1,0 +1,35 @@
+name: Verificacoes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: Qualidade e testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v7
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.12.1"
+          enable-cache: true
+
+      - name: Instalar Python
+        run: uv python install 3.11
+
+      - name: Instalar projeto
+        run: uv sync --locked --extra desenvolvimento
+
+      - name: Verificar qualidade
+        run: uv run ruff check .
+
+      - name: Executar testes
+        run: uv run pytest
