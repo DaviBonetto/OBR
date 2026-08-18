@@ -8,7 +8,7 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 0 — Fundacao do projeto.**
+**Fase 0 concluida em 18 de agosto de 2026 — Fundacao do projeto.**
 
 Nesta fase existem somente a arquitetura, os contratos centrais, configuracoes seguras,
 documentacao e verificacoes automatizadas. Camera, motores e mecanismos de resgate ainda
@@ -16,6 +16,8 @@ nao sao acionados.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
+
+Repositorio principal: [DaviBonetto/OBR](https://github.com/DaviBonetto/OBR).
 
 ## Objetivo
 

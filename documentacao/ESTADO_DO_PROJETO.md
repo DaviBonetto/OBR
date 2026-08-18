@@ -4,7 +4,7 @@ Atualizado em: 18 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 0 — em execucao.**
+**Fase 0 — concluida.**
 
 ## Entregas da Fase 0
 
@@ -14,8 +14,9 @@ Atualizado em: 18 de agosto de 2026.
 - [x] criar o contrato inicial da estimativa de linha;
 - [x] documentar criterios de aceite e seguranca;
 - [x] executar qualidade e testes automatizados;
-- [ ] criar o primeiro commit;
-- [ ] publicar e verificar `DaviBonetto/OBR`.
+- [x] criar o primeiro commit;
+- [x] publicar e verificar `DaviBonetto/OBR`;
+- [x] validar qualidade e testes tambem no GitHub Actions.
 
 ## Ainda nao implementado
 
