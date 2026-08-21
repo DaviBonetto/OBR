@@ -12,6 +12,7 @@ const elementos = {
   escuro: document.querySelector("#escuro"),
   nitidez: document.querySelector("#nitidez"),
   armazenamento: document.querySelector("#armazenamento"),
+  alertasImagem: document.querySelector("#alertas-imagem"),
   idadeQuadro: document.querySelector("#idade-quadro"),
   nome: document.querySelector("#nome"),
   local: document.querySelector("#local"),
@@ -75,6 +76,32 @@ function atualizarBotoes() {
   elementos.finalizar.disabled = !sessaoAtiva;
   elementos.estadoSessao.textContent = sessaoAtiva ? "SESSÃO ATIVA" : "SEM SESSÃO";
   elementos.estadoSessao.classList.toggle("ativo", sessaoAtiva);
+}
+
+function atualizarAlertasImagem(metricas) {
+  const alertas = [];
+  const brilho = Number(metricas.brilho_medio);
+  const escuro = Number(metricas.percentual_escuro);
+  const claro = Number(metricas.percentual_claro);
+  const nitidez = Number(metricas.nitidez_laplaciano);
+
+  if (brilho < 35 || escuro > 55) {
+    alertas.push("Imagem muito escura: descubra a lente, afaste-a do piso ou melhore a iluminação.");
+  }
+  if (brilho > 225 || claro > 35) {
+    alertas.push("Imagem muito clara: evite reflexo direto e reduza a iluminação sobre o piso.");
+  }
+  if (nitidez < 25) {
+    alertas.push("Nitidez baixa: limpe a lente, ajuste o foco e mantenha o robô imóvel.");
+  }
+
+  elementos.alertasImagem.replaceChildren();
+  elementos.alertasImagem.classList.toggle("oculto", alertas.length === 0);
+  for (const alerta of alertas) {
+    const item = document.createElement("p");
+    item.textContent = alerta;
+    elementos.alertasImagem.append(item);
+  }
 }
 
 async function iniciarSessao() {
@@ -179,6 +206,9 @@ async function atualizarEstado() {
       elementos.claro.textContent = `${Number(quadro.metricas.percentual_claro).toFixed(1)}%`;
       elementos.escuro.textContent = `${Number(quadro.metricas.percentual_escuro).toFixed(1)}%`;
       elementos.nitidez.textContent = Number(quadro.metricas.nitidez_laplaciano).toFixed(0);
+      atualizarAlertasImagem(quadro.metricas);
+    } else {
+      elementos.alertasImagem.classList.add("oculto");
     }
     const quantidade = captura.sessao?.capturas || 0;
     elementos.contadorFotos.textContent = `${quantidade} ${quantidade === 1 ? "foto" : "fotos"}`;

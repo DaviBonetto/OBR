@@ -233,6 +233,27 @@ h2 {
   font-size: 17px;
 }
 
+.alertas-imagem {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 202, 87, 0.38);
+  border-radius: 11px;
+  background: rgba(255, 202, 87, 0.08);
+  color: var(--amarelo);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.alertas-imagem p {
+  margin: 0;
+}
+
+.oculto {
+  display: none;
+}
+
 .formulario {
   display: grid;
   gap: 11px;

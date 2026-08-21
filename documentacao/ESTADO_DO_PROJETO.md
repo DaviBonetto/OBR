@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Atualizado em: 18 de agosto de 2026.
+Atualizado em: 21 de agosto de 2026.
 
 ## Fase atual
 
@@ -21,7 +21,6 @@ Atualizado em: 18 de agosto de 2026.
 ## Ainda nao implementado
 
 - detector classico ou por IA;
-- comunicacao com o Raspberry Pi;
 - controle de motores e servos;
 - maquina de estados;
 - estrategia ou mecanismo de resgate.
@@ -35,9 +34,15 @@ Atualizado em: 18 de agosto de 2026.
 - [x] painel web para foto unica e sequencia automatica;
 - [x] executar qualidade e testes automatizados;
 - [x] identificar e caracterizar a camera provisoria no Raspberry Pi 5;
-- [ ] instalar o painel de captura no Raspberry Pi;
-- [ ] abrir o painel real no computador;
+- [x] instalar o painel de captura no Raspberry Pi;
+- [x] abrir o painel real no computador;
 - [ ] capturar e verificar a primeira sessao fisica;
-- [ ] publicar e validar a Fase 1 no GitHub.
+- [x] publicar e validar o codigo da Fase 1 no GitHub.
+
+O painel real esta ativo em `10.136.42.116:8080` com a camera provisoria USB em
+`/dev/video0`, a 640 x 480 e aproximadamente 10 FPS. A imagem observada na
+instalacao estava muito escura e sem nitidez; o painel agora apresenta esses
+avisos explicitamente. A primeira sessao fisica somente deve ser capturada depois
+de descobrir e posicionar a lente sobre uma pista iluminada.
 
 Nenhum motor sera usado nesta fase.
