@@ -127,15 +127,11 @@ class EstimativaLinha:
             raise TypeError("centro_linha deve ser uma tupla imutavel")
 
         if self.erro_lateral_normalizado is not None:
-            _exigir_intervalo(
-                "erro_lateral_normalizado", self.erro_lateral_normalizado, -1.0, 1.0
-            )
+            _exigir_intervalo("erro_lateral_normalizado", self.erro_lateral_normalizado, -1.0, 1.0)
         if self.erro_angular_graus is not None:
             _exigir_finito("erro_angular_graus", self.erro_angular_graus)
         if self.curvatura_normalizada is not None:
-            _exigir_intervalo(
-                "curvatura_normalizada", self.curvatura_normalizada, -1.0, 1.0
-            )
+            _exigir_intervalo("curvatura_normalizada", self.curvatura_normalizada, -1.0, 1.0)
 
         if self.estado is EstadoDeteccao.ENCONTRADA:
             if len(self.centro_linha) < 2:

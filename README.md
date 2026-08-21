@@ -8,11 +8,11 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 0 concluida em 18 de agosto de 2026 — Fundacao do projeto.**
+**Fase 1 em andamento — Camera USB, captura e reproducao.**
 
-Nesta fase existem somente a arquitetura, os contratos centrais, configuracoes seguras,
-documentacao e verificacoes automatizadas. Camera, motores e mecanismos de resgate ainda
-nao sao acionados.
+A Fase 0 estabeleceu a arquitetura, contratos, configuracoes seguras e verificacoes
+automatizadas. A Fase 1 adiciona camera USB substituivel, painel de captura e sessoes de
+dataset. Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -60,6 +60,13 @@ No PowerShell:
 uv sync --extra desenvolvimento
 uv run ruff check .
 uv run pytest
+```
+
+Para abrir o painel com camera sintetica:
+
+```powershell
+uv sync --all-extras
+uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
 ```
 
 ## Regras que nao podem ser quebradas

@@ -47,6 +47,7 @@ OBR-Oficial/
 ├── codigo/obr_oficial/
 │   ├── nucleo/
 │   ├── dispositivos/
+│   ├── captura/
 │   ├── percepcao/
 │   │   ├── comum/
 │   │   ├── linha/
@@ -85,3 +86,9 @@ controle tambem consumira somente o contrato validado.
 - O conjunto de teste e separado por sessao e local, nunca por quadros aleatorios vizinhos.
 - Cada modelo aprovado possui manifesto, metricas, formato, hash e configuracao de entrada.
 - Pesos grandes somente entram no repositorio por decisao explicita e Git LFS.
+
+## Troca de camera
+
+Consumidores dependem de `FonteCamera`, nao de OpenCV, indice USB ou modelo fisico. Camera
+USB e simulacao implementam o mesmo contrato. Perfis e calibracoes permanecem fora do codigo,
+permitindo que a camera provisoria e a oficial tenham parametros independentes.

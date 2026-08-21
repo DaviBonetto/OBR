@@ -1,18 +1,33 @@
-# Configuracao inicial. Os valores fisicos serao medidos na Fase 1.
+# Perfil da camera provisoria. A camera oficial recebera outro perfil.
+
+[perfil]
+nome = "camera_usb_provisoria"
+versao = 1
+calibracao = ""
+identificador_usb = "058f:3841"
+nome_hardware = "Alcor Micro USB 2.0 PC Camera"
 
 [dispositivo]
 origem = 0
 largura = 640
 altura = 480
-quadros_por_segundo = 30
+quadros_por_segundo = 10
+formato = "MJPG"
 rotacao_graus = 0
 tamanho_buffer = 1
+tempo_primeiro_quadro_s = 8.0
 
 [exposicao]
 modo = "automatico"
 quadros_aquecimento = 30
 
 [captura]
-formato_video = "mkv"
+formato_imagem = "png"
+compressao_png = 3
 registrar_manifesto = true
 registrar_eventos = true
+
+[qualidade]
+limiar_escuro = 10
+limiar_claro = 245
+desfoque_minimo_aviso = 60.0

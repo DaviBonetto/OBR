@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OBR · Captura de Dataset</title>
+    <link rel="stylesheet" href="/painel.css">
+    <script src="/painel.js" defer></script>
+  </head>
+  <body>
+    <header class="topo">
+      <div>
+        <p class="rotulo">OBR OFICIAL</p>
+        <h1>Captura de Dataset</h1>
+      </div>
+      <div class="estado-geral">
+        <span id="indicador-camera" class="indicador"></span>
+        <div>
+          <strong id="texto-camera">Conectando à câmera…</strong>
+          <small id="perfil-camera">Aguardando perfil</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="grade-principal">
+      <section class="cartao visualizacao">
+        <div class="cabecalho-cartao">
+          <div>
+            <p class="rotulo">IMAGEM AO VIVO</p>
+            <h2 id="resolucao">— × —</h2>
+          </div>
+          <span id="estado-sessao" class="selo">SEM SESSÃO</span>
+        </div>
+
+        <div class="quadro-video">
+          <img id="video" src="/video.mjpg" alt="Imagem ao vivo da câmera do robô">
+          <div class="mira" aria-hidden="true"></div>
+          <div class="legenda-video">
+            <span id="nome-dispositivo">Câmera não identificada</span>
+            <span id="contador-fotos">0 fotos</span>
+          </div>
+        </div>
+
+        <div class="metricas">
+          <article><span>FPS real</span><strong id="fps">—</strong></article>
+          <article><span>Brilho</span><strong id="brilho">—</strong></article>
+          <article><span>Estourado</span><strong id="claro">—</strong></article>
+          <article><span>Escuro</span><strong id="escuro">—</strong></article>
+          <article><span>Nitidez</span><strong id="nitidez">—</strong></article>
+          <article><span>Espaço livre</span><strong id="armazenamento">—</strong></article>
+        </div>
+      </section>
+
+      <aside class="cartao controles">
+        <div class="cabecalho-cartao">
+          <div>
+            <p class="rotulo">SESSÃO</p>
+            <h2>Contexto da captura</h2>
+          </div>
+        </div>
+
+        <div class="formulario">
+          <label>
+            Nome da sessão
+            <input id="nome" maxlength="80" placeholder="Ex.: patio_sol_curvas" value="linha_teste">
+          </label>
+          <label>
+            Local
+            <input id="local" maxlength="100" placeholder="Ex.: pátio da escola">
+          </label>
+          <div class="duas-colunas">
+            <label>
+              Iluminação
+              <select id="iluminacao">
+                <option value="interna_normal">Interna normal</option>
+                <option value="fraca">Fraca</option>
+                <option value="forte">Forte</option>
+                <option value="sol_direto">Sol direto</option>
+                <option value="sombra">Sombra</option>
+                <option value="mista">Mista</option>
+              </select>
+            </label>
+            <label>
+              Piso
+              <select id="piso">
+                <option value="pista_oficial">Pista oficial</option>
+                <option value="papel">Papel</option>
+                <option value="madeira">Madeira</option>
+                <option value="ceramica">Cerâmica</option>
+                <option value="cimento">Cimento</option>
+                <option value="outro">Outro</option>
+              </select>
+            </label>
+          </div>
+          <label class="linha-checkbox">
+            <input id="leds" type="checkbox">
+            LEDs inferiores ligados
+          </label>
+          <label>
+            Observações
+            <textarea id="observacoes" maxlength="500" rows="2" placeholder="Sombras, reflexos, montagem…"></textarea>
+          </label>
+        </div>
+
+        <button id="iniciar" class="botao primario">Iniciar sessão</button>
+
+        <hr>
+
+        <div class="formulario">
+          <label>
+            Conteúdo deste quadro
+            <select id="tipo-quadro">
+              <option value="reta">Linha reta</option>
+              <option value="curva_aberta">Curva aberta</option>
+              <option value="curva_fechada">Curva fechada</option>
+              <option value="intersecao">Interseção</option>
+              <option value="lacuna">Lacuna</option>
+              <option value="sem_linha">Sem linha / negativo</option>
+              <option value="distrator">Objeto ou sombra parecida</option>
+              <option value="outro">Outro</option>
+            </select>
+          </label>
+          <label>
+            Nota do quadro
+            <input id="nota-quadro" maxlength="200" placeholder="Opcional">
+          </label>
+        </div>
+
+        <button id="capturar" class="botao captura" disabled>
+          <span>Capturar foto</span>
+          <kbd>Espaço</kbd>
+        </button>
+
+        <div class="sequencia">
+          <select id="intervalo" aria-label="Intervalo da sequência automática">
+            <option value="250">4 fotos/s</option>
+            <option value="500" selected>2 fotos/s</option>
+            <option value="1000">1 foto/s</option>
+            <option value="2000">1 foto/2s</option>
+          </select>
+          <button id="sequencia" class="botao secundario" disabled>Iniciar sequência</button>
+        </div>
+
+        <button id="finalizar" class="botao perigo" disabled>Finalizar sessão</button>
+
+        <div id="mensagem" class="mensagem" role="status">Pronto para configurar uma sessão.</div>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Capturas originais em PNG · sem detecção e sem motores</span>
+      <span id="idade-quadro">Idade do quadro: —</span>
+    </footer>
+  </body>
+</html>
