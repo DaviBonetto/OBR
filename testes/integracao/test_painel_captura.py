@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from obr_oficial.captura import GerenciadorSessoesCaptura
@@ -15,7 +16,16 @@ def test_fluxo_http_completo_de_uma_sessao(tmp_path: Path) -> None:
 
         pagina = cliente.get("/")
         assert pagina.status_code == 200
-        assert "Captura de Dataset" in pagina.get_data(as_text=True)
+        html = pagina.get_data(as_text=True)
+        assert "Captura de Dataset" in html
+        trecho_opcoes = html.split('<select id="tipo-quadro">', 1)[1].split("</select>", 1)[0]
+        assert re.findall(r'<option value="([^"]+)">([^<]+)</option>', trecho_opcoes) == [
+            ("reta", "Linha reta"),
+            ("curva_fechada", "Curva fechada"),
+            ("curva_aberta", "Curva aberta"),
+            ("intersecao", "Interseção em T — seguir reto"),
+            ("sem_linha", "Sem linha / negativo"),
+        ]
 
         estado = cliente.get("/api/estado")
         assert estado.status_code == 200
