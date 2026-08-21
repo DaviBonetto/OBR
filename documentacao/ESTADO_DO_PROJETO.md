@@ -52,6 +52,7 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] registrar `intersecao` com trajetoria desejada `reto`;
 - [x] definir contrato inicial de mascara, linha central e ponto objetivo;
 - [x] congelar o indice `fase2_v1` com 2.204 amostras;
+- [x] reproduzir os mesmos fingerprints no Windows e no Raspberry Pi;
 - [ ] gerar mascaras iniciais com o detector classico;
 - [ ] revisar e corrigir as anotacoes;
 - [ ] implementar o detector classico de referencia;

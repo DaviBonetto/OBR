@@ -14,8 +14,9 @@
 - todos os cinco conteudos presentes em todas as divisoes;
 - T registrado com trajetoria `reto`;
 - contrato inicial de anotacao registrado;
-- duas execucoes independentes produziram os mesmos fingerprints;
-- 31 testes automatizados aprovados antes da publicacao.
+- Windows e Raspberry Pi produziram os mesmos tres fingerprints;
+- 31 testes automatizados aprovados no computador e no Raspberry Pi;
+- dashboard permaneceu ativo durante a preparacao no Raspberry Pi.
 
 ## Proxima etapa
 
