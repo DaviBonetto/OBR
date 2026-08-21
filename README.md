@@ -8,11 +8,12 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 2 em andamento — Dataset versionado, rotulagem e detector classico.**
+**Fase 3 iniciada — Segmentacao neural com dataset revisado e teste fechado.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
-A Fase 2 comecou com copia de seguranca, verificacao de hashes, curadoria deterministica e
-separacao por ambiente. Motores e mecanismos de resgate continuam sem acionamento.
+A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
+separacao por ambiente. A revisao entregou 1.491 rotulos para o primeiro treino e isolou 122
+linhas dificeis para active learning. Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -85,6 +86,18 @@ uv run obr-revisar-mascaras --host 127.0.0.1 --porta 8091
 
 A CPU local atende toda a Fase 2. A T4 do Colab sera usada na Fase 3 para comparar e treinar
 redes leves de segmentacao; o modelo final continuara sendo medido e executado no Raspberry Pi 5.
+
+Para reproduzir a consolidacao e o pacote inicial da Fase 3:
+
+```powershell
+uv run obr-consolidar-rotulos --candidatas dados/rotulados/fase2_v1_classico_candidatas_v4
+uv run obr-exportar-fase3
+```
+
+O treinamento completo deve usar o notebook
+[`treinamento/fase_3/treinar_no_colab.ipynb`](treinamento/fase_3/treinar_no_colab.ipynb).
+Um smoke test local pode usar `obr-treinar-segmentacao`, mas nao substitui os experimentos T4
+nem o benchmark do Raspberry.
 
 ## Regras que nao podem ser quebradas
 

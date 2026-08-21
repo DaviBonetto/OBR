@@ -1,0 +1,20 @@
+# Primeiro experimento neural. O teste fechado nao faz parte deste arquivo nem do pacote.
+[entrada]
+largura = 320
+altura = 192
+roi_y = 0.30
+
+[treinamento]
+epocas = 60
+lote = 16
+taxa_aprendizado = 0.0003
+decaimento_peso = 0.0001
+paciencia = 10
+trabalhadores = 2
+semente = 20260821
+limiar = 0.50
+aumentos_fortes = true
+
+[perda]
+peso_bce = 0.40
+peso_dice = 0.60

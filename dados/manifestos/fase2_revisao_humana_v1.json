@@ -1,0 +1,29 @@
+{
+  "versao_manifesto": 1,
+  "tipo": "consolidacao_revisao_humana",
+  "regra_usuario": "itens_pendentes_foram_aprovados; itens_marcados_exigem_mudanca",
+  "quantidades": {
+    "candidatas": 1613,
+    "eventos_revisao": 171,
+    "revisoes_explicitas_unicas": 169,
+    "aprovacoes_implicitas": 1444,
+    "mascara_vazia_explicita": 30,
+    "reprocessar_explicito": 139,
+    "negativos_reprocessados_convertidos_para_vazio": 17,
+    "rotulos_supervisionados": 1491,
+    "mascaras_positivas": 1308,
+    "mascaras_vazias": 183,
+    "fila_active_learning": 122,
+    "treino_supervisionado": 1065,
+    "validacao_supervisionada": 426
+  },
+  "fingerprints": {
+    "candidatas": "622709c0810cc919e2104a1f9fd8938ee82d788bd3ee2c20c6c95eeaea463bc7",
+    "revisoes": "28767a848d9f8e0d8548a2ebc96aa4f679a226d8f276470c57cd2f3bbbaee27b",
+    "anotacoes_consolidadas": "660b9ba9aa84b66713ecf21a23f786a712f7fd4b0e101e0bf06ade353c99fe9d",
+    "fila_correcao": "302b31335574c55737c31931de61721522e1fed4440f033413ea14de7d3a8d8c"
+  },
+  "divisao_teste_processada": false,
+  "pronto_para_treino_inicial": true,
+  "pronto_para_treino_final": false
+}

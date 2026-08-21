@@ -1,0 +1,16 @@
+{
+  "versao_manifesto": 1,
+  "tipo": "dataset_segmentacao_fase3_inicial",
+  "arquivo_local_ignorado": "artefatos/fase3_dataset_inicial.zip",
+  "bytes": 284233469,
+  "sha256_arquivo": "244b4f7b5d15e495fa9059cd8b19f1bb56496c01bb42f6e506bccb7e53bf2c9d",
+  "sha256_indice": "3dac89a13d6b63120bc695b272be64456e20d174293ad4020ecb9c14914ef962",
+  "quantidades": {
+    "total": 1491,
+    "treino": 1065,
+    "validacao": 426
+  },
+  "divisao_teste_incluida": false,
+  "fila_active_learning_incluida": false,
+  "uso": "treino_inicial_e_active_learning; nao_e_treino_final"
+}

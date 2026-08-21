@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Etapa 1 concluida. Etapa 2 implementada e aguardando revisao humana.**
+**Etapa 1 concluida. Etapa 2 consolidada parcialmente e entregue para active learning.**
 
 ## Concluido em 21 de agosto de 2026
 
@@ -31,8 +31,8 @@
 
 ## Proxima etapa
 
-Revisar as mascaras candidatas, corrigir os casos marcados e congelar os rotulos humanos.
-Somente depois sera executado o benchmark unico no teste de 591 quadros.
+Treinar o primeiro modelo da Fase 3 com 1.491 rotulos confiaveis e usa-lo para corrigir as 122
+linhas rejeitadas. Somente apos novo congelamento sera executado o benchmark unico no teste.
 
 ## Bloqueios
 

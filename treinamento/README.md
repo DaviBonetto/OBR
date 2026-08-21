@@ -10,3 +10,13 @@ O primeiro conjunto aprovado e `fase2_v1`. Seus quadros sao separados por ambien
 - teste intocado: janela do laboratorio.
 
 O teste nao pode ser usado para escolher limiares, arquitetura, pesos ou aumentos de dados.
+
+## Fase 3
+
+O pacote inicial local e `artefatos/fase3_dataset_inicial.zip` e possui 1.491 pares
+supervisionados. Ele e ignorado pelo Git; seu hash versionado esta em
+`dados/manifestos/fase3_dataset_inicial.json`.
+
+O notebook do Colab esta em `treinamento/fase_3/treinar_no_colab.ipynb`. Ele compara LinhaNet
+e LR-ASPP sem tocar no teste fechado. Resultados completos tambem permanecem fora do Git ate
+serem auditados e aprovados.

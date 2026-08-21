@@ -24,6 +24,10 @@ dados = [
     "numpy>=2,<3",
     "opencv-python-headless>=4.13,<5",
 ]
+treinamento = [
+    "torch>=2.6,<3",
+    "torchvision>=0.21,<1",
+]
 desenvolvimento = [
     "pytest>=8.3,<10",
     "ruff>=0.12,<1",
@@ -31,6 +35,9 @@ desenvolvimento = [
 
 [project.scripts]
 obr-capturar = "obr_oficial.aplicacao.executar_captura:main"
+obr-consolidar-rotulos = "obr_oficial.aplicacao.consolidar_rotulos:main"
+obr-exportar-fase3 = "obr_oficial.aplicacao.exportar_fase3:main"
+obr-treinar-segmentacao = "obr_oficial.aplicacao.treinar_segmentacao:main"
 obr-preparar-dataset = "obr_oficial.aplicacao.preparar_dataset:main"
 obr-gerar-mascaras-classicas = "obr_oficial.aplicacao.gerar_mascaras_classicas:main"
 obr-revisar-mascaras = "obr_oficial.aplicacao.revisar_mascaras:main"

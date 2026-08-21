@@ -4,7 +4,7 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 2 — em execucao.**
+**Fase 3 — iniciada; primeiro treinamento neural pendente na T4.**
 
 ## Entregas da Fase 0
 
@@ -59,5 +59,17 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [ ] revisar e corrigir as anotacoes;
 - [ ] implementar o detector classico de referencia;
 - [ ] medir o detector no conjunto de teste intocado.
+
+## Entregas iniciais da Fase 3
+
+- [x] consolidar 1.491 rotulos supervisionados;
+- [x] separar 122 linhas dificeis para active learning;
+- [x] exportar pacote deterministico para CPU/Colab;
+- [x] implementar loader, aumentos, perdas e metricas;
+- [x] implementar LinhaNet e LR-ASPP MobileNetV3;
+- [x] validar forward e uma etapa de otimizacao na CPU;
+- [ ] treinar as duas arquiteturas na T4;
+- [ ] corrigir a fila de active learning;
+- [ ] congelar e exportar o modelo aprovado para ONNX;
 
 Nenhum motor sera usado nesta fase.
