@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from obr_oficial.nucleo.configuracao import raiz_projeto
@@ -26,11 +27,27 @@ def main(argumentos: list[str] | None = None) -> int:
         choices=("linhanet", "lraspp_mobilenet_v3_large"),
         default="linhanet",
     )
+    parser.add_argument("--epocas", type=int, help="sobrescreve epocas do TOML")
+    parser.add_argument("--lote", type=int, help="sobrescreve lote do TOML")
+    parser.add_argument("--trabalhadores", type=int, help="sobrescreve workers do TOML")
+    parser.add_argument("--paciencia", type=int, help="sobrescreve early stopping do TOML")
     opcoes = parser.parse_args(argumentos)
+    configuracao = carregar_configuracao_treinamento(opcoes.configuracao)
+    substituicoes = {
+        nome: valor
+        for nome, valor in (
+            ("epocas", opcoes.epocas),
+            ("lote", opcoes.lote),
+            ("trabalhadores", opcoes.trabalhadores),
+            ("paciencia", opcoes.paciencia),
+        )
+        if valor is not None
+    }
+    configuracao = replace(configuracao, **substituicoes)
     manifesto = treinar(
         opcoes.dataset.resolve(),
         opcoes.saida.resolve(),
-        carregar_configuracao_treinamento(opcoes.configuracao),
+        configuracao,
         arquitetura=opcoes.arquitetura,
         pretreinado=not opcoes.sem_pretreino,
     )

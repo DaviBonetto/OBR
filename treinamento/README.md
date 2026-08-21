@@ -18,5 +18,6 @@ supervisionados. Ele e ignorado pelo Git; seu hash versionado esta em
 `dados/manifestos/fase3_dataset_inicial.json`.
 
 O notebook do Colab esta em `treinamento/fase_3/treinar_no_colab.ipynb`. Ele compara LinhaNet
-e LR-ASPP sem tocar no teste fechado. Resultados completos tambem permanecem fora do Git ate
-serem auditados e aprovados.
+e LR-ASPP sem tocar no teste fechado. O fluxo recebe o ZIP do dataset pelo navegador e baixa no
+fim um unico `OBR_FASE3_RESULTADOS_T4.zip`, que contem checkpoints, historicos, comparacao,
+ambiente e hashes. Resultados completos permanecem fora do Git ate serem auditados e aprovados.
