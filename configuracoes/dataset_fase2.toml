@@ -1,0 +1,32 @@
+[dataset]
+nome = "fase2_v1"
+versao = 1
+largura = 640
+altura = 480
+tipos_permitidos = [
+    "reta",
+    "curva_fechada",
+    "curva_aberta",
+    "intersecao",
+    "sem_linha",
+]
+
+[filtros]
+limiar_diferenca_media = 5.0
+brilho_minimo = 20.0
+brilho_maximo = 225.0
+percentual_escuro_maximo = 80.0
+percentual_claro_maximo = 50.0
+
+[criterios]
+minimo_por_tipo_por_divisao = 20
+
+[divisoes]
+treino = [
+    "robotica_laboratorio",
+    "debaixo_da_mesa",
+    "meio_da_escola",
+    "portao_da_quadra",
+]
+validacao = ["em_cima_da_mesa_com_sol"]
+teste = ["janela_do_laboratorio"]

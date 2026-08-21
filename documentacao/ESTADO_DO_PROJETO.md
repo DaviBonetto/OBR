@@ -4,7 +4,7 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 1 — em execucao.**
+**Fase 2 — em execucao.**
 
 ## Entregas da Fase 0
 
@@ -36,13 +36,25 @@ Atualizado em: 21 de agosto de 2026.
 - [x] identificar e caracterizar a camera provisoria no Raspberry Pi 5;
 - [x] instalar o painel de captura no Raspberry Pi;
 - [x] abrir o painel real no computador;
-- [ ] capturar e verificar a primeira sessao fisica;
+- [x] capturar e verificar sessoes fisicas;
 - [x] publicar e validar o codigo da Fase 1 no GitHub.
 
-O painel real esta ativo em `10.136.42.116:8080` com a camera provisoria USB em
-`/dev/video0`, a 640 x 480 e aproximadamente 10 FPS. A imagem observada na
-instalacao estava muito escura e sem nitidez; o painel agora apresenta esses
-avisos explicitamente. A primeira sessao fisica somente deve ser capturada depois
-de descobrir e posicionar a lente sobre uma pista iluminada.
+O ultimo endereco validado do painel foi `10.0.0.61:8080`, sujeito a mudanca pela rede. A
+camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
+
+## Entregas da Fase 2
+
+- [x] copiar as 29 sessoes fisicas para backup local ignorado pelo Git;
+- [x] validar 3.583 PNGs, manifestos, resolucoes e hashes;
+- [x] implementar curadoria deterministica sem alterar originais;
+- [x] filtrar exposicao extrema e quase duplicatas apenas nos indices;
+- [x] separar treino, validacao e teste por ambiente completo;
+- [x] registrar `intersecao` com trajetoria desejada `reto`;
+- [x] definir contrato inicial de mascara, linha central e ponto objetivo;
+- [x] congelar o indice `fase2_v1` com 2.204 amostras;
+- [ ] gerar mascaras iniciais com o detector classico;
+- [ ] revisar e corrigir as anotacoes;
+- [ ] implementar o detector classico de referencia;
+- [ ] medir o detector no conjunto de teste intocado.
 
 Nenhum motor sera usado nesta fase.

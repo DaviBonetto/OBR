@@ -20,8 +20,10 @@ htmlcov/
 
 # Dados gerados e gravacoes grandes
 dados/brutos/**
+dados/processados/**
 dados/rotulados/**
 !dados/brutos/README.md
+!dados/processados/README.md
 !dados/rotulados/README.md
 artefatos/
 registros/

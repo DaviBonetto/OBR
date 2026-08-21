@@ -328,6 +328,11 @@ captura = [
     { name = "opencv-python-headless" },
     { name = "waitress" },
 ]
+dados = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "opencv-python-headless" },
+]
 desenvolvimento = [
     { name = "pytest" },
     { name = "ruff" },
@@ -337,12 +342,14 @@ desenvolvimento = [
 requires-dist = [
     { name = "flask", marker = "extra == 'captura'", specifier = ">=3.1,<4" },
     { name = "numpy", marker = "extra == 'captura'", specifier = ">=2,<3" },
+    { name = "numpy", marker = "extra == 'dados'", specifier = ">=2,<3" },
     { name = "opencv-python-headless", marker = "extra == 'captura'", specifier = ">=4.13,<5" },
+    { name = "opencv-python-headless", marker = "extra == 'dados'", specifier = ">=4.13,<5" },
     { name = "pytest", marker = "extra == 'desenvolvimento'", specifier = ">=8.3,<10" },
     { name = "ruff", marker = "extra == 'desenvolvimento'", specifier = ">=0.12,<1" },
     { name = "waitress", marker = "extra == 'captura'", specifier = ">=3.0,<4" },
 ]
-provides-extras = ["captura", "desenvolvimento"]
+provides-extras = ["captura", "dados", "desenvolvimento"]
 
 [[package]]
 name = "opencv-python-headless"

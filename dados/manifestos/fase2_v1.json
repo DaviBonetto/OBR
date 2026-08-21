@@ -1,0 +1,45 @@
+{
+  "camera": "camera_usb_provisoria",
+  "configuracao": "configuracoes/dataset_fase2.toml",
+  "dataset": "fase2_v1",
+  "fingerprints": {
+    "amostras_sha256": "89ef287f500c71fac3c7635d7c35a50e4d640d801a5d8485f533ca653c76a1b0",
+    "configuracao_sha256": "2b72b374d87bdcbbc3b2fe369ede7232491ee70ec2cbcbc4f428735d4bfbcc3d",
+    "fonte_sha256": "2f87b63b39a90a92f6d44caef095fbc052ee6f5647eb0917a482cbed20eca805"
+  },
+  "originais_alterados": false,
+  "pronto_para_anotacao": true,
+  "quantidades": {
+    "brutos": 3583,
+    "rejeitados_dos_indices": 1379,
+    "selecionados": 2204,
+    "sessoes": 29,
+    "teste": 591,
+    "treino": 1172,
+    "validacao": 441
+  },
+  "selecionados_por_divisao_e_tipo": {
+    "teste": {
+      "curva_aberta": 153,
+      "curva_fechada": 118,
+      "intersecao": 133,
+      "reta": 118,
+      "sem_linha": 69
+    },
+    "treino": {
+      "curva_aberta": 329,
+      "curva_fechada": 233,
+      "intersecao": 201,
+      "reta": 302,
+      "sem_linha": 107
+    },
+    "validacao": {
+      "curva_aberta": 216,
+      "curva_fechada": 57,
+      "intersecao": 56,
+      "reta": 66,
+      "sem_linha": 46
+    }
+  },
+  "versao": 1
+}

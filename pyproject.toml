@@ -20,6 +20,10 @@ captura = [
     "opencv-python-headless>=4.13,<5",
     "waitress>=3.0,<4",
 ]
+dados = [
+    "numpy>=2,<3",
+    "opencv-python-headless>=4.13,<5",
+]
 desenvolvimento = [
     "pytest>=8.3,<10",
     "ruff>=0.12,<1",
@@ -27,6 +31,7 @@ desenvolvimento = [
 
 [project.scripts]
 obr-capturar = "obr_oficial.aplicacao.executar_captura:main"
+obr-preparar-dataset = "obr_oficial.aplicacao.preparar_dataset:main"
 
 [tool.setuptools]
 package-dir = { "" = "codigo" }

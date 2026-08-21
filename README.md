@@ -8,11 +8,11 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 1 em andamento — Camera USB, captura e reproducao.**
+**Fase 2 em andamento — Dataset versionado, rotulagem e detector classico.**
 
-A Fase 0 estabeleceu a arquitetura, contratos, configuracoes seguras e verificacoes
-automatizadas. A Fase 1 adiciona camera USB substituivel, painel de captura e sessoes de
-dataset. Motores e mecanismos de resgate continuam sem acionamento.
+A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
+A Fase 2 comecou com copia de seguranca, verificacao de hashes, curadoria deterministica e
+separacao por ambiente. Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -67,6 +67,13 @@ Para abrir o painel com camera sintetica:
 ```powershell
 uv sync --all-extras
 uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
+```
+
+Para preparar a versao congelada do dataset sem alterar os originais:
+
+```powershell
+uv sync --extra dados
+uv run obr-preparar-dataset
 ```
 
 ## Regras que nao podem ser quebradas
