@@ -1,0 +1,26 @@
+# Baseline explicavel da Fase 2. Nao contem logica de motores nem de GAP.
+[entrada]
+largura = 320
+altura = 192
+roi_y = 0.30
+roi_altura = 0.70
+
+[segmentacao]
+limite_clahe = 2.0
+grade_clahe = 8
+bloco_adaptativo = 41
+constante_adaptativa = 7.0
+kernel_abertura = 3
+kernel_fechamento = 7
+
+[componente]
+area_minima = 0.015
+area_maxima = 0.75
+altura_minima = 0.25
+nitidez_borda_minima = 25.0
+confianca_encontrada = 0.58
+confianca_incerta = 0.40
+
+[geometria]
+linhas_centro = 17
+fator_largura_intersecao = 1.80

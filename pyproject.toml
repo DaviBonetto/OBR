@@ -32,6 +32,8 @@ desenvolvimento = [
 [project.scripts]
 obr-capturar = "obr_oficial.aplicacao.executar_captura:main"
 obr-preparar-dataset = "obr_oficial.aplicacao.preparar_dataset:main"
+obr-gerar-mascaras-classicas = "obr_oficial.aplicacao.gerar_mascaras_classicas:main"
+obr-revisar-mascaras = "obr_oficial.aplicacao.revisar_mascaras:main"
 
 [tool.setuptools]
 package-dir = { "" = "codigo" }

@@ -30,12 +30,12 @@ participara de escolha de limiares ou arquitetura.
 - sem linha: mascara vazia, sem ponto objetivo e estado `sem_evidencia`;
 - GAP: nao e uma classe visual desta etapa; sera recuperacao temporal na logica futura.
 
-## Detector classico planejado
+## Detector classico implementado
 
-O detector de referencia usara normalizacao local de iluminacao, limiar adaptativo, morfologia,
-componentes conexos e continuidade geometrica. Ele tera duas funcoes: estabelecer um baseline
-mensuravel e produzir mascaras iniciais para revisao, nunca promover automaticamente seus
-proprios erros a verdade de treino.
+O detector inicial usa normalizacao local de iluminacao, limiar adaptativo, morfologia,
+componentes conexos, nitidez da borda e continuidade geometrica. Ele estabelece um baseline
+mensuravel e produz mascaras iniciais para revisao, sem promover automaticamente seus proprios
+erros a verdade de treino. Os resultados e limites estao em `BASELINE_CLASSICO.md`.
 
 ## Riscos
 
@@ -48,5 +48,7 @@ proprios erros a verdade de treino.
 ## Referencias
 
 - [OpenCV: componentes conexos](https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html)
+- [OpenCV: limiarizacao adaptativa e Otsu](https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html)
+- [OpenCV: operacoes morfologicas](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html)
 - [PyTorch: datasets e carregamento](https://docs.pytorch.org/docs/stable/data.html)
 - [scikit-learn: validacao com grupos](https://scikit-learn.org/stable/modules/cross_validation.html)

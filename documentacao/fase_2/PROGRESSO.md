@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Etapa 1 concluida. Etapa 2 sera a proxima.**
+**Etapa 1 concluida. Etapa 2 implementada e aguardando revisao humana.**
 
 ## Concluido em 21 de agosto de 2026
 
@@ -18,10 +18,21 @@
 - 31 testes automatizados aprovados no computador e no Raspberry Pi;
 - dashboard permaneceu ativo durante a preparacao no Raspberry Pi.
 
+## Concluido na Etapa 2
+
+- detector classico explicavel implementado e parametrizado por TOML;
+- regra geometrica `intersecao T -> seguir reto` coberta por teste;
+- 1.613 mascaras candidatas geradas somente para treino e validacao;
+- conjunto de 591 imagens de teste permaneceu sem leitura;
+- acuracia indireta de presenca de 98,3881% na calibracao;
+- latencia mediana de 9,2797 ms e p95 de 11,2772 ms na CPU do computador;
+- painel local de revisao com filtros, sobreposicao e decisoes auditaveis;
+- 39 testes automatizados aprovados no computador.
+
 ## Proxima etapa
 
-Implementar o detector classico inicial e a geracao assistida de mascaras. O teste de 591
-quadros permanecera fechado durante essa calibracao.
+Revisar as mascaras candidatas, corrigir os casos marcados e congelar os rotulos humanos.
+Somente depois sera executado o benchmark unico no teste de 591 quadros.
 
 ## Bloqueios
 

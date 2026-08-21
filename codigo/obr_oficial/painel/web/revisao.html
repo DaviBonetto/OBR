@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBR · Revisão de máscaras</title>
+    <link rel="stylesheet" href="/revisao.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="rotulo">FASE 2 · ROTULAGEM ASSISTIDA</p>
+          <h1>Revisão de máscaras</h1>
+        </div>
+        <div id="progresso" class="progresso">Carregando…</div>
+      </header>
+
+      <section class="filtros" aria-label="Filtros">
+        <label>Divisão
+          <select id="divisao">
+            <option value="todas">Todas</option>
+            <option value="treino">Treino</option>
+            <option value="validacao">Validação</option>
+          </select>
+        </label>
+        <label>Conteúdo
+          <select id="tipo">
+            <option value="todos">Todos</option>
+            <option value="reta">Linha reta</option>
+            <option value="curva_aberta">Curva aberta</option>
+            <option value="curva_fechada">Curva fechada</option>
+            <option value="intersecao">Interseção T · seguir reto</option>
+            <option value="sem_linha">Sem linha / negativo</option>
+          </select>
+        </label>
+        <label>Revisão
+          <select id="revisao">
+            <option value="pendente">Pendentes</option>
+            <option value="todas">Todas</option>
+            <option value="aprovada">Aprovadas</option>
+            <option value="mascara_vazia">Máscara vazia</option>
+            <option value="reprocessar">Reprocessar</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="conteudo">
+        <div class="visualizacao">
+          <div class="topo-visual">
+            <div>
+              <strong id="nome-tipo">—</strong>
+              <span id="metadados">—</span>
+            </div>
+            <div class="modos" role="group" aria-label="Modo de visualização">
+              <button data-modo="origem">Original</button>
+              <button data-modo="mascara">Máscara</button>
+              <button class="ativo" data-modo="sobreposicao">Sobreposição</button>
+            </div>
+          </div>
+          <div class="quadro">
+            <img id="imagem" alt="Quadro em revisão" />
+            <p id="vazio">Nenhuma amostra neste filtro.</p>
+          </div>
+        </div>
+
+        <aside>
+          <div class="metricas">
+            <div><span>Confiança</span><strong id="confianca">—</strong></div>
+            <div><span>Latência</span><strong id="latencia">—</strong></div>
+            <div><span>Estado</span><strong id="estado">—</strong></div>
+            <div><span>Decisão</span><strong id="decisao-atual">Pendente</strong></div>
+          </div>
+          <label class="observacao">Observação opcional
+            <textarea id="observacao" maxlength="500" rows="4" placeholder="Descreva apenas o problema visível."></textarea>
+          </label>
+          <div class="acoes">
+            <button class="primario" data-decisao="aprovada">Aprovar máscara</button>
+            <button data-decisao="mascara_vazia">Marcar máscara vazia</button>
+            <button data-decisao="reprocessar">Enviar para correção</button>
+          </div>
+          <p class="aviso">O conjunto de teste não é carregado por este painel.</p>
+        </aside>
+      </section>
+
+      <nav>
+        <button id="anterior">← Anterior</button>
+        <span id="posicao">0 / 0</span>
+        <button id="proxima">Próxima →</button>
+      </nav>
+      <div id="mensagem" role="status"></div>
+    </main>
+    <script src="/revisao.js"></script>
+  </body>
+</html>

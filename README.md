@@ -76,6 +76,16 @@ uv sync --extra dados
 uv run obr-preparar-dataset
 ```
 
+Para gerar as mascaras candidatas de treino/validacao e abrir a revisao local:
+
+```powershell
+uv run obr-gerar-mascaras-classicas
+uv run obr-revisar-mascaras --host 127.0.0.1 --porta 8091
+```
+
+A CPU local atende toda a Fase 2. A T4 do Colab sera usada na Fase 3 para comparar e treinar
+redes leves de segmentacao; o modelo final continuara sendo medido e executado no Raspberry Pi 5.
+
 ## Regras que nao podem ser quebradas
 
 1. A interface nunca participa do caminho critico de controle.

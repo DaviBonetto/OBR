@@ -20,7 +20,7 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Ainda nao implementado
 
-- detector classico ou por IA;
+- detector por IA;
 - controle de motores e servos;
 - maquina de estados;
 - estrategia ou mecanismo de resgate.
@@ -53,7 +53,9 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] definir contrato inicial de mascara, linha central e ponto objetivo;
 - [x] congelar o indice `fase2_v1` com 2.204 amostras;
 - [x] reproduzir os mesmos fingerprints no Windows e no Raspberry Pi;
-- [ ] gerar mascaras iniciais com o detector classico;
+- [x] implementar e calibrar o detector classico inicial;
+- [x] gerar mascaras iniciais somente para treino e validacao;
+- [x] criar painel auditavel de revisao das mascaras;
 - [ ] revisar e corrigir as anotacoes;
 - [ ] implementar o detector classico de referencia;
 - [ ] medir o detector no conjunto de teste intocado.

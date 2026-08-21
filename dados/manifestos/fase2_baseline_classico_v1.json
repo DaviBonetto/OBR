@@ -1,0 +1,29 @@
+{
+  "versao_manifesto": 1,
+  "tipo": "benchmark_calibracao_baseline_classico",
+  "dataset": "fase2_v1",
+  "divisoes_processadas": [
+    "treino",
+    "validacao"
+  ],
+  "divisao_teste_processada": false,
+  "hash_configuracao_detector": "8af19ecd828a1c3e10d81fff0afd39ac9313abd6bc7222d2a282dde719668531",
+  "hash_arquivo_amostras": "83f5b382022a4fe2cf81f09218a645e134e8f85ed2161d8fbe799c9eab9510f8",
+  "quantidades": {
+    "total": 1613,
+    "treino": 1172,
+    "validacao": 441,
+    "linha_encontrada": 1448,
+    "linha_sem_evidencia": 12,
+    "negativo_sem_evidencia": 139,
+    "negativo_falso_positivo": 14
+  },
+  "acuracia_indireta_presenca": 0.983881,
+  "latencia_cpu_ms": {
+    "mediana": 9.2797,
+    "p95": 11.2772,
+    "maxima": 18.7141
+  },
+  "rotulos_humanos": false,
+  "observacao": "Pre-anotacao; nao representa IoU, Dice ou desempenho no teste fechado."
+}
