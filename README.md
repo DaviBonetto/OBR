@@ -8,14 +8,17 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 4 em andamento — inferencia, geometria, rastreamento e dashboard funcionando.**
+**Fase 4 fechada para teste fisico — a proxima etapa e a Fase 4.5 no Raspberry Pi 5.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
 A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
 separacao por ambiente. Na Fase 3, o LR-ASPP V2 foi calibrado em limiar `0,80`, atingiu Dice
 `0,97266` e FPR significativo `4,35%` na validacao e foi exportado para ONNX. A Fase 4 ja entrega
 linha central, pontos atual/objetivo, T reto, confirmacao temporal e dashboard somente leitura.
-O gate final usa 48 trajetorias centrais desenhadas por humano sem revelar previamente a IA.
+O painel do gate independente disponibiliza 48 trajetorias centrais para desenho humano sem
+revelar previamente a IA.
+Essa anotacao independente permanece opcional e nao foi apresentada como concluida. O acabamento
+visual final separa mascara logica, trajetoria de controle e marcadores sem alterar o modelo.
 Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o

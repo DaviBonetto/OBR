@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import asdict, dataclass
+from itertools import pairwise
 from threading import Condition, Event, Lock, Thread
 from time import monotonic
 
@@ -81,6 +82,75 @@ def estimativa_como_dict(estimativa: EstimativaLinha) -> dict[str, object]:
     }
 
 
+def _criar_mascara_visual(
+    probabilidade: np.ndarray,
+    largura: int,
+    altura: int,
+    limiar: float,
+) -> np.ndarray:
+    """Suaviza apenas a apresentacao; a mascara logica permanece intocada."""
+
+    ampliada = cv2.resize(
+        probabilidade,
+        (largura, altura),
+        interpolation=cv2.INTER_LINEAR,
+    )
+    suave = cv2.GaussianBlur(ampliada, (0, 0), sigmaX=1.15, sigmaY=1.15)
+    mascara = np.where(suave >= limiar, 255, 0).astype(np.uint8)
+    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    return cv2.morphologyEx(mascara, cv2.MORPH_CLOSE, nucleo)
+
+
+def _aplicar_mascara_gradiente(regiao: np.ndarray, mascara: np.ndarray) -> None:
+    """Aplica azul no horizonte e ciano perto do robo com borda antialias."""
+
+    altura, largura = mascara.shape
+    progresso = np.linspace(0.0, 1.0, altura, dtype=np.float32)[:, None, None]
+    cor_distante = np.array([165.0, 55.0, 10.0], dtype=np.float32)
+    cor_proxima = np.array([245.0, 215.0, 0.0], dtype=np.float32)
+    cores = cor_distante * (1.0 - progresso) + cor_proxima * progresso
+    cores = np.broadcast_to(cores, (altura, largura, 3))
+    base = regiao.astype(np.float32)
+    preenchimento = (mascara.astype(np.float32) / 255.0)[..., None] * 0.22
+    base = base * (1.0 - preenchimento) + cores * preenchimento
+
+    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    borda = cv2.morphologyEx(mascara, cv2.MORPH_GRADIENT, nucleo)
+    alpha_borda = cv2.GaussianBlur(borda, (0, 0), sigmaX=0.8).astype(np.float32)
+    alpha_borda = (alpha_borda / 255.0 * 0.92)[..., None]
+    base = base * (1.0 - alpha_borda) + cores * alpha_borda
+    regiao[:] = np.clip(base, 0, 255).astype(np.uint8)
+
+
+def _suavizar_polilinha(pontos: np.ndarray, repeticoes: int = 2) -> np.ndarray:
+    """Cria uma curva visual continua sem alterar os pontos usados pelo controle."""
+
+    if len(pontos) < 3:
+        return pontos.astype(np.int32)
+    suaves = pontos.astype(np.float32)
+    for _ in range(repeticoes):
+        refinados = [suaves[0]]
+        for inicio, fim in pairwise(suaves):
+            refinados.extend((0.75 * inicio + 0.25 * fim, 0.25 * inicio + 0.75 * fim))
+        refinados.append(suaves[-1])
+        suaves = np.asarray(refinados, dtype=np.float32)
+    return np.rint(suaves).astype(np.int32)
+
+
+def _desenhar_marcador(
+    imagem: np.ndarray,
+    centro: tuple[int, int],
+    cor: tuple[int, int, int],
+) -> None:
+    halo = imagem.copy()
+    cv2.circle(halo, centro, 20, cor, -1, cv2.LINE_AA)
+    cv2.addWeighted(halo, 0.24, imagem, 0.76, 0.0, dst=imagem)
+    cv2.circle(imagem, centro, 13, (8, 10, 12), -1, cv2.LINE_AA)
+    cv2.circle(imagem, centro, 12, (255, 255, 255), -1, cv2.LINE_AA)
+    cv2.circle(imagem, centro, 9, cor, -1, cv2.LINE_AA)
+    cv2.circle(imagem, centro, 3, (255, 255, 255), -1, cv2.LINE_AA)
+
+
 def desenhar_sobreposicao(
     quadro_bgr: np.ndarray,
     resultado: ResultadoDetectorNeural,
@@ -93,17 +163,14 @@ def desenhar_sobreposicao(
     altura, largura = imagem.shape[:2]
     y0 = round(altura * configuracao.roi_y)
     altura_roi = altura - y0
-    mascara = cv2.resize(
-        resultado.mascara,
-        (largura, altura_roi),
-        interpolation=cv2.INTER_NEAREST,
+    mascara_visual = _criar_mascara_visual(
+        resultado.probabilidade,
+        largura,
+        altura_roi,
+        configuracao.limiar_mascara,
     )
     regiao = imagem[y0:]
-    camada = np.zeros_like(regiao)
-    camada[mascara > 0] = (125, 45, 0)
-    cv2.addWeighted(camada, 0.38, regiao, 1.0, 0.0, dst=regiao)
-    contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(regiao, contornos, -1, (255, 105, 15), 2, cv2.LINE_AA)
+    _aplicar_mascara_gradiente(regiao, mascara_visual)
 
     def pixel(ponto: PontoNormalizado) -> tuple[int, int]:
         return (
@@ -111,17 +178,31 @@ def desenhar_sobreposicao(
             round(y0 + ponto.y * max(1, altura_roi - 1)),
         )
 
-    if len(estimativa.centro_linha) >= 2:
-        centro = np.array([pixel(ponto) for ponto in estimativa.centro_linha], dtype=np.int32)
-        cv2.polylines(imagem, [centro], False, (35, 55, 245), 3, cv2.LINE_AA)
     if estimativa.ponto_atual is not None and estimativa.ponto_objetivo is not None:
         atual = pixel(estimativa.ponto_atual)
         objetivo = pixel(estimativa.ponto_objetivo)
-        cv2.line(imagem, atual, objetivo, (210, 80, 10), 3, cv2.LINE_AA)
-        cv2.circle(imagem, objetivo, 9, (170, 55, 0), -1, cv2.LINE_AA)
-        cv2.circle(imagem, objetivo, 12, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.circle(imagem, atual, 9, (255, 255, 0), -1, cv2.LINE_AA)
-        cv2.circle(imagem, atual, 12, (255, 255, 255), 2, cv2.LINE_AA)
+        pontos = estimativa.centro_linha
+        if len(pontos) >= 2:
+            indice_atual = min(
+                range(len(pontos)),
+                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
+            )
+            indice_objetivo = min(
+                range(len(pontos)),
+                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_objetivo.y),
+            )
+            if indice_objetivo <= indice_atual:
+                trecho = list(pontos[indice_objetivo : indice_atual + 1])
+            else:
+                trecho = list(reversed(pontos[indice_atual : indice_objetivo + 1]))
+            centro_bruto = np.array([pixel(ponto) for ponto in trecho], dtype=np.int32)
+            centro_bruto[0] = objetivo
+            centro_bruto[-1] = atual
+            centro = _suavizar_polilinha(centro_bruto)
+            cv2.polylines(imagem, [centro], False, (4, 5, 7), 7, cv2.LINE_AA)
+            cv2.polylines(imagem, [centro], False, (35, 45, 245), 3, cv2.LINE_AA)
+        _desenhar_marcador(imagem, objetivo, (165, 55, 10))
+        _desenhar_marcador(imagem, atual, (255, 230, 0))
     return imagem
 
 

@@ -94,7 +94,14 @@ class RastreadorLinha:
         anterior = self._ultima_valida
         if anterior is None or anterior.ponto_atual is None or anterior.ponto_objetivo is None:
             return atual
-        alfa = self.configuracao.suavizacao
+        deslocamento = max(
+            abs(atual.ponto_atual.x - anterior.ponto_atual.x),
+            abs(atual.ponto_objetivo.x - anterior.ponto_objetivo.x),
+        )
+        alfa_minimo = max(0.20, self.configuracao.suavizacao * 0.65)
+        alfa_maximo = min(0.88, self.configuracao.suavizacao + 0.25)
+        resposta = float(np.clip((deslocamento - 0.01) / 0.16, 0.0, 1.0))
+        alfa = alfa_minimo + resposta * (alfa_maximo - alfa_minimo)
 
         def ponto(novo: PontoNormalizado, velho: PontoNormalizado) -> PontoNormalizado:
             return PontoNormalizado(

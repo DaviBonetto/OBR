@@ -4,7 +4,7 @@ Atualizado em: 22 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 4 — em andamento; pipeline neural e dashboard funcionando sem atuadores.**
+**Fase 4 — software fechado para a Fase 4.5; validacao fisica no Raspberry Pi pendente.**
 
 ## Entregas da Fase 0
 
@@ -89,7 +89,9 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] zerar falsos caminhos de alta confianca na validacao depois da confirmacao temporal;
 - [x] criar selecao estratificada e painel independente para a referencia humana;
 - [x] implementar erro simetrico contra polilinha humana e gates mediano/P95;
-- [ ] anotar uma referencia humana de linha central para medir erro mediano/P95;
+- [x] finalizar mascara visual antialias, trajetoria curta e marcadores atual/objetivo;
+- [x] estabilizar jitter pequeno sem atrasar mudancas grandes de direcao;
+- [ ] concluir uma referencia humana independente de linha central, se retomada;
 - [ ] validar com camera real no Raspberry Pi 5;
 - [ ] medir latencia e estabilidade por 30 minutos no Raspberry Pi 5;
 

@@ -69,13 +69,33 @@ A avaliacao mede distancia simetrica entre a trajetoria prevista e a polilinha h
 8 pixels. Ele so pode ser aprovado depois das 48 anotacoes. O teste fechado e recusado em todas
 as etapas.
 
+O usuario encerrou a anotacao manual depois de cinco tentativas. Esses pontos alternavam entre a
+base e o topo da imagem e, por isso, foram preservados apenas no historico local e excluidos da
+avaliacao. Nenhuma referencia gerada pela propria IA foi registrada como humana. Assim, o gate de
+3/8 pixels permanece **nao medido**, e nao foi usado para alegar perfeicao.
+
+## Acabamento final local
+
+A camada visual foi aproximada das referencias de competicao sem modificar o tensor, o limiar ou
+a mascara logica usados pela geometria:
+
+- preenchimento discreto com gradiente azul no horizonte e ciano perto do robo;
+- borda antialias derivada da probabilidade neural apenas para exibicao;
+- trajeto vermelho limitado ao trecho entre posicao atual e ponto objetivo;
+- marcadores ciano e azul-escuro com centro branco, anel e halo;
+- suavizacao temporal adaptativa: forte contra jitter pequeno e responsiva a curvas grandes.
+
+Depois dessas mudancas, a avaliacao das 426 imagens continuou com 100% dos 380 positivos
+localizados, 55 de 55 intersecoes T seguindo reto e zero falso caminho de alta confianca depois da
+confirmacao temporal. O teste final permaneceu fechado.
+
 ## Proximos gates
 
-1. concluir as 48 polilinhas no painel humano;
-2. executar o relatorio e ajustar a geometria somente se o gate reprovar;
-3. executar o dashboard com a camera provisoria no Raspberry Pi 5;
-4. medir FP32 no Raspberry e comparar INT8 somente se necessario;
-5. repetir calibracao geometrica com a camera oficial, sem retreinar automaticamente;
-6. congelar todo o pipeline antes de abrir o teste final uma unica vez.
+1. executar o dashboard com a camera provisoria no Raspberry Pi 5;
+2. testar iluminacao, sombra, Sol, reta, curva aberta, curva de 90 graus, T e negativos;
+3. registrar os casos que falharem e separar erro de segmentacao de erro geometrico;
+4. medir estabilidade e latencia FP32 por 30 minutos, comparando INT8 somente se necessario;
+5. repetir a calibracao com a camera oficial, sem retreinar automaticamente;
+6. retomar o gate humano se necessario e congelar tudo antes de abrir o teste final uma vez.
 
 Nenhum motor, servo ou mecanismo de resgate foi acionado.

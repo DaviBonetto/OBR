@@ -6,13 +6,19 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from obr_oficial.nucleo.contratos import EstadoDeteccao, FonteEstimativa, TipoCurva
+from obr_oficial.nucleo.contratos import (
+    EstadoDeteccao,
+    FonteEstimativa,
+    PontoNormalizado,
+    TipoCurva,
+)
 from obr_oficial.percepcao.linha import (
     ConfiguracaoDetectorNeural,
     DetectorNeuralLinha,
     ExtratorGeometriaLinha,
     RastreadorLinha,
     carregar_configuracao_detector_neural,
+    desenhar_sobreposicao,
     preprocessar_quadro,
 )
 
@@ -196,6 +202,43 @@ def test_sombra_isolada_nao_vira_rota_encontrada(tmp_path: Path) -> None:
     assert perdida.estado is EstadoDeteccao.PERDIDA
 
 
+def test_suavizacao_adaptativa_estabiliza_jitter_e_responde_a_curva(tmp_path: Path) -> None:
+    configuracao = _configuracao(tmp_path)
+    extrator = ExtratorGeometriaLinha(configuracao)
+    rastreador = RastreadorLinha(configuracao)
+    _mascara, base, _diagnostico = extrator.extrair(
+        _probabilidade_reta(),
+        id_quadro=40,
+        instante_monotonico_s=30.0,
+    )
+    rastreador.atualizar(base)
+    rastreador.atualizar(replace(base, id_quadro=41, instante_monotonico_s=30.01))
+
+    jitter = rastreador.atualizar(
+        replace(
+            base,
+            id_quadro=42,
+            instante_monotonico_s=30.02,
+            ponto_atual=PontoNormalizado(0.51, base.ponto_atual.y),
+            ponto_objetivo=PontoNormalizado(0.51, base.ponto_objetivo.y),
+        )
+    )
+    assert jitter.ponto_atual is not None
+    assert 0.5 < jitter.ponto_atual.x < 0.505
+
+    curva = rastreador.atualizar(
+        replace(
+            base,
+            id_quadro=43,
+            instante_monotonico_s=30.03,
+            ponto_atual=PontoNormalizado(0.75, base.ponto_atual.y),
+            ponto_objetivo=PontoNormalizado(0.75, base.ponto_objetivo.y),
+        )
+    )
+    assert curva.ponto_atual is not None
+    assert curva.ponto_atual.x > 0.68
+
+
 class _SessaoFalsa:
     def __init__(self, logits: np.ndarray) -> None:
         self.logits = logits
@@ -223,3 +266,27 @@ def test_detector_executa_sessao_injetada(tmp_path: Path) -> None:
     assert resultado.estimativa.estado is EstadoDeteccao.ENCONTRADA
     assert sessao.ultima_entrada is not None
     assert sessao.ultima_entrada.shape == (1, 3, 192, 320)
+
+
+def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
+    configuracao = _configuracao(tmp_path)
+    probabilidade = _probabilidade_reta()
+    logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(np.float32)
+    detector = DetectorNeuralLinha(configuracao, sessao=_SessaoFalsa(logits))
+    imagem = np.full((480, 640, 3), 180, dtype=np.uint8)
+    resultado = detector.processar(imagem, id_quadro=50, instante_monotonico_s=40.0)
+    mascara_original = resultado.mascara.copy()
+
+    visual = desenhar_sobreposicao(
+        imagem,
+        resultado,
+        resultado.estimativa,
+        configuracao,
+    )
+
+    assert np.array_equal(resultado.mascara, mascara_original)
+    assert np.array_equal(visual[20, 20], imagem[20, 20])
+    assert visual.shape == imagem.shape
+    assert int(visual[170, 335, 0]) > int(visual[170, 335, 2])
+    assert int(visual[440, 335, 1]) > int(visual[170, 335, 1])
+    assert tuple(int(canal) for canal in visual[479, 319]) == (255, 255, 255)
