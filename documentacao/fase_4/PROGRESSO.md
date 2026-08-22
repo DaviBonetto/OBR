@@ -79,8 +79,9 @@ avaliacao. Nenhuma referencia gerada pela propria IA foi registrada como humana.
 A camada visual foi aproximada das referencias de competicao sem modificar o tensor, o limiar ou
 a mascara logica usados pela geometria:
 
-- preenchimento discreto com gradiente azul no horizonte e ciano perto do robo;
-- borda antialias derivada da probabilidade neural apenas para exibicao;
+- nenhum preenchimento ou transparencia sobre a linha e a imagem da camera;
+- contorno antialias azul-violeta no horizonte e ciano perto do robo, derivado da
+  probabilidade neural apenas para exibicao;
 - trajeto vermelho limitado ao trecho entre posicao atual e ponto objetivo;
 - marcadores ciano e azul-escuro com centro branco, anel e halo;
 - suavizacao temporal adaptativa: forte contra jitter pequeno e responsiva a curvas grandes.

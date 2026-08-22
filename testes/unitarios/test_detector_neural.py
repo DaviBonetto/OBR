@@ -287,6 +287,20 @@ def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
     assert np.array_equal(resultado.mascara, mascara_original)
     assert np.array_equal(visual[20, 20], imagem[20, 20])
     assert visual.shape == imagem.shape
-    assert int(visual[170, 335, 0]) > int(visual[170, 335, 2])
-    assert int(visual[440, 335, 1]) > int(visual[170, 335, 1])
+    assert np.array_equal(visual[250, 330], imagem[250, 330])
+
+    borda_distante = visual[170:350, 294:307]
+    pixels_distantes = (
+        (borda_distante[..., 0] > 220)
+        & (borda_distante[..., 1] < 130)
+        & (borda_distante[..., 2] < 160)
+    )
+    borda_proxima = visual[400:455, 294:307]
+    pixels_proximos = (
+        (borda_proxima[..., 0] > 220)
+        & (borda_proxima[..., 1] > 180)
+        & (borda_proxima[..., 2] < 80)
+    )
+    assert np.count_nonzero(pixels_distantes) > 100
+    assert np.count_nonzero(pixels_proximos) > 30
     assert tuple(int(canal) for canal in visual[479, 319]) == (255, 255, 255)

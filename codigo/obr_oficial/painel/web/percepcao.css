@@ -40,7 +40,7 @@ h1 { margin: 3px 0 0; font-size: clamp(24px, 3vw, 38px); font-weight: 700; lette
 .legenda { display: flex; flex-wrap: wrap; gap: 18px; padding-top: 14px; color: #8f8f8f; font-size: 11px; }
 .legenda span { display: flex; align-items: center; gap: 7px; }
 .cor { width: 9px; height: 9px; border-radius: 50%; }
-.cor.atual { background: #00ffff; }.cor.objetivo { background: #003caa; }.cor.centro { background: #f53723; }.cor.mascara { background: #0f69ff; }
+.cor.atual { background: #00ffff; }.cor.objetivo { background: #003caa; }.cor.centro { background: #f53723; }.cor.mascara { background: linear-gradient(90deg, #6e46ff 0 50%, #00ebff 50%); }
 
 .telemetria { display: flex; flex-direction: column; gap: 12px; padding: 18px; border-left: 1px solid #202020; background: #090909; }
 .bloco { padding: 18px; border: 1px solid #242424; border-radius: 14px; background: #0d0d0d; }

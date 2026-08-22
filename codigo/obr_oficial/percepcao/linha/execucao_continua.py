@@ -95,31 +95,55 @@ def _criar_mascara_visual(
         (largura, altura),
         interpolation=cv2.INTER_LINEAR,
     )
-    suave = cv2.GaussianBlur(ampliada, (0, 0), sigmaX=1.15, sigmaY=1.15)
+    suave = cv2.GaussianBlur(ampliada, (0, 0), sigmaX=1.6, sigmaY=1.6)
     mascara = np.where(suave >= limiar, 255, 0).astype(np.uint8)
-    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
     return cv2.morphologyEx(mascara, cv2.MORPH_CLOSE, nucleo)
 
 
-def _aplicar_mascara_gradiente(regiao: np.ndarray, mascara: np.ndarray) -> None:
-    """Aplica azul no horizonte e ciano perto do robo com borda antialias."""
+def _desenhar_contorno_mascara(regiao: np.ndarray, mascara: np.ndarray) -> None:
+    """Contorna a linha sem pintar seu interior nem esconder a camera."""
 
-    altura, largura = mascara.shape
-    progresso = np.linspace(0.0, 1.0, altura, dtype=np.float32)[:, None, None]
-    cor_distante = np.array([165.0, 55.0, 10.0], dtype=np.float32)
-    cor_proxima = np.array([245.0, 215.0, 0.0], dtype=np.float32)
-    cores = cor_distante * (1.0 - progresso) + cor_proxima * progresso
-    cores = np.broadcast_to(cores, (altura, largura, 3))
-    base = regiao.astype(np.float32)
-    preenchimento = (mascara.astype(np.float32) / 255.0)[..., None] * 0.22
-    base = base * (1.0 - preenchimento) + cores * preenchimento
+    contornos, _hierarquia = cv2.findContours(
+        mascara,
+        cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_NONE,
+    )
+    if not contornos:
+        return
 
-    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    borda = cv2.morphologyEx(mascara, cv2.MORPH_GRADIENT, nucleo)
-    alpha_borda = cv2.GaussianBlur(borda, (0, 0), sigmaX=0.8).astype(np.float32)
-    alpha_borda = (alpha_borda / 255.0 * 0.92)[..., None]
-    base = base * (1.0 - alpha_borda) + cores * alpha_borda
-    regiao[:] = np.clip(base, 0, 255).astype(np.uint8)
+    contornos_suaves: list[np.ndarray] = []
+    for contorno in contornos:
+        perimetro = cv2.arcLength(contorno, True)
+        epsilon = min(6.0, max(1.5, perimetro * 0.003))
+        contornos_suaves.append(cv2.approxPolyDP(contorno, epsilon, True))
+
+    # O corte reproduz a leitura visual das referencias: destino em azul-violeta
+    # e trecho mais proximo do robo em ciano, sem gradiente entre as duas regioes.
+    corte_proximidade = round(mascara.shape[0] * 0.72)
+    cor_distante = (255, 70, 110)
+    cor_proxima = (255, 235, 0)
+    espessura = 3
+
+    cv2.drawContours(
+        regiao,
+        contornos_suaves,
+        -1,
+        cor_distante,
+        espessura,
+        cv2.LINE_AA,
+    )
+    if corte_proximidade < mascara.shape[0]:
+        camada_proxima = regiao.copy()
+        cv2.drawContours(
+            camada_proxima,
+            contornos_suaves,
+            -1,
+            cor_proxima,
+            espessura,
+            cv2.LINE_AA,
+        )
+        regiao[corte_proximidade:] = camada_proxima[corte_proximidade:]
 
 
 def _suavizar_polilinha(pontos: np.ndarray, repeticoes: int = 2) -> np.ndarray:
@@ -170,7 +194,7 @@ def desenhar_sobreposicao(
         configuracao.limiar_mascara,
     )
     regiao = imagem[y0:]
-    _aplicar_mascara_gradiente(regiao, mascara_visual)
+    _desenhar_contorno_mascara(regiao, mascara_visual)
 
     def pixel(ponto: PontoNormalizado) -> tuple[int, int]:
         return (
