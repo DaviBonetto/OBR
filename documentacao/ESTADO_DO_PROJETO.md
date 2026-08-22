@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Atualizado em: 21 de agosto de 2026.
+Atualizado em: 22 de agosto de 2026.
 
 ## Fase atual
 
@@ -20,7 +20,6 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Ainda nao implementado
 
-- detector por IA;
 - controle de motores e servos;
 - maquina de estados;
 - estrategia ou mecanismo de resgate.
@@ -88,6 +87,8 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] consumir somente o ultimo quadro da camera;
 - [x] criar dashboard preto e somente leitura;
 - [x] zerar falsos caminhos de alta confianca na validacao depois da confirmacao temporal;
+- [x] criar selecao estratificada e painel independente para a referencia humana;
+- [x] implementar erro simetrico contra polilinha humana e gates mediano/P95;
 - [ ] anotar uma referencia humana de linha central para medir erro mediano/P95;
 - [ ] validar com camera real no Raspberry Pi 5;
 - [ ] medir latencia e estabilidade por 30 minutos no Raspberry Pi 5;

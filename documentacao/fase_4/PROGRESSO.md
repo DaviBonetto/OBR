@@ -57,10 +57,22 @@ as divergencias. O codigo publicado contem somente o extrator leve aprovado nest
 Antes de declarar o centro perfeito, criaremos um pequeno conjunto de referencia com pontos
 centrais humanos em retas, curvas abertas, curvas fechadas e T. O teste final continua fechado.
 
+## Gate humano implementado
+
+O painel `obr-referenciar-centro-fase4` seleciona deterministicamente 48 quadros reais de
+validacao: 12 retas, 12 curvas abertas, 12 curvas fechadas e 12 intersecoes T. O humano desenha a
+polilinha do centro desde o robo ate o destino. A previsao da IA permanece escondida por padrao e
+nenhum ponto e derivado da mascara.
+
+A avaliacao mede distancia simetrica entre a trajetoria prevista e a polilinha humana em
+`320 x 192`, por tipo e no total. O gate exige mediana de no maximo 3 pixels e P95 de no maximo
+8 pixels. Ele so pode ser aprovado depois das 48 anotacoes. O teste fechado e recusado em todas
+as etapas.
+
 ## Proximos gates
 
-1. criar e revisar a referencia humana de linha central;
-2. medir erro mediano e P95 do centro contra essa referencia;
+1. concluir as 48 polilinhas no painel humano;
+2. executar o relatorio e ajustar a geometria somente se o gate reprovar;
 3. executar o dashboard com a camera provisoria no Raspberry Pi 5;
 4. medir FP32 no Raspberry e comparar INT8 somente se necessario;
 5. repetir calibracao geometrica com a camera oficial, sem retreinar automaticamente;

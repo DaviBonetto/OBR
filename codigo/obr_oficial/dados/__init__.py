@@ -16,6 +16,11 @@ from obr_oficial.dados.preparacao_dataset import (
     PreparadorDataset,
     carregar_configuracao_dataset,
 )
+from obr_oficial.dados.referencia_centro import (
+    ErroReferenciaCentro,
+    RepositorioReferenciaCentro,
+    preparar_selecao_referencia,
+)
 
 __all__ = [
     "ConfiguracaoConsolidacaoRotulos",
@@ -25,7 +30,10 @@ __all__ = [
     "ErroConsolidacaoRotulos",
     "ErroGeracaoMascaras",
     "ErroPreparacaoDataset",
+    "ErroReferenciaCentro",
     "GeradorMascarasClassicas",
     "PreparadorDataset",
+    "RepositorioReferenciaCentro",
     "carregar_configuracao_dataset",
+    "preparar_selecao_referencia",
 ]

@@ -15,6 +15,7 @@ A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria 
 separacao por ambiente. Na Fase 3, o LR-ASPP V2 foi calibrado em limiar `0,80`, atingiu Dice
 `0,97266` e FPR significativo `4,35%` na validacao e foi exportado para ONNX. A Fase 4 ja entrega
 linha central, pontos atual/objetivo, T reto, confirmacao temporal e dashboard somente leitura.
+O gate final usa 48 trajetorias centrais desenhadas por humano sem revelar previamente a IA.
 Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
@@ -119,6 +120,15 @@ uv run obr-percepcao-linha --simulacao --host 127.0.0.1 --porta 8081
 
 Abra `http://127.0.0.1:8081`. O progresso, as metricas e os limites atuais estao em
 [`documentacao/fase_4/PROGRESSO.md`](documentacao/fase_4/PROGRESSO.md).
+
+Para concluir a referencia humana independente da Fase 4:
+
+```powershell
+uv run obr-referenciar-centro-fase4 --host 127.0.0.1 --porta 8093
+```
+
+O painel abre `http://127.0.0.1:8093`, usa apenas validacao e mantem a previsao da IA escondida
+ate o revisor decidir compara-la.
 
 ## Regras que nao podem ser quebradas
 

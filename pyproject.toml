@@ -61,6 +61,7 @@ obr-revisar-mascaras = "obr_oficial.aplicacao.revisar_mascaras:main"
 obr-exportar-modelo-linha = "obr_oficial.aplicacao.exportar_modelo_linha:main"
 obr-percepcao-linha = "obr_oficial.aplicacao.executar_percepcao_linha:main"
 obr-avaliar-geometria-linha = "obr_oficial.aplicacao.avaliar_geometria_linha:main"
+obr-referenciar-centro-fase4 = "obr_oficial.aplicacao.referenciar_centro_fase4:main"
 
 [tool.setuptools]
 package-dir = { "" = "codigo" }

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBR · Referência humana do centro</title>
+    <link rel="stylesheet" href="/referencia_centro.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="rotulo">OBR · GATE FINAL DA FASE 4</p>
+          <h1>Centro perfeito da linha</h1>
+          <p class="subtitulo">Referência humana independente · somente validação</p>
+        </div>
+        <div id="progresso" class="progresso">Carregando…</div>
+      </header>
+
+      <section class="filtros" aria-label="Filtros">
+        <label>Conteúdo
+          <select id="tipo">
+            <option value="todos">Todos</option>
+            <option value="reta">Linha reta</option>
+            <option value="curva_aberta">Curva aberta</option>
+            <option value="curva_fechada">Curva fechada / 90°</option>
+            <option value="intersecao">Interseção T · seguir reto</option>
+          </select>
+        </label>
+        <label>Estado
+          <select id="estado-filtro">
+            <option value="pendentes">Pendentes</option>
+            <option value="anotadas">Anotadas</option>
+            <option value="todas">Todas</option>
+          </select>
+        </label>
+        <div class="legenda">
+          <span><i class="humano"></i> Referência humana</span>
+          <span><i class="ia"></i> Centro calculado pela IA</span>
+        </div>
+      </section>
+
+      <section class="conteudo">
+        <div class="visualizacao">
+          <div class="topo-visual">
+            <div>
+              <strong id="nome-tipo">—</strong>
+              <span id="metadados">—</span>
+            </div>
+            <label class="alternador">
+              <input id="mostrar-ia" type="checkbox" />
+              Revelar IA depois de marcar
+            </label>
+          </div>
+          <div class="quadro">
+            <canvas id="canvas" width="320" height="192" aria-label="Imagem para anotação"></canvas>
+            <p id="vazio">Nenhuma amostra neste filtro.</p>
+          </div>
+          <p id="instrucao" class="instrucao">Clique no centro da linha começando perto do robô.</p>
+        </div>
+
+        <aside>
+          <div class="passos">
+            <p class="numero">01</p>
+            <strong>Comece embaixo</strong>
+            <span>Marque o centro mais próximo do robô.</span>
+            <p class="numero">02</p>
+            <strong>Siga a trajetória</strong>
+            <span>Adicione pontos na ordem até o destino. Em T, siga reto.</span>
+            <p class="numero">03</p>
+            <strong>Salve</strong>
+            <span>Use pelo menos quatro pontos. A IA fica escondida para não influenciar.</span>
+          </div>
+          <div class="controles">
+            <button id="desfazer">Desfazer ponto</button>
+            <button id="limpar">Limpar</button>
+          </div>
+          <label class="observacao">Observação opcional
+            <textarea id="observacao" maxlength="500" rows="3"></textarea>
+          </label>
+          <button id="salvar" class="primario">Salvar referência e avançar</button>
+          <p class="aviso">O conjunto de teste não é carregado. Nenhum ponto é gerado pela máscara.</p>
+        </aside>
+      </section>
+
+      <nav>
+        <button id="anterior">← Anterior</button>
+        <span id="posicao">0 / 0</span>
+        <button id="proxima">Próxima →</button>
+      </nav>
+      <div id="mensagem" role="status"></div>
+    </main>
+    <script src="/referencia_centro.js"></script>
+  </body>
+</html>

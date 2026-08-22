@@ -13,6 +13,7 @@ from obr_oficial.percepcao.linha import (
 )
 from obr_oficial.percepcao.linha.avaliacao_geometria import (
     avaliar_geometria_validacao,
+    avaliar_referencia_humana,
     gerar_montagem_diagnostico,
     salvar_relatorio,
 )
@@ -27,6 +28,11 @@ def main(argumentos: list[str] | None = None) -> int:
         "--configuracao",
         type=Path,
         default=raiz / "configuracoes" / "percepcao_linha_neural.toml",
+    )
+    analisador.add_argument(
+        "--referencia-humana",
+        type=Path,
+        default=raiz / "dados" / "referencia_centro_fase4",
     )
     analisador.add_argument(
         "--dataset",
@@ -50,6 +56,12 @@ def main(argumentos: list[str] | None = None) -> int:
         detector,
         opcoes.dataset,
     )
+    if (opcoes.referencia_humana / "selecao.jsonl").is_file():
+        relatorio["referencia_humana"] = avaliar_referencia_humana(
+            detector,
+            opcoes.dataset,
+            opcoes.referencia_humana,
+        )
     salvar_relatorio(relatorio, opcoes.saida)
     gerar_montagem_diagnostico(
         detector,
