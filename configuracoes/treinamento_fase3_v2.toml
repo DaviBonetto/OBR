@@ -1,0 +1,26 @@
+# Fase 3 V2: pune sombras e falsos positivos sem abrir o conjunto de teste.
+[entrada]
+largura = 320
+altura = 192
+roi_y = 0.30
+
+[treinamento]
+epocas = 80
+lote = 32
+taxa_aprendizado = 0.0002
+decaimento_peso = 0.0001
+paciencia = 15
+trabalhadores = 2
+semente = 20260822
+limiar = 0.50
+aumentos_fortes = true
+area_minima_negativo = 0.01
+peso_fpr_selecao = 0.25
+peso_amostra_negativa = 3.0
+
+[perda]
+peso_bce = 0.40
+peso_dice = 0.60
+peso_presenca = 0.25
+peso_negativo_presenca = 3.0
+fracao_topk_presenca = 0.01

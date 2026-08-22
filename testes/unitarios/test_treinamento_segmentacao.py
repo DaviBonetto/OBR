@@ -121,3 +121,33 @@ def test_perda_e_metricas_reagem_a_previsao_correta() -> None:
     metricas = acumulador.calcular()
     assert metricas["dice"] == pytest.approx(1.0)
     assert metricas["iou"] == pytest.approx(1.0)
+
+
+def test_perda_presenca_pune_sombra_em_quadro_negativo() -> None:
+    alvo = torch.zeros((1, 1, 10, 10))
+    logits_limpos = torch.full_like(alvo, -8.0)
+    logits_sombra = logits_limpos.clone()
+    logits_sombra[:, :, 2:7, 2:7] = 8.0
+    perda = PerdaBceDice(
+        0.4,
+        0.6,
+        peso_presenca=0.25,
+        peso_negativo_presenca=3.0,
+        fracao_topk_presenca=0.01,
+    )
+
+    assert perda(logits_sombra, alvo) > perda(logits_limpos, alvo)
+
+
+def test_metrica_distingue_qualquer_pixel_de_falso_positivo_significativo() -> None:
+    alvo = torch.zeros((2, 1, 10, 10))
+    logits = torch.full_like(alvo, -8.0)
+    logits[0, 0, 0, :4] = 8.0
+    logits[1, 0, 0, :6] = 8.0
+    acumulador = AcumuladorMetricas(0.5, area_minima_negativo=0.05)
+
+    acumulador.adicionar(logits, alvo)
+    metricas = acumulador.calcular()
+
+    assert metricas["taxa_falso_positivo_negativos"] == pytest.approx(1.0)
+    assert metricas["taxa_falso_positivo_negativos_significativos"] == pytest.approx(0.5)

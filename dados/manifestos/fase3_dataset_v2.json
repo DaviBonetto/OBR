@@ -1,0 +1,23 @@
+{
+  "arquivo_local_ignorado": "artefatos/fase3_dataset_v2.zip",
+  "bytes": 284253470,
+  "correcoes": {
+    "hard_negatives_sombra": 24,
+    "intersecoes_reconstruidas": 23,
+    "mascaras_modelo_aprovadas": 7
+  },
+  "dataset_pai": "fase3_dataset_inicial",
+  "divisao_teste_incluida": false,
+  "quantidades": {
+    "total": 1491,
+    "treino": 1065,
+    "validacao": 426
+  },
+  "sha256_arquivo": "cd8fc89ddfb151284274998d40c1586df80176a8888e311a1153bf2f1f86eeba",
+  "sha256_candidatas_auditoria": "00fd50b2252d2a21d02b7c6748673e3618fb760a38f21bfda9721221cbfba6f9",
+  "sha256_indice": "e9f6548b5a02ab65e62f41211bca1ba07e80107a9e6101e48b20b616290c8872",
+  "sha256_revisoes_auditoria": "f0ecd54992c17a915c24c60b04576edf28a44cc1e115f312d5dee5d0ab4fb45a",
+  "tipo": "dataset_segmentacao_fase3_v2",
+  "uso": "treinamento_fase3_v2_com_hard_negatives; nao_e_treino_final",
+  "versao_manifesto": 2
+}

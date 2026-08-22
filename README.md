@@ -103,6 +103,10 @@ Antes de um treinamento V2, os desacordos entre o modelo e rotulos vazios sao is
 `obr-auditar-rotulos-fase3` e revisados no mesmo painel, sem abrir o conjunto de teste. O fluxo e
 documentado em [`treinamento/README.md`](treinamento/README.md).
 
+O dataset V2 e gerado por `obr-consolidar-dataset-v2`. O notebook da Fase 3 usa hard negatives e
+recusa promover um modelo com falsos positivos significativos acima do gate definido. A Fase 4
+nao deve iniciar enquanto esses criterios de percepcao nao forem aprovados.
+
 ## Regras que nao podem ser quebradas
 
 1. A interface nunca participa do caminho critico de controle.

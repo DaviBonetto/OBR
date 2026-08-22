@@ -46,3 +46,23 @@ As tres decisoes significam exatamente:
 - `reprocessar`: existe linha, mas a mascara mostrada precisa ser corrigida.
 
 O comando recusa qualquer divisao de teste e nao sobrescreve uma fila que ja contenha decisoes.
+
+### Dataset e treinamento V2
+
+A auditoria V2 consolidou 54 decisoes humanas:
+
+- 24 sombras confirmadas como hard negatives;
+- 23 intersecoes T reconstruidas depois de mascaras vazias acidentais;
+- 7 mascaras neurais aprovadas pelo usuario.
+
+O pacote resultante e `artefatos/fase3_dataset_v2.zip`. Seu tamanho e hash ficam registrados em
+`dados/manifestos/fase3_dataset_v2.json`. O notebook principal foi atualizado para a V2 e agora:
+
+- aumenta a presenca de negativos nos lotes;
+- adiciona uma perda de presenca que pune regioes falsas em quadros sem linha;
+- mede falsos positivos significativos, ignorando apenas ruido de poucos pixels;
+- escolhe o checkpoint por Dice com penalidade de falso positivo;
+- exige como gate inicial Dice >= 0,95 e FPR significativo <= 0,10.
+
+O teste fechado continua fora do pacote e da selecao do modelo. A Fase 4 comeca somente depois
+que um checkpoint V2 passar pelos gates, pela auditoria visual e pelo benchmark no Raspberry Pi 5.

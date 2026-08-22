@@ -31,6 +31,8 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument("--lote", type=int, help="sobrescreve lote do TOML")
     parser.add_argument("--trabalhadores", type=int, help="sobrescreve workers do TOML")
     parser.add_argument("--paciencia", type=int, help="sobrescreve early stopping do TOML")
+    parser.add_argument("--taxa-aprendizado", type=float, help="sobrescreve learning rate")
+    parser.add_argument("--checkpoint-inicial", type=Path, help="pesos para ajuste fino")
     opcoes = parser.parse_args(argumentos)
     configuracao = carregar_configuracao_treinamento(opcoes.configuracao)
     substituicoes = {
@@ -40,6 +42,7 @@ def main(argumentos: list[str] | None = None) -> int:
             ("lote", opcoes.lote),
             ("trabalhadores", opcoes.trabalhadores),
             ("paciencia", opcoes.paciencia),
+            ("taxa_aprendizado", opcoes.taxa_aprendizado),
         )
         if valor is not None
     }
@@ -50,6 +53,7 @@ def main(argumentos: list[str] | None = None) -> int:
         configuracao,
         arquitetura=opcoes.arquitetura,
         pretreinado=not opcoes.sem_pretreino,
+        checkpoint_inicial=opcoes.checkpoint_inicial,
     )
     print(json.dumps(manifesto, ensure_ascii=False, indent=2))
     return 0

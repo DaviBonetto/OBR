@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import tomllib
@@ -14,7 +15,7 @@ import cv2
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchvision.models import MobileNet_V3_Large_Weights
 from torchvision.models.segmentation import lraspp_mobilenet_v3_large
 
@@ -41,6 +42,12 @@ class ConfiguracaoTreinamento:
     peso_bce: float
     peso_dice: float
     aumentos_fortes: bool
+    peso_presenca: float = 0.0
+    peso_negativo_presenca: float = 1.0
+    fracao_topk_presenca: float = 0.01
+    area_minima_negativo: float = 0.0
+    peso_fpr_selecao: float = 0.0
+    peso_amostra_negativa: float = 1.0
 
 
 def carregar_configuracao_treinamento(caminho: Path) -> ConfiguracaoTreinamento:
@@ -66,6 +73,12 @@ def carregar_configuracao_treinamento(caminho: Path) -> ConfiguracaoTreinamento:
         peso_bce=float(perda["peso_bce"]),
         peso_dice=float(perda["peso_dice"]),
         aumentos_fortes=bool(treino["aumentos_fortes"]),
+        peso_presenca=float(perda.get("peso_presenca", 0.0)),
+        peso_negativo_presenca=float(perda.get("peso_negativo_presenca", 1.0)),
+        fracao_topk_presenca=float(perda.get("fracao_topk_presenca", 0.01)),
+        area_minima_negativo=float(treino.get("area_minima_negativo", 0.0)),
+        peso_fpr_selecao=float(treino.get("peso_fpr_selecao", 0.0)),
+        peso_amostra_negativa=float(treino.get("peso_amostra_negativa", 1.0)),
     )
 
 
@@ -318,12 +331,22 @@ def criar_modelo(arquitetura: str, *, pretreinado: bool = True) -> nn.Module:
 
 
 class PerdaBceDice(nn.Module):
-    """Combina estabilidade por pixel e sobreposicao global."""
+    """Combina segmentacao e presenca para suprimir falsos positivos grandes."""
 
-    def __init__(self, peso_bce: float, peso_dice: float) -> None:
+    def __init__(
+        self,
+        peso_bce: float,
+        peso_dice: float,
+        peso_presenca: float = 0.0,
+        peso_negativo_presenca: float = 1.0,
+        fracao_topk_presenca: float = 0.01,
+    ) -> None:
         super().__init__()
         self.peso_bce = peso_bce
         self.peso_dice = peso_dice
+        self.peso_presenca = peso_presenca
+        self.peso_negativo_presenca = peso_negativo_presenca
+        self.fracao_topk_presenca = fracao_topk_presenca
         self.bce = nn.BCEWithLogitsLoss()
 
     def forward(self, logits: torch.Tensor, alvo: torch.Tensor) -> torch.Tensor:
@@ -333,16 +356,37 @@ class PerdaBceDice(nn.Module):
         intersecao = torch.sum(probabilidade * alvo, dim=dimensoes)
         denominador = torch.sum(probabilidade + alvo, dim=dimensoes)
         dice = 1.0 - torch.mean((2.0 * intersecao + 1.0) / (denominador + 1.0))
-        return self.peso_bce * bce + self.peso_dice * dice
+        base = self.peso_bce * bce + self.peso_dice * dice
+        if self.peso_presenca <= 0:
+            return base
+        achatado = logits.flatten(start_dim=1)
+        quantidade_topk = max(1, round(achatado.shape[1] * self.fracao_topk_presenca))
+        logit_presenca = torch.topk(achatado, quantidade_topk, dim=1).values.mean(dim=1)
+        alvo_presenca = (torch.sum(alvo, dim=dimensoes) > 0).to(logits.dtype)
+        pesos = torch.where(
+            alvo_presenca > 0,
+            torch.ones_like(alvo_presenca),
+            torch.full_like(alvo_presenca, self.peso_negativo_presenca),
+        )
+        perda_presenca = nn.functional.binary_cross_entropy_with_logits(
+            logit_presenca,
+            alvo_presenca,
+            weight=pesos,
+        )
+        return base + self.peso_presenca * perda_presenca
 
 
 class AcumuladorMetricas:
     """Metricas pixel a pixel e falsos positivos em quadros negativos."""
 
-    def __init__(self, limiar: float) -> None:
+    def __init__(self, limiar: float, area_minima_negativo: float = 0.0) -> None:
         self.limiar = limiar
+        self.area_minima_negativo = area_minima_negativo
         self.tp = self.fp = self.fn = self.tn = 0
         self.negativos = self.negativos_falsos = 0
+        self.negativos_falsos_significativos = 0
+        self.pixels_previstos_negativos = 0
+        self.pixels_totais_negativos = 0
 
     def adicionar(self, logits: torch.Tensor, alvo: torch.Tensor) -> None:
         previsto = torch.sigmoid(logits) >= self.limiar
@@ -356,6 +400,16 @@ class AcumuladorMetricas:
         negativos = por_amostra == 0
         self.negativos += int(torch.count_nonzero(negativos))
         self.negativos_falsos += int(torch.count_nonzero(negativos & (falso_por_amostra > 0)))
+        pixels_por_amostra = previsto[0].numel()
+        limite_significativo = max(
+            1,
+            int(np.ceil(pixels_por_amostra * self.area_minima_negativo)),
+        )
+        self.negativos_falsos_significativos += int(
+            torch.count_nonzero(negativos & (falso_por_amostra >= limite_significativo))
+        )
+        self.pixels_previstos_negativos += int(torch.sum(falso_por_amostra[negativos]))
+        self.pixels_totais_negativos += int(torch.count_nonzero(negativos)) * pixels_por_amostra
 
     def calcular(self) -> dict[str, float]:
         suave = 1e-9
@@ -366,6 +420,12 @@ class AcumuladorMetricas:
             "recall": self.tp / (self.tp + self.fn + suave),
             "taxa_falso_positivo_negativos": self.negativos_falsos
             / (self.negativos + suave),
+            "taxa_falso_positivo_negativos_significativos": (
+                self.negativos_falsos_significativos / (self.negativos + suave)
+            ),
+            "area_media_prevista_negativos": (
+                self.pixels_previstos_negativos / (self.pixels_totais_negativos + suave)
+            ),
         }
 
 
@@ -391,9 +451,25 @@ def criar_carregadores(
         "generator": gerador,
         "persistent_workers": configuracao.trabalhadores > 0,
     }
+    dataset_treino = DatasetSegmentacaoLinha(raiz_dataset, configuracao, "treino")
+    amostrador = None
+    if configuracao.peso_amostra_negativa > 1.0:
+        pesos = [
+            configuracao.peso_amostra_negativa
+            if item["tipo_quadro"] == "sem_linha"
+            else 1.0
+            for item in dataset_treino.amostras
+        ]
+        amostrador = WeightedRandomSampler(
+            pesos,
+            num_samples=len(pesos),
+            replacement=True,
+            generator=torch.Generator().manual_seed(configuracao.semente + 1),
+        )
     treino = DataLoader(
-        DatasetSegmentacaoLinha(raiz_dataset, configuracao, "treino"),
-        shuffle=True,
+        dataset_treino,
+        shuffle=amostrador is None,
+        sampler=amostrador,
         drop_last=False,
         **argumentos,
     )
@@ -412,9 +488,10 @@ def _avaliar(
     perda_fn: nn.Module,
     dispositivo: torch.device,
     limiar: float,
+    area_minima_negativo: float = 0.0,
 ) -> tuple[float, dict[str, float]]:
     modelo.eval()
-    acumulador = AcumuladorMetricas(limiar)
+    acumulador = AcumuladorMetricas(limiar, area_minima_negativo)
     perdas = []
     with torch.inference_mode():
         for imagens, mascaras in carregador:
@@ -433,6 +510,7 @@ def treinar(
     *,
     arquitetura: str = "linhanet",
     pretreinado: bool = True,
+    checkpoint_inicial: Path | None = None,
 ) -> dict[str, object]:
     """Treina, interrompe por validacao e salva somente o melhor checkpoint."""
 
@@ -446,12 +524,26 @@ def treinar(
         torch.cuda.manual_seed_all(configuracao.semente)
     dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     modelo = criar_modelo(arquitetura, pretreinado=pretreinado).to(dispositivo)
+    sha256_checkpoint_inicial = None
+    if checkpoint_inicial is not None:
+        checkpoint_inicial = checkpoint_inicial.resolve()
+        pacote_inicial = torch.load(checkpoint_inicial, map_location="cpu", weights_only=True)
+        if pacote_inicial.get("arquitetura") != arquitetura:
+            raise ErroTreinamentoSegmentacao("Arquitetura do checkpoint inicial incompativel")
+        modelo.load_state_dict(pacote_inicial["estado_modelo"])
+        sha256_checkpoint_inicial = hashlib.sha256(checkpoint_inicial.read_bytes()).hexdigest()
     treino_loader, validacao_loader = criar_carregadores(
         raiz_dataset,
         configuracao,
         dispositivo,
     )
-    perda_fn = PerdaBceDice(configuracao.peso_bce, configuracao.peso_dice)
+    perda_fn = PerdaBceDice(
+        configuracao.peso_bce,
+        configuracao.peso_dice,
+        configuracao.peso_presenca,
+        configuracao.peso_negativo_presenca,
+        configuracao.fracao_topk_presenca,
+    )
     otimizador = torch.optim.AdamW(
         modelo.parameters(),
         lr=configuracao.taxa_aprendizado,
@@ -459,6 +551,8 @@ def treinar(
     )
     escalador = torch.amp.GradScaler("cuda", enabled=dispositivo.type == "cuda")
     melhor_dice = -1.0
+    melhor_pontuacao = -float("inf")
+    melhor_fpr_significativo = 1.0
     sem_melhora = 0
     historico = []
     inicio = perf_counter()
@@ -490,17 +584,26 @@ def treinar(
             perda_fn,
             dispositivo,
             configuracao.limiar,
+            configuracao.area_minima_negativo,
         )
+        pontuacao = metricas["dice"] - configuracao.peso_fpr_selecao * metricas[
+            "taxa_falso_positivo_negativos_significativos"
+        ]
         registro = {
             "epoca": epoca,
             "perda_treino": float(np.mean(perdas_treino)),
             "perda_validacao": perda_validacao,
+            "pontuacao_selecao": pontuacao,
             **metricas,
         }
         historico.append(registro)
         print(json.dumps(registro, ensure_ascii=False), flush=True)
-        if metricas["dice"] > melhor_dice:
+        if pontuacao > melhor_pontuacao:
             melhor_dice = metricas["dice"]
+            melhor_pontuacao = pontuacao
+            melhor_fpr_significativo = metricas[
+                "taxa_falso_positivo_negativos_significativos"
+            ]
             sem_melhora = 0
             torch.save(
                 {
@@ -523,6 +626,9 @@ def treinar(
         "torch": torch.__version__,
         "configuracao": asdict(configuracao),
         "melhor_dice_validacao": melhor_dice,
+        "melhor_pontuacao_selecao": melhor_pontuacao,
+        "fpr_significativo_checkpoint": melhor_fpr_significativo,
+        "sha256_checkpoint_inicial": sha256_checkpoint_inicial,
         "epocas_executadas": len(historico),
         "duracao_s": round(perf_counter() - inicio, 3),
         "teste_aberto": False,
