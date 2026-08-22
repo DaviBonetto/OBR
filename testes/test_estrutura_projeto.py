@@ -9,6 +9,8 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "pyproject.toml",
         "configuracoes/camera_usb.toml",
         "configuracoes/percepcao.toml",
+        "configuracoes/percepcao_linha_neural.toml",
+        "configuracoes/painel_percepcao.toml",
         "configuracoes/controle.toml",
         "configuracoes/dataset_fase2.toml",
         "documentacao/ARQUITETURA.md",

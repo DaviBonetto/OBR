@@ -670,6 +670,14 @@ implantacao = [
     { name = "torch" },
     { name = "torchvision" },
 ]
+percepcao = [
+    { name = "flask" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "onnxruntime" },
+    { name = "opencv-python-headless" },
+    { name = "waitress" },
+]
 treinamento = [
     { name = "torch" },
     { name = "torchvision" },
@@ -678,14 +686,18 @@ treinamento = [
 [package.metadata]
 requires-dist = [
     { name = "flask", marker = "extra == 'captura'", specifier = ">=3.1,<4" },
+    { name = "flask", marker = "extra == 'percepcao'", specifier = ">=3.1,<4" },
     { name = "numpy", marker = "extra == 'captura'", specifier = ">=2,<3" },
     { name = "numpy", marker = "extra == 'dados'", specifier = ">=2,<3" },
     { name = "numpy", marker = "extra == 'implantacao'", specifier = ">=2,<3" },
+    { name = "numpy", marker = "extra == 'percepcao'", specifier = ">=2,<3" },
     { name = "onnx", marker = "extra == 'implantacao'", specifier = ">=1.17,<2" },
     { name = "onnxruntime", marker = "extra == 'implantacao'", specifier = ">=1.20,<2" },
+    { name = "onnxruntime", marker = "extra == 'percepcao'", specifier = ">=1.20,<2" },
     { name = "onnxscript", marker = "extra == 'implantacao'", specifier = ">=0.2,<1" },
     { name = "opencv-python-headless", marker = "extra == 'captura'", specifier = ">=4.13,<5" },
     { name = "opencv-python-headless", marker = "extra == 'dados'", specifier = ">=4.13,<5" },
+    { name = "opencv-python-headless", marker = "extra == 'percepcao'", specifier = ">=4.13,<5" },
     { name = "pytest", marker = "extra == 'desenvolvimento'", specifier = ">=8.3,<10" },
     { name = "ruff", marker = "extra == 'desenvolvimento'", specifier = ">=0.12,<1" },
     { name = "torch", marker = "extra == 'implantacao'", specifier = ">=2.6,<3" },
@@ -693,8 +705,9 @@ requires-dist = [
     { name = "torchvision", marker = "extra == 'implantacao'", specifier = ">=0.21,<1" },
     { name = "torchvision", marker = "extra == 'treinamento'", specifier = ">=0.21,<1" },
     { name = "waitress", marker = "extra == 'captura'", specifier = ">=3.0,<4" },
+    { name = "waitress", marker = "extra == 'percepcao'", specifier = ">=3.0,<4" },
 ]
-provides-extras = ["captura", "dados", "treinamento", "implantacao", "desenvolvimento"]
+provides-extras = ["captura", "dados", "treinamento", "implantacao", "percepcao", "desenvolvimento"]
 
 [[package]]
 name = "onnx"

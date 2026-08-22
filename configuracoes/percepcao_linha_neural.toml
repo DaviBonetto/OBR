@@ -1,0 +1,28 @@
+# Pipeline congelado da Fase 4. Nao contem controle de motores.
+
+[modelo]
+arquivo = "modelos/linha/lraspp_v2/modelo.onnx"
+sha256 = "fc01a35bd1415ee1a27ff43d800f1e43f91d36f482ceca4ba179f93df4f2c7cd"
+largura = 320
+altura = 192
+roi_y = 0.30
+limiar_mascara = 0.80
+
+[geometria]
+quantidade_faixas = 24
+altura_faixa = 5
+cobertura_minima = 0.20
+fator_largura_intersecao = 1.80
+distancia_objetivo_reta = 0.42
+distancia_objetivo_curva = 0.25
+angulo_reta_graus = 6.0
+angulo_curva_fechada_graus = 24.0
+
+[confianca]
+limiar_encontrada = 0.75
+limiar_incerta = 0.45
+
+[rastreamento]
+suavizacao = 0.55
+quadros_confirmacao = 2
+idade_maxima_temporal_ms = 120.0

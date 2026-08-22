@@ -1,0 +1,11 @@
+[servidor]
+endereco = "0.0.0.0"
+porta = 8081
+
+[video]
+quadros_por_segundo_maximo = 20
+qualidade_jpeg = 82
+
+[comandos]
+aceitar_comandos = false
+

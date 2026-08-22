@@ -4,7 +4,7 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 4 — iniciada; candidato LR-ASPP V2 congelado e exportado para ONNX.**
+**Fase 4 — em andamento; pipeline neural e dashboard funcionando sem atuadores.**
 
 ## Entregas da Fase 0
 
@@ -77,5 +77,19 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [ ] medir FP32 e, se vantajoso, INT8 no Raspberry Pi 5;
 - [ ] validar a camera provisoria e a camera oficial;
 - [ ] abrir o teste congelado uma unica vez depois de congelar todo o pipeline;
+
+## Entregas iniciais da Fase 4
+
+- [x] executar o ONNX com pre-processamento identico ao treinamento;
+- [x] verificar o hash do modelo antes da inferencia;
+- [x] extrair linha central, ponto atual, ponto objetivo e erros;
+- [x] manter intersecao T com trajetoria reta;
+- [x] implementar confirmacao, suavizacao e GAP temporal limitado;
+- [x] consumir somente o ultimo quadro da camera;
+- [x] criar dashboard preto e somente leitura;
+- [x] zerar falsos caminhos de alta confianca na validacao depois da confirmacao temporal;
+- [ ] anotar uma referencia humana de linha central para medir erro mediano/P95;
+- [ ] validar com camera real no Raspberry Pi 5;
+- [ ] medir latencia e estabilidade por 30 minutos no Raspberry Pi 5;
 
 Nenhum motor sera usado nesta fase.

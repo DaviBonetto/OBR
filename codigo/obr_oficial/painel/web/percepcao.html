@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBR · Percepção da linha</title>
+    <link rel="stylesheet" href="/percepcao.css" />
+  </head>
+  <body>
+    <main class="painel">
+      <section class="visao">
+        <header class="topo">
+          <div>
+            <p class="sobretitulo">OBR · FASE 4</p>
+            <h1>Percepção da linha</h1>
+          </div>
+          <div class="estado-global">
+            <span id="indicador" class="indicador"></span>
+            <strong id="estado">INICIANDO</strong>
+          </div>
+        </header>
+        <div class="quadro-video">
+          <img src="/video-linha.mjpg" alt="Linha detectada em tempo real" />
+          <div class="selo">SOMENTE LEITURA · MOTORES DESABILITADOS</div>
+        </div>
+        <footer class="legenda">
+          <span><i class="cor atual"></i>posição atual</span>
+          <span><i class="cor objetivo"></i>ponto objetivo</span>
+          <span><i class="cor centro"></i>centro detectado</span>
+          <span><i class="cor mascara"></i>máscara da IA</span>
+        </footer>
+      </section>
+
+      <aside class="telemetria">
+        <section class="bloco destaque">
+          <p class="rotulo">CONFIANÇA</p>
+          <div class="valor-grande" id="confianca">—</div>
+          <div class="barra"><span id="barra-confianca"></span></div>
+          <p id="motivo" class="motivo">Aguardando o primeiro quadro</p>
+        </section>
+
+        <section class="bloco grade">
+          <div><p class="rotulo">CURVA</p><strong id="curva">—</strong></div>
+          <div><p class="rotulo">FONTE</p><strong id="fonte">—</strong></div>
+          <div><p class="rotulo">ERRO LATERAL</p><strong id="erro-lateral">—</strong></div>
+          <div><p class="rotulo">ÂNGULO</p><strong id="erro-angular">—</strong></div>
+        </section>
+
+        <section class="bloco">
+          <p class="titulo-bloco">TEMPO REAL</p>
+          <dl>
+            <div><dt>Inferência</dt><dd id="inferencia">—</dd></div>
+            <div><dt>Geometria</dt><dd id="geometria">—</dd></div>
+            <div><dt>Total</dt><dd id="tempo-total">—</dd></div>
+            <div><dt>Percepção</dt><dd id="fps-percepcao">—</dd></div>
+            <div><dt>Câmera</dt><dd id="fps-camera">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="bloco">
+          <p class="titulo-bloco">DIAGNÓSTICO</p>
+          <dl>
+            <div><dt>Interseção T</dt><dd id="intersecao">—</dd></div>
+            <div><dt>Cobertura</dt><dd id="cobertura">—</dd></div>
+            <div><dt>Área da máscara</dt><dd id="area">—</dd></div>
+            <div><dt>Idade temporal</dt><dd id="idade">—</dd></div>
+          </dl>
+          <p class="regra">T = seguir reto · GAP = manter direção temporariamente</p>
+        </section>
+      </aside>
+    </main>
+    <script src="/percepcao.js"></script>
+  </body>
+</html>

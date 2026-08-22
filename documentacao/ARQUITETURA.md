@@ -79,6 +79,11 @@ idade e tempos de processamento.
 O painel jamais le diretamente tensores, mascaras internas ou variaveis do modelo. O futuro
 controle tambem consumira somente o contrato validado.
 
+Na Fase 4, `ProcessadorContinuoLinha` concretiza esse fluxo em uma thread independente. Ele
+consome sempre o ultimo `QuadroCamera`, publica somente o ultimo `ResultadoQuadroLinha` e entrega
+ao painel uma serializacao de `EstimativaLinha`. O dashboard nao possui endpoint de comando e a
+inferencia continua funcionando mesmo que nenhum navegador esteja conectado.
+
 ## Dados e modelos
 
 - Videos brutos e rotulos completos ficam fora do Git comum.

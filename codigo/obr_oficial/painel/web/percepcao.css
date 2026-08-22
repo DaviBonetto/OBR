@@ -1,0 +1,65 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #050505;
+  color: #f5f5f5;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #050505; }
+
+.painel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  min-height: 100vh;
+}
+
+.visao { display: flex; flex-direction: column; min-width: 0; padding: 26px 28px 18px; }
+.topo { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.sobretitulo, .rotulo, .titulo-bloco { margin: 0; color: #8a8a8a; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+h1 { margin: 3px 0 0; font-size: clamp(24px, 3vw, 38px); font-weight: 700; letter-spacing: -.04em; }
+.estado-global { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .1em; }
+.indicador { width: 9px; height: 9px; border-radius: 50%; background: #777; box-shadow: 0 0 0 5px #7772; }
+.indicador.encontrada { background: #28e09d; box-shadow: 0 0 0 5px #28e09d22; }
+.indicador.incerta { background: #ffc857; box-shadow: 0 0 0 5px #ffc85722; }
+.indicador.perdida { background: #ff4d5e; box-shadow: 0 0 0 5px #ff4d5e22; }
+
+.quadro-video {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid #242424;
+  border-radius: 18px;
+  background: #0b0b0b;
+}
+.quadro-video img { width: 100%; height: 100%; max-height: calc(100vh - 160px); object-fit: contain; }
+.selo { position: absolute; top: 14px; right: 14px; padding: 7px 10px; border: 1px solid #343434; border-radius: 999px; background: #080808d9; color: #aaa; font-size: 9px; font-weight: 800; letter-spacing: .11em; }
+.legenda { display: flex; flex-wrap: wrap; gap: 18px; padding-top: 14px; color: #8f8f8f; font-size: 11px; }
+.legenda span { display: flex; align-items: center; gap: 7px; }
+.cor { width: 9px; height: 9px; border-radius: 50%; }
+.cor.atual { background: #00ffff; }.cor.objetivo { background: #003caa; }.cor.centro { background: #f53723; }.cor.mascara { background: #0f69ff; }
+
+.telemetria { display: flex; flex-direction: column; gap: 12px; padding: 18px; border-left: 1px solid #202020; background: #090909; }
+.bloco { padding: 18px; border: 1px solid #242424; border-radius: 14px; background: #0d0d0d; }
+.bloco.destaque { background: #f1f1f1; color: #090909; }
+.destaque .rotulo { color: #555; }
+.valor-grande { margin: 7px 0 10px; font-size: 42px; font-weight: 750; letter-spacing: -.05em; }
+.barra { height: 5px; overflow: hidden; border-radius: 999px; background: #c8c8c8; }
+.barra span { display: block; width: 0; height: 100%; background: #090909; transition: width 150ms ease; }
+.motivo { min-height: 30px; margin: 12px 0 0; color: #555; font-size: 11px; line-height: 1.45; }
+.grade { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; }
+.grade strong { display: block; margin-top: 5px; font-size: 14px; }
+.titulo-bloco { margin-bottom: 12px; }
+dl { display: grid; gap: 8px; margin: 0; }
+dl div { display: flex; justify-content: space-between; gap: 16px; }
+dt { color: #828282; font-size: 12px; } dd { margin: 0; font-size: 12px; font-weight: 700; }
+.regra { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid #242424; color: #777; font-size: 10px; line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .painel { grid-template-columns: 1fr; }
+  .telemetria { border-top: 1px solid #202020; border-left: 0; }
+  .quadro-video img { max-height: 62vh; }
+}

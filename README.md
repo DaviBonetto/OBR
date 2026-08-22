@@ -8,13 +8,14 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 4 iniciada — candidato neural exportado, com teste final ainda fechado.**
+**Fase 4 em andamento — inferencia, geometria, rastreamento e dashboard funcionando.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
 A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
 separacao por ambiente. Na Fase 3, o LR-ASPP V2 foi calibrado em limiar `0,80`, atingiu Dice
-`0,97266` e FPR significativo `4,35%` na validacao e foi exportado para ONNX com `100%` de
-concordancia das mascaras avaliadas. Motores e mecanismos de resgate continuam sem acionamento.
+`0,97266` e FPR significativo `4,35%` na validacao e foi exportado para ONNX. A Fase 4 ja entrega
+linha central, pontos atual/objetivo, T reto, confirmacao temporal e dashboard somente leitura.
+Motores e mecanismos de resgate continuam sem acionamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -108,6 +109,16 @@ O dataset V2 e gerado por `obr-consolidar-dataset-v2`. O notebook da Fase 3 usa 
 recusa promover um modelo com falsos positivos significativos acima do gate definido. O resultado
 auditado e a justificativa do limiar estao em
 [`documentacao/fase_3/RESULTADO_V2.md`](documentacao/fase_3/RESULTADO_V2.md).
+
+Para executar a percepcao completa com camera simulada:
+
+```powershell
+uv sync --extra percepcao
+uv run obr-percepcao-linha --simulacao --host 127.0.0.1 --porta 8081
+```
+
+Abra `http://127.0.0.1:8081`. O progresso, as metricas e os limites atuais estao em
+[`documentacao/fase_4/PROGRESSO.md`](documentacao/fase_4/PROGRESSO.md).
 
 ## Regras que nao podem ser quebradas
 

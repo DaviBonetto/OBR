@@ -12,6 +12,9 @@ reproduzivel no ambiente indicado.
 - erro P95 do centro em 320 x 192: no maximo 8 pixels;
 - estimativa sem evidencia nova mantida por no maximo 120 ms.
 
+Os gates de erro de centro exigem pontos centrais anotados por humano. Mascaras por pixel, por si
+so, nao autorizam derivar uma referencia heuristica e apresenta-la como verdade independente.
+
 ## Raspberry Pi 5
 
 - inferencia P95: no maximo 20 ms;
