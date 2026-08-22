@@ -21,3 +21,28 @@ O notebook do Colab esta em `treinamento/fase_3/treinar_no_colab.ipynb`. Ele com
 e LR-ASPP sem tocar no teste fechado. O fluxo recebe o ZIP do dataset pelo navegador e baixa no
 fim um unico `OBR_FASE3_RESULTADOS_T4.zip`, que contem checkpoints, historicos, comparacao,
 ambiente e hashes. Resultados completos permanecem fora do Git ate serem auditados e aprovados.
+
+### Auditoria humana antes do V2
+
+O resultado T4 deve ser usado para localizar desacordos, nunca para alterar rotulos sozinho.
+Depois de extrair o ZIP de resultados em `artefatos/fase3_resultados_t4`, gere uma fila somente
+com mascaras vazias manuais e negativos contestados pelo modelo:
+
+```powershell
+uv run --all-extras obr-auditar-rotulos-fase3 `
+  --dataset artefatos/fase3_dataset_inicial `
+  --checkpoint artefatos/fase3_resultados_t4/resultados/lraspp_v1/melhor.pt
+
+uv run --all-extras obr-revisar-mascaras `
+  --brutos artefatos/fase3_dataset_inicial `
+  --candidatas dados/rotulados/fase3_v1_auditoria_desacordos `
+  --host 127.0.0.1 --porta 8092
+```
+
+As tres decisoes significam exatamente:
+
+- `aprovada`: existe linha e a mascara mostrada esta correta;
+- `mascara_vazia`: realmente nao existe linha;
+- `reprocessar`: existe linha, mas a mascara mostrada precisa ser corrigida.
+
+O comando recusa qualquer divisao de teste e nao sobrescreve uma fila que ja contenha decisoes.

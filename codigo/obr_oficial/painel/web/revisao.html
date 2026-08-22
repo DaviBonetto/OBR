@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OBR · Revisão de máscaras</title>
+    <title>OBR · Revisão humana</title>
     <link rel="stylesheet" href="/revisao.css" />
   </head>
   <body>
     <main>
       <header>
         <div>
-          <p class="rotulo">FASE 2 · ROTULAGEM ASSISTIDA</p>
-          <h1>Revisão de máscaras</h1>
+          <p class="rotulo">REVISÃO HUMANA · TREINO E VALIDAÇÃO</p>
+          <h1>Revisão de rótulos e máscaras</h1>
         </div>
         <div id="progresso" class="progresso">Carregando…</div>
       </header>
@@ -75,9 +75,9 @@
             <textarea id="observacao" maxlength="500" rows="4" placeholder="Descreva apenas o problema visível."></textarea>
           </label>
           <div class="acoes">
-            <button class="primario" data-decisao="aprovada">Aprovar máscara</button>
-            <button data-decisao="mascara_vazia">Marcar máscara vazia</button>
-            <button data-decisao="reprocessar">Enviar para correção</button>
+            <button class="primario" data-decisao="aprovada">Linha presente · máscara correta</button>
+            <button data-decisao="mascara_vazia">Sem linha · manter vazia</button>
+            <button data-decisao="reprocessar">Linha presente · corrigir máscara</button>
           </div>
           <p class="aviso">O conjunto de teste não é carregado por este painel.</p>
         </aside>

@@ -20,6 +20,22 @@ function nomeTipo(tipo) {
   })[tipo] || tipo;
 }
 
+function nomeDecisao(decisao) {
+  return ({
+    aprovada: "Linha presente · máscara correta",
+    mascara_vazia: "Sem linha · manter vazia",
+    reprocessar: "Linha presente · corrigir máscara",
+  })[decisao] || decisao || "Pendente";
+}
+
+function nomeMotivo(motivo) {
+  return ({
+    rotulo_vazio_manual: "Máscara vazia marcada manualmente",
+    rotulo_vazio_manual_e_desacordo_modelo: "Máscara vazia manual contestada pela IA",
+    desacordo_modelo_com_negativo: "Negativo contestado pela IA",
+  })[motivo] || motivo;
+}
+
 function atualizarResumo(resumo) {
   const revisadas = resumo.total - resumo.pendente;
   $("#progresso").textContent = `${revisadas} revisadas · ${resumo.pendente} pendentes`;
@@ -39,11 +55,12 @@ function renderizar(dados) {
 
   const a = dados.amostra;
   $("#nome-tipo").textContent = nomeTipo(a.tipo_quadro);
-  $("#metadados").textContent = `${a.divisao} · ${a.origem}`;
+  const motivo = a.motivo_auditoria ? ` · ${nomeMotivo(a.motivo_auditoria)}` : "";
+  $("#metadados").textContent = `${a.divisao} · ${a.origem}${motivo}`;
   $("#confianca").textContent = `${(a.confianca * 100).toFixed(1)}%`;
   $("#latencia").textContent = `${a.latencia_ms.toFixed(2)} ms`;
   $("#estado").textContent = a.estado;
-  $("#decisao-atual").textContent = a.revisao_atual?.decisao || "pendente";
+  $("#decisao-atual").textContent = nomeDecisao(a.revisao_atual?.decisao);
   $("#observacao").value = a.revisao_atual?.observacao || "";
   atualizarImagem();
 }

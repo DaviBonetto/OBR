@@ -99,6 +99,10 @@ O treinamento completo deve usar o notebook
 Um smoke test local pode usar `obr-treinar-segmentacao`, mas nao substitui os experimentos T4
 nem o benchmark do Raspberry.
 
+Antes de um treinamento V2, os desacordos entre o modelo e rotulos vazios sao isolados por
+`obr-auditar-rotulos-fase3` e revisados no mesmo painel, sem abrir o conjunto de teste. O fluxo e
+documentado em [`treinamento/README.md`](treinamento/README.md).
+
 ## Regras que nao podem ser quebradas
 
 1. A interface nunca participa do caminho critico de controle.

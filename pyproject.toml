@@ -36,6 +36,7 @@ desenvolvimento = [
 [project.scripts]
 obr-capturar = "obr_oficial.aplicacao.executar_captura:main"
 obr-consolidar-rotulos = "obr_oficial.aplicacao.consolidar_rotulos:main"
+obr-auditar-rotulos-fase3 = "obr_oficial.aplicacao.auditar_rotulos_fase3:main"
 obr-exportar-fase3 = "obr_oficial.aplicacao.exportar_fase3:main"
 obr-treinar-segmentacao = "obr_oficial.aplicacao.treinar_segmentacao:main"
 obr-preparar-dataset = "obr_oficial.aplicacao.preparar_dataset:main"
