@@ -65,4 +65,5 @@ O pacote resultante e `artefatos/fase3_dataset_v2.zip`. Seu tamanho e hash ficam
 - exige como gate inicial Dice >= 0,95 e FPR significativo <= 0,10.
 
 O teste fechado continua fora do pacote e da selecao do modelo. A Fase 4 comeca somente depois
-que um checkpoint V2 passar pelos gates, pela auditoria visual e pelo benchmark no Raspberry Pi 5.
+que um checkpoint V2 passar pelos gates e pela auditoria visual. O benchmark no Raspberry Pi 5
+pertence a Fase 5 e e obrigatorio antes de promover o candidato a modelo final.

@@ -1,0 +1,72 @@
+{
+  "ambiente_exportacao": {
+    "plataforma": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch": "2.13.0+cpu"
+  },
+  "arquitetura": "lraspp_mobilenet_v3_large",
+  "auditoria": {
+    "benchmark_raspberry_pi_5_executado": false,
+    "motores_acionados": false,
+    "teste_aberto": false
+  },
+  "benchmark_onnx": {
+    "escopo": "computador_local; nao_e_benchmark_do_raspberry_pi_5",
+    "iteracoes": 50,
+    "media_ms": 16.470202000346035,
+    "p50_ms": 15.52820000142674,
+    "p95_ms": 23.118704999433245
+  },
+  "entrada": {
+    "dimensoes": [
+      1,
+      3,
+      192,
+      320
+    ],
+    "formato": "NCHW_RGB_normalizado_imagenet",
+    "roi_y": 0.3
+  },
+  "estado": "candidato_fase4; benchmark_raspberry_pendente",
+  "gates_validacao": {
+    "aprovado": true,
+    "dice_aprovado": true,
+    "dice_minimo": 0.95,
+    "fpr_aprovado": true,
+    "fpr_significativo_maximo": 0.1
+  },
+  "onnx": {
+    "arquivo": "modelo.onnx",
+    "opset": 18,
+    "paridade": {
+      "amostras": 9,
+      "aprovado": true,
+      "concordancia_mascaras": 1.0,
+      "diferenca_absoluta_maxima_logits": 4.9591064453125e-05,
+      "diferenca_absoluta_media_logits": 6.353127976884328e-06,
+      "gate_concordancia_mascaras": 0.999,
+      "gate_diferenca_maxima": 0.001
+    },
+    "sha256": "fc01a35bd1415ee1a27ff43d800f1e43f91d36f482ceca4ba179f93df4f2c7cd"
+  },
+  "origem": {
+    "checkpoint": "melhor.pt",
+    "sha256_checkpoint": "1f14775d85aaec686a9eba69e8fe6ff69c6e484475ada6cca8f3464d699b83a1",
+    "sha256_dataset_v2": "cd8fc89ddfb151284274998d40c1586df80176a8888e311a1153bf2f1f86eeba",
+    "sha256_pacote_resultados_t4": "87BF4DB688859FE9B09F95AE9C8F3425C67C0FD22D95203180FCE05FD4D9EA57"
+  },
+  "pos_processamento": {
+    "limiar": 0.8,
+    "sigmoid": true
+  },
+  "validacao_limiar_calibrado": {
+    "area_media_prevista_negativos": 0.011327063519021735,
+    "dice": 0.9726606384063299,
+    "iou": 0.9467763766955067,
+    "precisao": 0.9945377278455821,
+    "recall": 0.9517253043098649,
+    "taxa_falso_positivo_negativos": 0.1304347826058601,
+    "taxa_falso_positivo_negativos_significativos": 0.04347826086862004
+  },
+  "versao_manifesto": 1
+}

@@ -4,7 +4,7 @@ Atualizado em: 21 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 3 — iniciada; primeiro treinamento neural pendente na T4.**
+**Fase 4 — iniciada; candidato LR-ASPP V2 congelado e exportado para ONNX.**
 
 ## Entregas da Fase 0
 
@@ -68,8 +68,14 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] implementar loader, aumentos, perdas e metricas;
 - [x] implementar LinhaNet e LR-ASPP MobileNetV3;
 - [x] validar forward e uma etapa de otimizacao na CPU;
-- [ ] treinar as duas arquiteturas na T4;
-- [ ] corrigir a fila de active learning;
-- [ ] congelar e exportar o modelo aprovado para ONNX;
+- [x] treinar as duas arquiteturas na T4;
+- [x] corrigir a fila de active learning;
+- [x] auditar o pacote V2 e todos os hashes internos;
+- [x] calibrar o limiar somente na validacao;
+- [x] congelar e exportar o candidato aprovado para ONNX;
+- [x] verificar paridade numerica PyTorch/ONNX;
+- [ ] medir FP32 e, se vantajoso, INT8 no Raspberry Pi 5;
+- [ ] validar a camera provisoria e a camera oficial;
+- [ ] abrir o teste congelado uma unica vez depois de congelar todo o pipeline;
 
 Nenhum motor sera usado nesta fase.
