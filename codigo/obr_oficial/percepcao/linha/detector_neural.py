@@ -466,4 +466,3 @@ class DetectorNeuralLinha:
             tempos=tempos,
         )
         return ResultadoDetectorNeural(probabilidade, mascara, estimativa, diagnostico)
-
