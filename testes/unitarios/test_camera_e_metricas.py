@@ -1,10 +1,18 @@
+import json
+from pathlib import Path
 from time import sleep
 
+import cv2
 import numpy as np
 import pytest
 
 from obr_oficial.dispositivos.buffer_ultimo_quadro import BufferUltimoQuadro
 from obr_oficial.dispositivos.camera_base import MetricasImagem, QuadroCamera
+from obr_oficial.dispositivos.camera_reproducao import (
+    CameraReproducaoImagens,
+    ErroReproducaoCapturas,
+    carregar_imagens_dataset,
+)
 from obr_oficial.dispositivos.camera_simulada import CameraSimulada
 from obr_oficial.dispositivos.metricas_imagem import calcular_metricas_imagem
 
@@ -68,3 +76,70 @@ def test_camera_simulada_entrega_quadros_e_fps() -> None:
         assert estado.altura == 120
     finally:
         camera.parar()
+
+
+def _salvar_png(caminho: Path, valor: int) -> None:
+    imagem = np.full((48, 64, 3), valor, dtype=np.uint8)
+    sucesso, conteudo = cv2.imencode(".png", imagem)
+    assert sucesso
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    caminho.write_bytes(conteudo.tobytes())
+
+
+def test_reproducao_entrega_capturas_reais_em_loop(tmp_path: Path) -> None:
+    primeira = tmp_path / "captura_1.png"
+    segunda = tmp_path / "captura_2.png"
+    _salvar_png(primeira, 30)
+    _salvar_png(segunda, 220)
+    camera = CameraReproducaoImagens((primeira, segunda), fps=30.0)
+
+    camera.iniciar()
+    try:
+        quadro_1 = camera.obter_ultimo_quadro()
+        assert quadro_1 is not None
+        quadro_2 = camera.obter_ultimo_quadro(depois_de=quadro_1.id_quadro, timeout_s=0.2)
+        assert quadro_2 is not None
+        assert int(quadro_1.imagem_bgr[0, 0, 0]) == 30
+        assert int(quadro_2.imagem_bgr[0, 0, 0]) == 220
+        estado = camera.obter_estado()
+        assert estado.origem == "capturas_reais"
+        assert estado.propriedades["quantidade_imagens"] == 2
+        assert (estado.largura, estado.altura) == (64, 48)
+    finally:
+        camera.parar()
+
+
+def test_carrega_apenas_validacao_e_recusa_teste(tmp_path: Path) -> None:
+    imagem = tmp_path / "imagens" / "real.png"
+    _salvar_png(imagem, 80)
+    indice = tmp_path / "indice.jsonl"
+    indice.write_text(
+        json.dumps({"divisao": "validacao", "imagem": "imagens/real.png"}) + "\n",
+        encoding="utf-8",
+    )
+
+    assert carregar_imagens_dataset(tmp_path) == (imagem.resolve(),)
+
+    indice.write_text(
+        "\n".join(
+            (
+                json.dumps({"divisao": "validacao", "imagem": "imagens/real.png"}),
+                json.dumps({"divisao": "teste", "imagem": "imagens/real.png"}),
+            )
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ErroReproducaoCapturas, match="contaminado"):
+        carregar_imagens_dataset(tmp_path)
+
+
+def test_reproducao_recusa_caminho_fora_do_dataset(tmp_path: Path) -> None:
+    externa = tmp_path.parent / "externa.png"
+    _salvar_png(externa, 80)
+    (tmp_path / "indice.jsonl").write_text(
+        json.dumps({"divisao": "validacao", "imagem": "../externa.png"}) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ErroReproducaoCapturas, match="fora da raiz"):
+        carregar_imagens_dataset(tmp_path)

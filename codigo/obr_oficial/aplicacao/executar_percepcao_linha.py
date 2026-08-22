@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 from typing import Any
 
 from waitress import serve
 
-from obr_oficial.dispositivos import CameraSimulada, CameraUSB, ConfiguracaoCameraUSB
+from obr_oficial.dispositivos import (
+    CameraReproducaoImagens,
+    CameraSimulada,
+    CameraUSB,
+    ConfiguracaoCameraUSB,
+    carregar_imagens_dataset,
+)
 from obr_oficial.nucleo.configuracao import carregar_configuracao, exigir_secao, raiz_projeto
 from obr_oficial.painel import criar_painel_percepcao_linha
 from obr_oficial.percepcao.linha import (
@@ -22,7 +29,20 @@ def main(argumentos: list[str] | None = None) -> int:
     analisador = argparse.ArgumentParser(
         description="Dashboard da percepcao neural; nao controla atuadores"
     )
-    analisador.add_argument("--simulacao", action="store_true", help="usa pista sintetica")
+    fontes = analisador.add_mutually_exclusive_group()
+    fontes.add_argument("--simulacao", action="store_true", help="usa pista sintetica")
+    fontes.add_argument(
+        "--reproduzir-capturas",
+        type=Path,
+        metavar="PASTA_DATASET",
+        help="reproduz capturas reais de um dataset local sem abrir o teste",
+    )
+    analisador.add_argument(
+        "--divisao-reproducao",
+        choices=("treino", "validacao"),
+        default="validacao",
+    )
+    analisador.add_argument("--fps-reproducao", type=float, default=5.0)
     analisador.add_argument("--configuracao-camera", default="camera_usb.toml")
     analisador.add_argument(
         "--configuracao-percepcao",
@@ -47,7 +67,17 @@ def main(argumentos: list[str] | None = None) -> int:
     servidor = exigir_secao(configuracao_painel, "servidor")
     video = exigir_secao(configuracao_painel, "video")
 
-    if opcoes.simulacao:
+    if opcoes.reproduzir_capturas is not None:
+        caminho_dataset = opcoes.reproduzir_capturas
+        if not caminho_dataset.is_absolute():
+            caminho_dataset = raiz / caminho_dataset
+        imagens = carregar_imagens_dataset(caminho_dataset, opcoes.divisao_reproducao)
+        fonte = CameraReproducaoImagens(
+            imagens,
+            fps=opcoes.fps_reproducao,
+            nome_perfil=f"capturas-reais-{opcoes.divisao_reproducao}",
+        )
+    elif opcoes.simulacao:
         fonte = CameraSimulada(
             largura=int(dispositivo["largura"]),
             altura=int(dispositivo["altura"]),
@@ -87,6 +117,7 @@ def main(argumentos: list[str] | None = None) -> int:
     processador.iniciar()
     print("ATUADORES: DESABILITADOS", flush=True)
     print(f"Modelo: {configuracao_percepcao.arquivo_modelo.name}", flush=True)
+    print(f"Fonte: {fonte.obter_estado().origem}", flush=True)
     print(f"Painel de percepcao: http://{host}:{porta}", flush=True)
     try:
         serve(painel, host=host, port=porta, threads=6, channel_timeout=30)
