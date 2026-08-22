@@ -83,22 +83,36 @@ def estimativa_como_dict(estimativa: EstimativaLinha) -> dict[str, object]:
 
 
 def _criar_mascara_visual(
-    probabilidade: np.ndarray,
+    mascara: np.ndarray,
     largura: int,
     altura: int,
-    limiar: float,
 ) -> np.ndarray:
-    """Suaviza apenas a apresentacao; a mascara logica permanece intocada."""
+    """Redimensiona a mascara logica sem inventar ou suavizar seus limites."""
 
-    ampliada = cv2.resize(
-        probabilidade,
+    binaria = np.where(mascara > 0, 255, 0).astype(np.uint8)
+    return cv2.resize(
+        binaria,
         (largura, altura),
-        interpolation=cv2.INTER_LINEAR,
+        interpolation=cv2.INTER_NEAREST,
     )
-    suave = cv2.GaussianBlur(ampliada, (0, 0), sigmaX=1.6, sigmaY=1.6)
-    mascara = np.where(suave >= limiar, 255, 0).astype(np.uint8)
-    nucleo = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    return cv2.morphologyEx(mascara, cv2.MORPH_CLOSE, nucleo)
+
+
+def _segmento_na_borda_externa(
+    inicio: np.ndarray,
+    fim: np.ndarray,
+    largura: int,
+    altura: int,
+) -> bool:
+    """Identifica somente arestas criadas pelo recorte nos limites da imagem."""
+
+    x_inicio, y_inicio = (int(valor) for valor in inicio)
+    x_fim, y_fim = (int(valor) for valor in fim)
+    return (
+        (y_inicio == 0 and y_fim == 0)
+        or (y_inicio == altura - 1 and y_fim == altura - 1)
+        or (x_inicio == 0 and x_fim == 0)
+        or (x_inicio == largura - 1 and x_fim == largura - 1)
+    )
 
 
 def _desenhar_contorno_mascara(regiao: np.ndarray, mascara: np.ndarray) -> None:
@@ -112,38 +126,32 @@ def _desenhar_contorno_mascara(regiao: np.ndarray, mascara: np.ndarray) -> None:
     if not contornos:
         return
 
-    contornos_suaves: list[np.ndarray] = []
-    for contorno in contornos:
-        perimetro = cv2.arcLength(contorno, True)
-        epsilon = min(6.0, max(1.5, perimetro * 0.003))
-        contornos_suaves.append(cv2.approxPolyDP(contorno, epsilon, True))
-
     # O corte reproduz a leitura visual das referencias: destino em azul-violeta
     # e trecho mais proximo do robo em ciano, sem gradiente entre as duas regioes.
     corte_proximidade = round(mascara.shape[0] * 0.72)
     cor_distante = (255, 70, 110)
     cor_proxima = (255, 235, 0)
     espessura = 3
+    altura, largura = mascara.shape
 
-    cv2.drawContours(
-        regiao,
-        contornos_suaves,
-        -1,
-        cor_distante,
-        espessura,
-        cv2.LINE_AA,
-    )
-    if corte_proximidade < mascara.shape[0]:
-        camada_proxima = regiao.copy()
-        cv2.drawContours(
-            camada_proxima,
-            contornos_suaves,
-            -1,
-            cor_proxima,
-            espessura,
-            cv2.LINE_AA,
-        )
-        regiao[corte_proximidade:] = camada_proxima[corte_proximidade:]
+    for contorno in contornos:
+        pontos = contorno.reshape(-1, 2)
+        if len(pontos) < 2:
+            continue
+        pontos_fechados = np.vstack((pontos, pontos[0]))
+        for inicio, fim in pairwise(pontos_fechados):
+            if _segmento_na_borda_externa(inicio, fim, largura, altura):
+                continue
+            y_medio = (int(inicio[1]) + int(fim[1])) / 2.0
+            cor = cor_proxima if y_medio >= corte_proximidade else cor_distante
+            cv2.line(
+                regiao,
+                tuple(int(valor) for valor in inicio),
+                tuple(int(valor) for valor in fim),
+                cor,
+                espessura,
+                cv2.LINE_AA,
+            )
 
 
 def _suavizar_polilinha(pontos: np.ndarray, repeticoes: int = 2) -> np.ndarray:
@@ -187,13 +195,13 @@ def desenhar_sobreposicao(
     altura, largura = imagem.shape[:2]
     y0 = round(altura * configuracao.roi_y)
     altura_roi = altura - y0
-    mascara_visual = _criar_mascara_visual(
-        resultado.probabilidade,
-        largura,
-        altura_roi,
-        configuracao.limiar_mascara,
-    )
-    regiao = imagem[y0:]
+    mascara_quadro = getattr(resultado, "mascara_quadro", None)
+    if isinstance(mascara_quadro, np.ndarray) and mascara_quadro.ndim == 2:
+        mascara_visual = _criar_mascara_visual(mascara_quadro, largura, altura)
+        regiao = imagem
+    else:
+        mascara_visual = _criar_mascara_visual(resultado.mascara, largura, altura_roi)
+        regiao = imagem[y0:]
     _desenhar_contorno_mascara(regiao, mascara_visual)
 
     def pixel(ponto: PontoNormalizado) -> tuple[int, int]:

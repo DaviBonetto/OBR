@@ -21,8 +21,10 @@ class _SessaoLinhaReta:
         self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(
             np.float32
         )
+        self.chamadas = 0
 
     def run(self, _saidas, _entradas):
+        self.chamadas += 1
         return [self.logits]
 
 
@@ -34,10 +36,14 @@ def _configuracao(tmp_path: Path) -> ConfiguracaoDetectorNeural:
         altura=192,
         roi_y=0.3,
         limiar_mascara=0.8,
+        limiar_mascara_visual=0.55,
         quantidade_faixas=24,
         altura_faixa=5,
         cobertura_minima=0.2,
-        fator_largura_intersecao=1.8,
+        fator_largura_intersecao=2.2,
+        quantidade_faixas_intersecao=40,
+        faixas_continuacao_intersecao=8,
+        tolerancia_alinhamento_intersecao=0.08,
         distancia_objetivo_reta=0.42,
         distancia_objetivo_curva=0.25,
         angulo_reta_graus=6.0,
@@ -53,7 +59,8 @@ def _configuracao(tmp_path: Path) -> ConfiguracaoDetectorNeural:
 def test_dashboard_observa_ultimo_resultado_sem_comandos(tmp_path: Path) -> None:
     camera = CameraSimulada(largura=160, altura=120, fps=20.0)
     configuracao = _configuracao(tmp_path)
-    detector = DetectorNeuralLinha(configuracao, sessao=_SessaoLinhaReta())
+    sessao = _SessaoLinhaReta()
+    detector = DetectorNeuralLinha(configuracao, sessao=sessao)
     processador = ProcessadorContinuoLinha(camera, detector, RastreadorLinha(configuracao))
     camera.iniciar()
     processador.iniciar()
@@ -80,6 +87,7 @@ def test_dashboard_observa_ultimo_resultado_sem_comandos(tmp_path: Path) -> None
         assert estado["atuadores_habilitados"] is False
         assert estado["percepcao"]["estimativa"]["estado"] == "encontrada"
         assert estado["processador"]["total_processados"] >= 1
+        assert sessao.chamadas >= 4
 
         video = cliente.get("/video-linha.mjpg", buffered=False)
         primeiro_bloco = next(video.response)

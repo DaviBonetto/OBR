@@ -90,6 +90,9 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] criar selecao estratificada e painel independente para a referencia humana;
 - [x] implementar erro simetrico contra polilinha humana e gates mediano/P95;
 - [x] finalizar mascara visual antialias, trajetoria curta e marcadores atual/objetivo;
+- [x] completar a mascara no quadro inteiro com duas janelas sobrepostas e histerese conectada;
+- [x] remover fechamentos artificiais do contorno nas bordas do quadro;
+- [x] separar T de curvas de 90 graus, com 55/55 T e zero falso T nos outros 371 quadros;
 - [x] estabilizar jitter pequeno sem atrasar mudancas grandes de direcao;
 - [ ] concluir uma referencia humana independente de linha central, se retomada;
 - [ ] validar com camera real no Raspberry Pi 5;

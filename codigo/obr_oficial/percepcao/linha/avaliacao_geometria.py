@@ -270,6 +270,7 @@ def avaliar_geometria_validacao(
     falsos_caminhos = falsos_alta_confianca = 0
     falsos_alta_confianca_temporais = 0
     intersecoes = intersecoes_retas = 0
+    intersecoes_detectadas_por_tipo: dict[str, dict[str, int]] = {}
     ids_falsos_alta_confianca: list[str] = []
     erros_por_tipo: dict[str, list[float]] = {}
     erros_por_quadro: list[dict[str, Any]] = []
@@ -292,6 +293,14 @@ def avaliar_geometria_validacao(
             instante_monotonico_s=indice * 0.1,
         )
         estimativa = resultado.estimativa
+        tipo_quadro = str(item["tipo_quadro"])
+        contagem_intersecao = intersecoes_detectadas_por_tipo.setdefault(
+            tipo_quadro,
+            {"quadros": 0, "detectadas": 0},
+        )
+        contagem_intersecao["quadros"] += 1
+        if resultado.diagnostico.intersecao_detectada:
+            contagem_intersecao["detectadas"] += 1
         estimativa_temporal = rastreador.atualizar(estimativa)
         tempos_pre.append(estimativa.tempos.pre_processamento_ms)
         tempos_inferencia.append(estimativa.tempos.inferencia_ms)
@@ -358,7 +367,7 @@ def avaliar_geometria_validacao(
                 intersecoes_retas += 1
 
     return {
-        "versao_relatorio": 1,
+        "versao_relatorio": 2,
         "divisao": "validacao",
         "teste_aberto": False,
         "total_quadros": len(amostras),
@@ -387,6 +396,13 @@ def avaliar_geometria_validacao(
         "intersecoes": intersecoes,
         "intersecoes_classificadas_reta": intersecoes_retas,
         "taxa_intersecoes_retas": intersecoes_retas / max(1, intersecoes),
+        "intersecoes_detectadas_por_tipo": {
+            tipo: {
+                **contagem,
+                "taxa": contagem["detectadas"] / max(1, contagem["quadros"]),
+            }
+            for tipo, contagem in sorted(intersecoes_detectadas_por_tipo.items())
+        },
         "latencia_pc_ms": {
             "pre_processamento": _percentis(tempos_pre),
             "inferencia": _percentis(tempos_inferencia),

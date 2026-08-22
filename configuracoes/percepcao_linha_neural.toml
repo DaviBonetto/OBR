@@ -7,12 +7,21 @@ largura = 320
 altura = 192
 roi_y = 0.30
 limiar_mascara = 0.80
+limiar_mascara_visual = 0.55
 
 [geometria]
 quantidade_faixas = 24
 altura_faixa = 5
 cobertura_minima = 0.20
-fator_largura_intersecao = 1.80
+fator_largura_intersecao = 2.20
+quantidade_faixas_intersecao = 40
+bootstrap_faixas_intersecao = 5
+persistencia_alargamento_intersecao = 2
+fator_largura_continuacao_intersecao = 1.65
+faixas_continuacao_intersecao = 8
+faixas_continuacao_borda_intersecao = 7
+tolerancia_alinhamento_largura_intersecao = 0.55
+tolerancia_alinhamento_intersecao = 0.08
 distancia_objetivo_reta = 0.42
 distancia_objetivo_curva = 0.25
 angulo_reta_graus = 6.0

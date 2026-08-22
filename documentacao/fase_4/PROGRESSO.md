@@ -8,10 +8,11 @@ O candidato LR-ASPP V2 agora executa em um pipeline completo, ainda sem atuadore
 
 ```text
 ultimo quadro da camera
-  -> recorte e normalizacao identicos ao treino
-  -> ONNX Runtime
-  -> mascara com limiar 0,80
-  -> linha central e diagnosticos
+  -> duas janelas sobrepostas, com a mesma escala fisica do treino
+  -> ONNX Runtime sequencial: janela superior + janela inferior
+  -> mascara inferior 0,80 para controle
+  -> mascara full-frame 0,55 conectada a semente inferior 0,80
+  -> linha central inferior + topologia full-frame
   -> confirmacao e suavizacao temporal
   -> EstimativaLinha imutavel
   -> dashboard somente leitura
@@ -23,7 +24,8 @@ Foram implementados:
 - consumo exclusivo do ultimo quadro, sem fila crescente;
 - linha central, ponto atual, ponto objetivo, erro lateral e angular;
 - classificacao de reta e curvas suaves/fechadas para esquerda/direita;
-- intersecao T com objetivo frontal e tipo de curva `reta`;
+- intersecao T confirmada somente quando ha ramo e continuacao frontal;
+- curvas de 90 graus sem continuacao frontal preservadas como curvas fechadas;
 - confirmacao de uma rota nova em dois quadros coerentes;
 - memoria de GAP limitada a 120 ms, marcada como evidencia temporal;
 - suavizacao temporal sem alterar a mascara da IA;
@@ -35,10 +37,13 @@ Foram implementados:
 A avaliacao percorreu as 426 imagens de validacao do dataset V2, sem abrir o teste:
 
 - 380 de 380 quadros positivos localizaram a linha;
-- 55 de 55 intersecoes foram classificadas com trajetoria reta;
+- 55 de 55 intersecoes foram detectadas e classificadas com trajetoria reta;
+- 0 de 202 curvas abertas, 0 de 57 curvas fechadas, 0 de 66 retas e 0 de 46
+  negativos foram confundidos com T;
 - 1 de 46 negativos gerou caminho de alta confianca por quadro isolado;
 - 0 de 46 negativos permaneceu de alta confianca depois da confirmacao temporal;
-- ultima execucao completa no PC: mediana `19,13 ms`, P95 `31,04 ms`;
+- ultima execucao completa com duas inferencias no PC: mediana `59,27 ms`, P95
+  `330,50 ms`;
 - execucao ao vivo simulada: nenhuma falha observada e cerca de 10 FPS, limitada pela camera
   simulada configurada em 10 FPS.
 
@@ -74,21 +79,36 @@ base e o topo da imagem e, por isso, foram preservados apenas no historico local
 avaliacao. Nenhuma referencia gerada pela propria IA foi registrada como humana. Assim, o gate de
 3/8 pixels permanece **nao medido**, e nao foi usado para alegar perfeicao.
 
-## Acabamento final local
+## Mascara full-frame e acabamento final local
 
-A camada visual foi aproximada das referencias de competicao sem modificar o tensor, o limiar ou
-a mascara logica usados pela geometria:
+A rede foi mantida na escala em que foi treinada. Em vez de esticar a ROI ou executar o modelo
+fora da distribuicao conhecida, o quadro e lido em duas janelas de 70% da altura, sobrepostas
+entre 30% e 70%. O passe inferior continua sendo a fonte da linha central e do futuro controle.
+O passe superior completa somente a mascara do quadro e fornece contexto para confirmar a
+topologia do T.
+
+A fusao usa histerese conectada: `0,80` forma a semente forte no passe inferior e `0,55` recupera
+a borda completa apenas no componente ligado a essa semente. Manchas superiores desconectadas
+sao descartadas. A camada visual agora:
 
 - nenhum preenchimento ou transparencia sobre a linha e a imagem da camera;
-- contorno antialias azul-violeta no horizonte e ciano perto do robo, derivado da
-  probabilidade neural apenas para exibicao;
+- contorno azul-violeta no horizonte e ciano perto do robo, cobrindo o quadro inteiro;
+- nenhum `blur`, fechamento morfologico ou simplificacao poligonal no desenho;
+- componentes que saem do quadro permanecem abertos, sem as tampas horizontais artificiais no
+  topo, na antiga fronteira da ROI ou no rodape;
+- horizontais internas verdadeiras, incluindo o ramo de uma intersecao T, permanecem visiveis;
 - trajeto vermelho limitado ao trecho entre posicao atual e ponto objetivo;
 - marcadores ciano e azul-escuro com centro branco, anel e halo;
 - suavizacao temporal adaptativa: forte contra jitter pequeno e responsiva a curvas grandes.
 
-Depois dessas mudancas, a avaliacao das 426 imagens continuou com 100% dos 380 positivos
-localizados, 55 de 55 intersecoes T seguindo reto e zero falso caminho de alta confianca depois da
-confirmacao temporal. O teste final permaneceu fechado.
+Antes da nova topologia, 91 de 371 quadros que nao eram T recebiam o diagnostico de intersecao.
+Depois da mudanca, a avaliacao das 426 imagens ficou com 100% dos 380 positivos localizados,
+55 de 55 T detectados, zero falso T nas outras quatro classes e zero falso caminho de alta
+confianca depois da confirmacao temporal. O teste final permaneceu fechado.
+
+Essa validacao usa capturas reais ja registradas, mas a parte superior nao possui rotulos humanos
+full-frame independentes. A cobertura visual superior e a latencia ainda precisam ser confirmadas
+ao vivo com a camera provisoria no Raspberry Pi 5 e, depois, repetidas com a camera oficial.
 
 ## Proximos gates
 
