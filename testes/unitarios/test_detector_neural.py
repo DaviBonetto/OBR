@@ -379,6 +379,7 @@ def test_rota_visual_percorre_curva_de_90_graus() -> None:
     rota = _extrair_rota_visual(mascara, intersecao_t=False)
 
     assert rota is not None
+    assert rota.tolist() == [[320, 310], [490, 310], [490, 14]]
     assert len(rota) == 3
     assert rota[0, 1] > 250
     assert rota[-1, 1] < 30
@@ -402,6 +403,48 @@ def test_rota_visual_do_t_permanece_reta() -> None:
     assert rota[0, 1] > 450
     assert rota[-1, 1] < 30
     assert abs(int(rota[0, 0]) - int(rota[-1, 0])) <= 8
+
+
+def test_rota_visual_reta_centraliza_bolinha_atual() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    mascara[:, 200:380] = 255
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=False)
+
+    assert rota is not None
+    assert abs(int(rota[0, 0]) - 290) <= 2
+    assert np.max(np.abs(rota[:, 0] - 290)) <= 2
+
+
+def test_rota_visual_curva_aberta_centraliza_bolinha_atual() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    centros = np.asarray(((260, 479), (270, 360), (300, 240), (340, 120), (360, 0)))
+    cv2.polylines(mascara, [centros], False, 255, 90, cv2.LINE_AA)
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=False)
+
+    assert rota is not None
+    x_atual, y_atual = rota[0]
+    intervalo = np.flatnonzero(mascara[y_atual] > 0)
+    centro_real = 0.5 * (int(intervalo[0]) + int(intervalo[-1]))
+    assert abs(float(x_atual) - centro_real) <= 2.0
+    assert not _eh_cotovelo_ortogonal(rota)
+
+
+def test_rota_visual_do_t_centraliza_tronco_sem_entrar_no_ramo() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    mascara[:220, 200:320] = 255
+    mascara[150:250, 100:600] = 255
+    mascara[220:, 120:300] = 255
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=True)
+
+    assert rota is not None
+    assert len(rota) == 2
+    assert abs(int(rota[0, 0]) - 210) <= 2
+    assert abs(int(rota[-1, 0]) - 260) <= 2
+    assert rota[0, 1] > 450
+    assert rota[-1, 1] < 30
 
 
 def test_rota_visual_nao_inventa_cotovelo_em_linha_diagonal() -> None:

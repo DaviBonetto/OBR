@@ -241,6 +241,74 @@ def _cobertura_rota_na_mascara(pontos: np.ndarray, mascara: np.ndarray) -> float
     return float(np.mean(mascara[densos[:, 1], densos[:, 0]] > 0))
 
 
+def _intervalo_ativo_proximo(
+    vetor: np.ndarray,
+    referencia: float,
+) -> tuple[float, int] | None:
+    """Retorna centro e largura do trecho ativo mais proximo da referencia."""
+
+    ativos = np.flatnonzero(vetor > 0)
+    if len(ativos) == 0:
+        return None
+    indice = int(ativos[np.argmin(np.abs(ativos - referencia))])
+    zeros_antes = np.flatnonzero(vetor[:indice] == 0)
+    inicio_intervalo = int(zeros_antes[-1] + 1) if len(zeros_antes) else 0
+    zeros_depois = np.flatnonzero(vetor[indice + 1 :] == 0)
+    fim_intervalo = (
+        int(indice + zeros_depois[0]) if len(zeros_depois) else len(vetor) - 1
+    )
+    return 0.5 * (inicio_intervalo + fim_intervalo), fim_intervalo - inicio_intervalo + 1
+
+
+def _centralizar_rota_monotona(
+    pontos: np.ndarray,
+    mascara: np.ndarray,
+) -> np.ndarray:
+    """Segue o centro de cada secao horizontal em retas e curvas comuns."""
+
+    if len(pontos) < 2:
+        return pontos
+    inicio = np.asarray(pontos[0], dtype=np.float32)
+    fim = np.asarray(pontos[-1], dtype=np.float32)
+    deslocamento_y = abs(float(fim[1] - inicio[1]))
+    if deslocamento_y < 0.20 * mascara.shape[0]:
+        return pontos
+
+    quantidade = max(8, min(24, round(deslocamento_y / 24.0)))
+    ys = np.linspace(inicio[1], fim[1], quantidade, dtype=np.float32)
+    x_referencia = float(inicio[0])
+    centralizados: list[tuple[float, float]] = []
+    for y in ys:
+        y_inteiro = int(np.clip(round(float(y)), 0, mascara.shape[0] - 1))
+        intervalo = _intervalo_ativo_proximo(mascara[y_inteiro], x_referencia)
+        if intervalo is None:
+            continue
+        x_central, _largura = intervalo
+        centralizados.append((x_central, float(y_inteiro)))
+        x_referencia = x_central
+    if len(centralizados) < 2:
+        return pontos
+    return np.asarray(centralizados, dtype=np.float32)
+
+
+def _centralizar_extremos_em_secoes(
+    pontos: np.ndarray,
+    mascara: np.ndarray,
+) -> np.ndarray:
+    """Centraliza as bolinhas sem permitir que um ramo de T desvie a rota."""
+
+    centralizados = np.asarray(pontos, dtype=np.float32).copy()
+    if len(centralizados) < 2:
+        return centralizados
+    for indice in (0, len(centralizados) - 1):
+        x, y = centralizados[indice]
+        y_inteiro = int(np.clip(round(float(y)), 0, mascara.shape[0] - 1))
+        intervalo = _intervalo_ativo_proximo(mascara[y_inteiro], float(x))
+        if intervalo is not None:
+            centralizados[indice] = (intervalo[0], float(y_inteiro))
+    return centralizados
+
+
 def _ortogonalizar_rota_se_couber(
     pontos: np.ndarray,
     mascara: np.ndarray,
@@ -266,28 +334,18 @@ def _ortogonalizar_rota_se_couber(
     if coberturas[melhor_indice] < 0.97:
         return pontos
 
-    def centro_intervalo(vetor: np.ndarray, referencia: float) -> tuple[float, int] | None:
-        ativos = np.flatnonzero(vetor > 0)
-        if len(ativos) == 0:
-            return None
-        indice = int(ativos[np.argmin(np.abs(ativos - referencia))])
-        inicio_intervalo = indice
-        fim_intervalo = indice
-        while inicio_intervalo > 0 and vetor[inicio_intervalo - 1] > 0:
-            inicio_intervalo -= 1
-        while fim_intervalo + 1 < len(vetor) and vetor[fim_intervalo + 1] > 0:
-            fim_intervalo += 1
-        return 0.5 * (inicio_intervalo + fim_intervalo), fim_intervalo - inicio_intervalo + 1
-
     if melhor_indice == 0:
         # Entrada horizontal, saida vertical. Centralize cada trecho usando as
         # duas bordas reais da mascara em vez da borda mais proxima do robo.
         x_sonda = int(np.clip(round(inicio[0]), 0, mascara.shape[1] - 1))
-        intervalo_vertical_inicio = centro_intervalo(mascara[:, x_sonda], inicio[1])
+        intervalo_vertical_inicio = _intervalo_ativo_proximo(
+            mascara[:, x_sonda],
+            inicio[1],
+        )
         if intervalo_vertical_inicio is None:
             return pontos
         y_central, espessura_horizontal = intervalo_vertical_inicio
-        intervalo_horizontal_inicio = centro_intervalo(
+        intervalo_horizontal_inicio = _intervalo_ativo_proximo(
             mascara[round(y_central)],
             inicio[0],
         )
@@ -295,11 +353,14 @@ def _ortogonalizar_rota_se_couber(
             return pontos
         _, comprimento_horizontal = intervalo_horizontal_inicio
         y_sonda = int(np.clip(round(0.5 * (y_central + fim[1])), 0, mascara.shape[0] - 1))
-        intervalo_horizontal_saida = centro_intervalo(mascara[y_sonda], fim[0])
+        intervalo_horizontal_saida = _intervalo_ativo_proximo(
+            mascara[y_sonda],
+            fim[0],
+        )
         if intervalo_horizontal_saida is None:
             return pontos
         x_central, espessura_vertical = intervalo_horizontal_saida
-        intervalo_vertical_saida = centro_intervalo(
+        intervalo_vertical_saida = _intervalo_ativo_proximo(
             mascara[:, round(x_central)],
             fim[1],
         )
@@ -321,11 +382,14 @@ def _ortogonalizar_rota_se_couber(
     else:
         # Entrada vertical, saida horizontal: mesma centralizacao transposta.
         y_sonda = int(np.clip(round(inicio[1]), 0, mascara.shape[0] - 1))
-        intervalo_horizontal_inicio = centro_intervalo(mascara[y_sonda], inicio[0])
+        intervalo_horizontal_inicio = _intervalo_ativo_proximo(
+            mascara[y_sonda],
+            inicio[0],
+        )
         if intervalo_horizontal_inicio is None:
             return pontos
         x_central, espessura_vertical = intervalo_horizontal_inicio
-        intervalo_vertical_inicio = centro_intervalo(
+        intervalo_vertical_inicio = _intervalo_ativo_proximo(
             mascara[:, round(x_central)],
             inicio[1],
         )
@@ -333,11 +397,14 @@ def _ortogonalizar_rota_se_couber(
             return pontos
         _, comprimento_vertical = intervalo_vertical_inicio
         x_sonda = int(np.clip(round(0.5 * (x_central + fim[0])), 0, mascara.shape[1] - 1))
-        intervalo_vertical_saida = centro_intervalo(mascara[:, x_sonda], fim[1])
+        intervalo_vertical_saida = _intervalo_ativo_proximo(
+            mascara[:, x_sonda],
+            fim[1],
+        )
         if intervalo_vertical_saida is None:
             return pontos
         y_central, espessura_horizontal = intervalo_vertical_saida
-        intervalo_horizontal_saida = centro_intervalo(
+        intervalo_horizontal_saida = _intervalo_ativo_proximo(
             mascara[round(y_central)],
             fim[0],
         )
@@ -448,6 +515,7 @@ def _extrair_rota_visual(
             largura=largura_original,
             altura=altura_original,
         )
+        caminho_t = _centralizar_extremos_em_secoes(caminho_t, mascara)
         caminho_t = np.rint(caminho_t).astype(np.int32)
         caminho_t = _ajustar_pontos_a_mascara(caminho_t, mascara)
         return caminho_t if len(caminho_t) >= 2 else None
@@ -532,12 +600,17 @@ def _extrair_rota_visual(
 
     caminho = caminho / escala
     caminho = _ortogonalizar_rota_se_couber(caminho, mascara)
+    cotovelo_90 = _eh_cotovelo_ortogonal(caminho)
+    if not cotovelo_90:
+        caminho = _centralizar_rota_monotona(caminho, mascara)
     caminho = _recortar_extremos_rota(
         caminho,
         margem_px=10.0,
         largura=largura_original,
         altura=altura_original,
     )
+    if not cotovelo_90:
+        caminho = _centralizar_extremos_em_secoes(caminho, mascara)
     caminho = np.rint(caminho).astype(np.int32)
     caminho = _ajustar_pontos_a_mascara(caminho, mascara)
     if len(caminho) < 2:

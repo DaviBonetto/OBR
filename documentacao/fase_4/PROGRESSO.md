@@ -124,6 +124,12 @@ horizontal e outro vertical. O T usa a continuacao frontal ja confirmada pela to
 entra nos ramos laterais. Curvas abertas e linhas diagonais conservam a rota suave. Cada ponto
 desenhado e ajustado de volta para um pixel valido da mascara.
 
+Em retas e curvas comuns, a rota visual segue o centro de secoes horizontais consecutivas da
+mascara. Assim, a posicao atual nao e mais atraida pela borda mais proxima do robo. No T, somente
+os dois extremos sao centralizados no tronco e na continuacao frontal, para o ramo lateral nao
+desviar o trajeto. O cotovelo de 90 graus aprovado ignora deliberadamente essa etapa e permanece
+inalterado.
+
 Os marcadores foram reduzidos para 16 pixels de diametro total: nucleo ciano para a posicao atual,
 nucleo azul-escuro para o objetivo, borda branca de um pixel e contorno escuro discreto. A linha
 vermelha usa dois pixels sobre um contorno escuro, sem os antigos aneis e halos que escondiam a
@@ -137,7 +143,8 @@ No replay das 426 capturas reais de validacao:
 - nenhuma das 202 curvas abertas e nenhuma das 66 retas recebeu cotovelo artificial;
 - nenhuma rota positiva teve menos de 20 pixels;
 - zero ponto das rotas ficou fora da mascara;
-- custo isolado da rota no PC: mediana `8,20 ms`, P95 `12,15 ms` e maximo `23,07 ms`.
+- extremos de retas, curvas comuns e T ficaram a no maximo `0,5 px` do centro da secao da linha;
+- custo isolado da rota no PC: mediana `10,28 ms`, P95 `15,23 ms` e maximo isolado `44,50 ms`.
 
 Esses numeros validam o replay no computador, nao o movimento do robo. A mascara inferior, o
 tensor neural, o rastreador de controle e os atuadores nao foram alterados por este acabamento.
