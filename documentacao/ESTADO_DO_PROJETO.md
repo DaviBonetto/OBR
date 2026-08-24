@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Atualizado em: 22 de agosto de 2026.
+Atualizado em: 24 de agosto de 2026.
 
 ## Fase atual
 
@@ -93,6 +93,7 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [x] completar a mascara no quadro inteiro com duas janelas sobrepostas e histerese conectada;
 - [x] remover fechamentos artificiais do contorno nas bordas do quadro;
 - [x] separar T de curvas de 90 graus, com 55/55 T e zero falso T nos outros 371 quadros;
+- [x] redesenhar rota visual conectada e marcadores compactos, sem alterar o futuro controle;
 - [x] estabilizar jitter pequeno sem atrasar mudancas grandes de direcao;
 - [ ] concluir uma referencia humana independente de linha central, se retomada;
 - [ ] validar com camera real no Raspberry Pi 5;

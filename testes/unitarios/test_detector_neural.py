@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pytest
 
@@ -21,7 +22,12 @@ from obr_oficial.percepcao.linha import (
     desenhar_sobreposicao,
     preprocessar_quadro,
 )
-from obr_oficial.percepcao.linha.execucao_continua import _desenhar_contorno_mascara
+from obr_oficial.percepcao.linha.execucao_continua import (
+    _desenhar_contorno_mascara,
+    _desenhar_marcador,
+    _eh_cotovelo_ortogonal,
+    _extrair_rota_visual,
+)
 
 
 def _configuracao(tmp_path: Path) -> ConfiguracaoDetectorNeural:
@@ -365,6 +371,61 @@ def test_contorno_aberto_nas_bordas_e_fechado_no_interior() -> None:
     assert np.array_equal(regiao[50, 25], original[50, 25])
 
 
+def test_rota_visual_percorre_curva_de_90_graus() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    mascara[:360, 440:540] = 255
+    mascara[260:360, 80:540] = 255
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=False)
+
+    assert rota is not None
+    assert len(rota) == 3
+    assert rota[0, 1] > 250
+    assert rota[-1, 1] < 30
+    assert np.ptp(rota[:, 0]) > 100
+    assert np.ptp(rota[:, 1]) > 250
+    assert abs(int(rota[0, 1]) - int(rota[1, 1])) <= 2
+    assert abs(int(rota[1, 0]) - int(rota[2, 0])) <= 2
+    assert _eh_cotovelo_ortogonal(rota)
+    assert all(mascara[y, x] > 0 for x, y in rota)
+
+
+def test_rota_visual_do_t_permanece_reta() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    mascara[:, 285:355] = 255
+    mascara[150:230, 45:600] = 255
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=True)
+
+    assert rota is not None
+    assert len(rota) == 2
+    assert rota[0, 1] > 450
+    assert rota[-1, 1] < 30
+    assert abs(int(rota[0, 0]) - int(rota[-1, 0])) <= 8
+
+
+def test_rota_visual_nao_inventa_cotovelo_em_linha_diagonal() -> None:
+    mascara = np.zeros((480, 640), dtype=np.uint8)
+    cv2.line(mascara, (280, 479), (470, 0), 255, 90)
+
+    rota = _extrair_rota_visual(mascara, intersecao_t=False)
+
+    assert rota is not None
+    assert not _eh_cotovelo_ortogonal(rota)
+
+
+def test_marcador_minimalista_nao_esconde_a_linha() -> None:
+    imagem = np.full((60, 60, 3), 180, dtype=np.uint8)
+    original = imagem.copy()
+
+    _desenhar_marcador(imagem, (30, 30), (255, 230, 0))
+
+    alterados = np.argwhere(np.any(imagem != original, axis=2))
+    raios = np.linalg.norm(alterados - np.array([30, 30]), axis=1)
+    assert float(np.max(raios)) <= 9.5
+    assert tuple(int(canal) for canal in imagem[30, 30]) == (255, 230, 0)
+
+
 def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
     configuracao = _configuracao(tmp_path)
     probabilidade = _probabilidade_reta()
@@ -408,4 +469,9 @@ def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
     )
     assert np.count_nonzero(pixels_distantes) > 100
     assert np.count_nonzero(pixels_proximos) > 30
-    assert tuple(int(canal) for canal in visual[479, 319]) == (255, 255, 255)
+    rota = _extrair_rota_visual(resultado.mascara_quadro, intersecao_t=False)
+    assert rota is not None
+    atual_x, atual_y = rota[0]
+    objetivo_x, objetivo_y = rota[-1]
+    assert tuple(int(canal) for canal in visual[atual_y, atual_x]) == (255, 230, 0)
+    assert tuple(int(canal) for canal in visual[objetivo_y, objetivo_x]) == (165, 55, 10)

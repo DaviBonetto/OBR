@@ -1,6 +1,6 @@
 # Progresso da Fase 4
 
-Atualizado em 22 de agosto de 2026.
+Atualizado em 24 de agosto de 2026.
 
 ## Entrega inicial
 
@@ -98,7 +98,7 @@ sao descartadas. A camada visual agora:
   topo, na antiga fronteira da ROI ou no rodape;
 - horizontais internas verdadeiras, incluindo o ramo de uma intersecao T, permanecem visiveis;
 - trajeto vermelho limitado ao trecho entre posicao atual e ponto objetivo;
-- marcadores ciano e azul-escuro com centro branco, anel e halo;
+- marcadores ciano e azul-escuro compactos, com borda branca fina e sem halo grande;
 - suavizacao temporal adaptativa: forte contra jitter pequeno e responsiva a curvas grandes.
 
 Antes da nova topologia, 91 de 371 quadros que nao eram T recebiam o diagnostico de intersecao.
@@ -109,6 +109,38 @@ confianca depois da confirmacao temporal. O teste final permaneceu fechado.
 Essa validacao usa capturas reais ja registradas, mas a parte superior nao possui rotulos humanos
 full-frame independentes. A cobertura visual superior e a latencia ainda precisam ser confirmadas
 ao vivo com a camera provisoria no Raspberry Pi 5 e, depois, repetidas com a camera oficial.
+
+## Rota visual e marcadores V2
+
+A trajetoria vermelha do dashboard foi separada explicitamente da linha central inferior que sera
+usada pelo controle. A camada visual agora extrai uma crista central conectada em uma malha de
+`128 x 96`, encontra o caminho continuo e devolve os pontos para a resolucao original. Isso permite
+desenhar o trecho horizontal de uma curva de 90 graus antes de subir pelo trecho vertical, em vez
+de ligar faixas verticais por uma diagonal artificial.
+
+O cotovelo exato de 90 graus so e aplicado quando os dois segmentos completos permanecem dentro
+da mascara, com ao menos 97% de cobertura, e quando as proporcoes locais comprovam um ramo
+horizontal e outro vertical. O T usa a continuacao frontal ja confirmada pela topologia e nunca
+entra nos ramos laterais. Curvas abertas e linhas diagonais conservam a rota suave. Cada ponto
+desenhado e ajustado de volta para um pixel valido da mascara.
+
+Os marcadores foram reduzidos para 16 pixels de diametro total: nucleo ciano para a posicao atual,
+nucleo azul-escuro para o objetivo, borda branca de um pixel e contorno escuro discreto. A linha
+vermelha usa dois pixels sobre um contorno escuro, sem os antigos aneis e halos que escondiam a
+camera.
+
+No replay das 426 capturas reais de validacao:
+
+- todas as 380 imagens positivas produziram rota visual;
+- 55 de 55 T mantiveram a decisao frontal reta;
+- 37 das 57 curvas fechadas apresentaram a geometria estrita de cotovelo de 90 graus;
+- nenhuma das 202 curvas abertas e nenhuma das 66 retas recebeu cotovelo artificial;
+- nenhuma rota positiva teve menos de 20 pixels;
+- zero ponto das rotas ficou fora da mascara;
+- custo isolado da rota no PC: mediana `8,20 ms`, P95 `12,15 ms` e maximo `23,07 ms`.
+
+Esses numeros validam o replay no computador, nao o movimento do robo. A mascara inferior, o
+tensor neural, o rastreador de controle e os atuadores nao foram alterados por este acabamento.
 
 ## Proximos gates
 
