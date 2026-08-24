@@ -8,7 +8,7 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Fase 4 fechada para teste fisico — a proxima etapa e a Fase 4.5 no Raspberry Pi 5.**
+**Linha congelada e Fase Verde 0 concluida — a proxima etapa e a captura do verde.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
 A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
@@ -20,6 +20,9 @@ revelar previamente a IA.
 Essa anotacao independente permanece opcional e nao foi apresentada como concluida. O acabamento
 visual final separa mascara logica, trajetoria de controle e marcadores sem alterar o modelo.
 Motores e mecanismos de resgate continuam sem acionamento.
+O novo contrato de pista processa linha e verde no mesmo quadro. Quando nao ha verde valido, a
+decisao verde e neutra e o seguimento da linha continua normalmente. Consulte
+[`documentacao/fase_verde/PROGRESSO.md`](documentacao/fase_verde/PROGRESSO.md).
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -152,7 +155,8 @@ ate o revisor decidir compara-la.
 | 2 | Dataset inicial, rotulagem e detector classico de referencia |
 | 3 | Treinamento e exportacao da segmentacao por IA |
 | 4 | Geometria, confianca, rastreamento e painel da linha |
-| 5 | Benchmark e implantacao no Raspberry Pi 5 |
+| Verde 0-5 | Captura, IA, geometria e validacao dos marcadores verdes |
+| 5 | Benchmark e implantacao da percepcao no Raspberry Pi 5 |
 | 6 | Controle de locomocao em simulacao e com rodas suspensas |
 | 7 | Percepcao completa da pista e maquina de estados |
 | 8 | Sistema de resgate e testes integrados |

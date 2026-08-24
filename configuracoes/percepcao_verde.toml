@@ -1,0 +1,20 @@
+[verde]
+versao = 1
+
+[geometria]
+# Valores iniciais normalizados. Serao calibrados somente com dados reais, sem esconder falhas.
+confianca_minima = 0.75
+area_normalizada_minima = 0.0001
+area_normalizada_maxima = 0.08
+margem_antes_depois = 0.01
+margem_lateral = 0.015
+
+[temporal]
+janela_quadros = 5
+confirmacoes_minimas = 3
+memoria_maxima_ms = 120.0
+
+[integracao]
+# AUSENTE e neutro: a linha continua sendo processada e seguida normalmente.
+detector_linha_sempre_ativo = true
+decisao_neutra_sem_verde = true

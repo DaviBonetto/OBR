@@ -4,7 +4,7 @@ Atualizado em: 24 de agosto de 2026.
 
 ## Fase atual
 
-**Fase 4 — software fechado para a Fase 4.5; validacao fisica no Raspberry Pi pendente.**
+**Fase Verde 0 concluida; proxima etapa: painel e protocolo de captura do verde.**
 
 ## Entregas da Fase 0
 
@@ -100,3 +100,21 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 - [ ] medir latencia e estabilidade por 30 minutos no Raspberry Pi 5;
 
 Nenhum motor sera usado nesta fase.
+
+## Entregas da Fase Verde 0
+
+- [x] congelar por hash o modelo, a configuracao e a implementacao aprovada da linha;
+- [x] definir ausencia de verde como decisao neutra, sem interromper a linha;
+- [x] compor linha e verde no mesmo quadro por `EstimativaPista`;
+- [x] definir contratos imutaveis para marcador, estado e decisao verde;
+- [x] classificar antes/depois e esquerda/direita pelo sentido de chegada;
+- [x] ignorar marcadores depois inclusive em cruzes mistas;
+- [x] exigir dois marcadores antes, em lados opostos, para retorno de 180 graus;
+- [x] versionar configuracao inicial e gates temporais;
+- [x] cobrir as regras com testes unitarios sem abrir o teste final;
+- [ ] criar o painel e o protocolo de captura da Fase Verde 1;
+- [ ] capturar, rotular, treinar e validar o detector visual do verde;
+- [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
+
+O detalhamento esta em `documentacao/fase_verde/PROGRESSO.md`. Os testes da Fase Verde 0 usam
+geometria sintetica; ainda nao provam deteccao por camera, iluminacao ou latencia fisica.

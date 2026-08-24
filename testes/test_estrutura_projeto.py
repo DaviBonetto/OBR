@@ -10,6 +10,7 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "configuracoes/camera_usb.toml",
         "configuracoes/percepcao.toml",
         "configuracoes/percepcao_linha_neural.toml",
+        "configuracoes/percepcao_verde.toml",
         "configuracoes/painel_percepcao.toml",
         "configuracoes/controle.toml",
         "configuracoes/dataset_fase2.toml",
@@ -17,8 +18,11 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "documentacao/SEGURANCA.md",
         "documentacao/ESTADO_DO_PROJETO.md",
         "codigo/obr_oficial/nucleo/contratos.py",
+        "codigo/obr_oficial/percepcao/pista/verde/geometria.py",
         "codigo/obr_oficial/dados/preparacao_dataset.py",
         "dados/manifestos/fase2_v1.json",
+        "dados/manifestos/fase_verde_0.json",
+        "documentacao/fase_verde/PROGRESSO.md",
     )
 
     ausentes = [caminho for caminho in caminhos if not (raiz / caminho).is_file()]

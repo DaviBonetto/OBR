@@ -19,6 +19,7 @@ from obr_oficial.nucleo.configuracao import (
         "resgate.toml",
         "painel.toml",
         "raspberry_pi.toml",
+        "percepcao_verde.toml",
     ],
 )
 def test_carrega_todas_as_configuracoes_oficiais(nome: str) -> None:

@@ -1,0 +1,27 @@
+{
+  "atuadores_acionados": false,
+  "base_linha_congelada": {
+    "commit": "3416b9b5ae35ecc7a792f9e974509ae3db7a8288",
+    "configuracao_sha256": "a139e054ae22f6adf4e9dc804c074c8027e3d04c5495292a9d5100c26bca82a2",
+    "detector_neural_sha256": "f95c6a87d9c3bf185ee61393e1b7ca8c2c02301b7270bfdd613589c790d43250",
+    "execucao_continua_sha256": "72fed618307ab0f309c7fc9ea3f49c567b5973410e16cae26415f7bb39412a0f",
+    "modelo_onnx_sha256": "fc01a35bd1415ee1a27ff43d800f1e43f91d36f482ceca4ba179f93df4f2c7cd",
+    "rastreamento_sha256": "64990ff2eb7234b38478c23b5e1b224a1540acfe6ab0ea8afc3fc72ac3fe06af"
+  },
+  "contrato_integracao": {
+    "ausencia_verde": "decisao_neutra",
+    "detector_linha_sempre_ativo": true,
+    "resultados_no_mesmo_quadro": true,
+    "verde_substitui_linha": false
+  },
+  "estado": "fase_verde_0_concluida",
+  "regras": {
+    "antes_direita": "virar_direita",
+    "antes_esquerda": "virar_esquerda",
+    "depois": "ignorar",
+    "dois_antes_lados_opostos": "retornar_180",
+    "sem_verde_valido": "nenhuma_decisao_verde"
+  },
+  "teste_final_aberto": false,
+  "versao_manifesto": 1
+}

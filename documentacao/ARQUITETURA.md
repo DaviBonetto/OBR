@@ -84,6 +84,17 @@ consome sempre o ultimo `QuadroCamera`, publica somente o ultimo `ResultadoQuadr
 ao painel uma serializacao de `EstimativaLinha`. O dashboard nao possui endpoint de comando e a
 inferencia continua funcionando mesmo que nenhum navegador esteja conectado.
 
+## Contrato da pista e do verde
+
+`EstimativaPista` agrega uma `EstimativaLinha` e uma `EstimativaVerde` produzidas para o mesmo
+quadro. A agregacao nao cria prioridade implicita: a linha permanece ativa em todos os quadros e
+o verde publica apenas uma intencao opcional para a futura maquina de estados.
+
+`DecisaoVerde.NENHUMA` e o resultado normal quando nao ha verde, quando o unico marcador esta
+depois da intersecao ou quando a geometria e ambigua. Portanto, um negativo do verde nunca apaga
+a linha e nunca comanda motores. A percepcao verde reside em `percepcao/pista/verde` e depende do
+contrato da linha somente para formar o referencial da intersecao, sem alterar o detector neural.
+
 ## Dados e modelos
 
 - Videos brutos e rotulos completos ficam fora do Git comum.
