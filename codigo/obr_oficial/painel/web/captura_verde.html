@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OBR · Captura do Verde</title>
+    <link rel="stylesheet" href="/painel.css">
+    <script src="/captura-verde.js" defer></script>
+  </head>
+  <body>
+    <header class="topo">
+      <div>
+        <p class="rotulo">OBR · FASE VERDE 1</p>
+        <h1>Captura do Verde</h1>
+      </div>
+      <div class="estado-geral">
+        <span id="indicador-camera" class="indicador"></span>
+        <div>
+          <strong id="texto-camera">Conectando à câmera…</strong>
+          <small id="perfil-camera">Aguardando perfil</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="grade-principal">
+      <section class="cartao visualizacao">
+        <div class="cabecalho-cartao">
+          <div>
+            <p class="rotulo">IMAGEM ORIGINAL AO VIVO</p>
+            <h2 id="resolucao">— × —</h2>
+          </div>
+          <span id="estado-sessao" class="selo">SEM SESSÃO</span>
+        </div>
+
+        <div class="quadro-video">
+          <img id="video" src="/video.mjpg" alt="Imagem ao vivo da câmera do robô">
+          <div class="legenda-video">
+            <span id="nome-dispositivo">Câmera não identificada</span>
+            <span id="contador-fotos">0 fotos</span>
+          </div>
+        </div>
+
+        <div class="metricas">
+          <article><span>FPS real</span><strong id="fps">—</strong></article>
+          <article><span>Brilho</span><strong id="brilho">—</strong></article>
+          <article><span>Estourado</span><strong id="claro">—</strong></article>
+          <article><span>Escuro</span><strong id="escuro">—</strong></article>
+          <article><span>Nitidez</span><strong id="nitidez">—</strong></article>
+          <article><span>Espaço livre</span><strong id="armazenamento">—</strong></article>
+        </div>
+
+        <div id="alertas-imagem" class="alertas-imagem oculto" role="alert"></div>
+
+        <div class="resumo-categorias" aria-label="Contagem por categoria">
+          <article><span>Esquerda</span><strong id="contagem-antes_esquerda">0</strong></article>
+          <article><span>Direita</span><strong id="contagem-antes_direita">0</strong></article>
+          <article><span>180°</span><strong id="contagem-dois_antes_180">0</strong></article>
+          <article><span>Depois</span><strong id="contagem-depois_ignorar">0</strong></article>
+          <article><span>Negativo</span><strong id="contagem-sem_verde_negativo">0</strong></article>
+        </div>
+      </section>
+
+      <aside class="cartao controles">
+        <div class="cabecalho-cartao">
+          <div>
+            <p class="rotulo">SESSÃO VERDE</p>
+            <h2>Contexto da captura</h2>
+          </div>
+        </div>
+
+        <div class="formulario">
+          <label>
+            Nome da sessão
+            <input id="nome" maxlength="80" placeholder="Ex.: verde_quadra_sol_01" value="verde_sessao_01">
+          </label>
+          <label>
+            Local
+            <input id="local" maxlength="100" placeholder="Ex.: quadra da escola">
+          </label>
+          <div class="duas-colunas">
+            <label>
+              Iluminação
+              <select id="iluminacao">
+                <option value="interna_normal">Interna normal</option>
+                <option value="fraca">Fraca</option>
+                <option value="forte">Forte</option>
+                <option value="sol_direto">Sol direto</option>
+                <option value="sombra">Sombra</option>
+                <option value="mista">Mista</option>
+              </select>
+            </label>
+            <label>
+              Piso
+              <select id="piso">
+                <option value="pista_oficial">Pista oficial</option>
+                <option value="papel">Papel</option>
+                <option value="madeira">Madeira</option>
+                <option value="ceramica">Cerâmica</option>
+                <option value="cimento">Cimento</option>
+                <option value="outro">Outro</option>
+              </select>
+            </label>
+          </div>
+          <label class="linha-checkbox">
+            <input id="leds" type="checkbox">
+            LEDs inferiores ligados
+          </label>
+          <label>
+            Observações
+            <textarea id="observacoes" maxlength="500" rows="2" placeholder="Sombras, reflexos, material do verde…"></textarea>
+          </label>
+        </div>
+
+        <button id="iniciar" class="botao primario">Iniciar sessão</button>
+
+        <hr>
+
+        <fieldset class="seletor-categoria">
+          <legend>O que existe neste quadro?</legend>
+          <p class="ajuda-categoria">A linha continua normal. Escolha somente o papel do verde.</p>
+          <div class="grade-categorias">
+            <label class="opcao-categoria">
+              <input type="radio" name="categoria-verde" value="antes_esquerda" checked>
+              <span><strong>Antes — esquerda</strong><small>Virar à esquerda</small></span><kbd>1</kbd>
+            </label>
+            <label class="opcao-categoria">
+              <input type="radio" name="categoria-verde" value="antes_direita">
+              <span><strong>Antes — direita</strong><small>Virar à direita</small></span><kbd>2</kbd>
+            </label>
+            <label class="opcao-categoria">
+              <input type="radio" name="categoria-verde" value="dois_antes_180">
+              <span><strong>Dois antes</strong><small>Retornar 180°</small></span><kbd>3</kbd>
+            </label>
+            <label class="opcao-categoria">
+              <input type="radio" name="categoria-verde" value="depois_ignorar">
+              <span><strong>Depois</strong><small>Detectar e ignorar</small></span><kbd>4</kbd>
+            </label>
+            <label class="opcao-categoria">
+              <input type="radio" name="categoria-verde" value="sem_verde_negativo">
+              <span><strong>Sem verde / negativo</strong><small>Linha segue normalmente</small></span><kbd>5</kbd>
+            </label>
+          </div>
+        </fieldset>
+
+        <label id="campo-cruz-mista" class="linha-checkbox destaque-checkbox">
+          <input id="cruz-mista" type="checkbox">
+          Cruz mista: também existe verde depois
+        </label>
+
+        <div id="decisao-esperada" class="decisao-esperada">DECISÃO · VIRAR À ESQUERDA</div>
+
+        <label class="nota-quadro">
+          Nota do quadro
+          <input id="nota-quadro" maxlength="200" placeholder="Opcional">
+        </label>
+
+        <button id="capturar" class="botao captura" disabled>
+          <span>Capturar foto</span>
+          <kbd>Espaço</kbd>
+        </button>
+
+        <div class="sequencia">
+          <select id="intervalo" aria-label="Intervalo da sequência automática">
+            <option value="250">4 fotos/s</option>
+            <option value="500" selected>2 fotos/s</option>
+            <option value="1000">1 foto/s</option>
+            <option value="2000">1 foto/2s</option>
+          </select>
+          <button id="sequencia" class="botao secundario" disabled>Iniciar sequência</button>
+        </div>
+
+        <button id="finalizar" class="botao perigo" disabled>Finalizar sessão</button>
+        <div id="mensagem" class="mensagem" role="status">Pronto para configurar uma sessão verde.</div>
+      </aside>
+    </main>
+
+    <footer>
+      <span>PNG original · rótulo humano do verde · sem IA e sem motores</span>
+      <span id="idade-quadro">Idade do quadro: —</span>
+    </footer>
+  </body>
+</html>

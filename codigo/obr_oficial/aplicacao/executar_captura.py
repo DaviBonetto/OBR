@@ -18,6 +18,12 @@ def main(argumentos: list[str] | None = None) -> int:
     analisador = argparse.ArgumentParser(description="Painel OBR para captura de dataset")
     analisador.add_argument("--simulacao", action="store_true", help="usa imagem sintetica")
     analisador.add_argument(
+        "--modo",
+        choices=("linha", "verde"),
+        default="linha",
+        help="protocolo de rotulagem exibido no painel",
+    )
+    analisador.add_argument(
         "--configuracao-camera",
         default="camera_usb.toml",
         help="perfil TOML dentro de configuracoes",
@@ -61,7 +67,10 @@ def main(argumentos: list[str] | None = None) -> int:
             )
         )
 
-    pasta_dados = (opcoes.dados or raiz_projeto() / "dados" / "brutos").resolve()
+    pasta_padrao = raiz_projeto() / "dados" / "brutos"
+    if opcoes.modo == "verde":
+        pasta_padrao /= "verde"
+    pasta_dados = (opcoes.dados or pasta_padrao).resolve()
     sessoes = GerenciadorSessoesCaptura(
         pasta_dados,
         compressao_png=int(captura_config["compressao_png"]),
@@ -71,6 +80,7 @@ def main(argumentos: list[str] | None = None) -> int:
         sessoes,
         quadros_video_por_segundo=float(video["quadros_por_segundo_maximo"]),
         qualidade_jpeg=int(video["qualidade_jpeg"]),
+        modo=opcoes.modo,
     )
     host = opcoes.host or str(servidor["endereco"])
     porta = opcoes.porta or int(servidor["porta"])
@@ -78,6 +88,7 @@ def main(argumentos: list[str] | None = None) -> int:
     fonte.iniciar()
     estado = fonte.obter_estado()
     print(f"Camera: {estado.nome_dispositivo} ({estado.largura}x{estado.altura})", flush=True)
+    print(f"Captura: {opcoes.modo} -> {pasta_dados}", flush=True)
     print(f"Painel: http://{host}:{porta}", flush=True)
     try:
         serve(painel, host=host, port=porta, threads=6, channel_timeout=30)

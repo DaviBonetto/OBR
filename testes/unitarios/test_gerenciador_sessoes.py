@@ -58,3 +58,15 @@ def test_nao_inicia_duas_sessoes_ao_mesmo_tempo(tmp_path: Path) -> None:
 
     with pytest.raises(ErroCaptura, match="Ja existe"):
         gerenciador.iniciar({"nome": "segunda"}, {})
+
+
+def test_conta_categorias_verdes_no_manifesto(tmp_path: Path) -> None:
+    gerenciador = GerenciadorSessoesCaptura(tmp_path)
+    gerenciador.iniciar({"nome": "verde"}, {})
+
+    gerenciador.capturar(_quadro(), {"categoria_verde": "antes_esquerda"})
+    gerenciador.capturar(_quadro(), {"categoria_verde": "antes_esquerda"})
+    gerenciador.capturar(_quadro(), {"categoria_verde": "depois_ignorar"})
+
+    contagens = gerenciador.obter_estado()["sessao"]["contagens_por_categoria"]
+    assert contagens == {"antes_esquerda": 2, "depois_ignorar": 1}

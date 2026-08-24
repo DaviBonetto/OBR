@@ -52,11 +52,40 @@ estourado, nitidez e espaco livre. Ele permite:
 
 Atalho de captura: barra de espaco, desde que nenhum campo de texto esteja ativo.
 
+### Modo de captura verde
+
+O argumento `--modo verde` abre uma interface separada e salva por padrao em
+`dados/brutos/verde`. O painel da linha permanece disponivel no modo padrao e seus rotulos nao
+sao alterados.
+
+As cinco categorias do verde sao:
+
+- antes - esquerda;
+- antes - direita;
+- dois antes - retorno de 180 graus;
+- depois - detectar e ignorar;
+- sem verde / negativo.
+
+`Sem verde / negativo` nao significa sem linha. A imagem pode conter linha reta, curva ou
+intersecao; somente a mascara do marcador verde sera vazia. Um marcador oficial depois da
+intersecao pertence a `depois - ignorar` e ainda devera ser segmentado. O campo `cruz mista`
+registra que a imagem possui marcador valido antes e tambem marcador depois.
+
+O backend converte cada escolha em metadados explicitos sobre presenca antes/depois, decisao
+esperada e mascara vazia. Categorias invalidas e cruz mista sem marcador antes sao recusadas antes
+da gravacao. Os atalhos `1` a `5` mudam a categoria e a barra de espaco captura a foto.
+
 ## Execucao simulada
 
 ```powershell
 uv sync --all-extras
 uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
+```
+
+Simulacao do protocolo verde:
+
+```powershell
+uv run obr-capturar --modo verde --simulacao --host 127.0.0.1 --porta 8080
 ```
 
 ## Execucao no Raspberry Pi
@@ -65,6 +94,9 @@ uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
 uv sync --locked --all-extras
 uv run obr-capturar --origem /dev/video0 --host 0.0.0.0 --porta 8080
 ```
+
+Para capturar verde no Raspberry Pi, acrescente `--modo verde`. O script de implantacao tambem
+aceita `OBR_CAPTURA_MODO=verde`.
 
 Depois, abrir `http://IP_DO_RASPBERRY:8080` no computador.
 

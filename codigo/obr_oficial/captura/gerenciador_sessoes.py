@@ -60,6 +60,7 @@ class GerenciadorSessoesCaptura:
                 "contexto": contexto_limpo,
                 "camera": camera,
                 "capturas": 0,
+                "contagens_por_categoria": {},
             }
             self._salvar_manifesto()
             return self.obter_estado_sem_lock()
@@ -93,6 +94,7 @@ class GerenciadorSessoesCaptura:
             temporario.write_bytes(conteudo)
             temporario.replace(caminho)
 
+            contexto_limpo = self._normalizar_contexto(contexto or {})
             registro = {
                 "versao_registro": 1,
                 "numero": numero,
@@ -107,12 +109,16 @@ class GerenciadorSessoesCaptura:
                     "altura": quadro.altura,
                 },
                 "metricas": quadro.metricas.como_dict(),
-                "contexto": self._normalizar_contexto(contexto or {}),
+                "contexto": contexto_limpo,
             }
             with (self._pasta_sessao / "capturas.jsonl").open("a", encoding="utf-8") as arquivo:
                 arquivo.write(json.dumps(registro, ensure_ascii=False, sort_keys=True) + "\n")
 
             self._manifesto["capturas"] = numero
+            categoria = contexto_limpo.get("categoria_verde")
+            if isinstance(categoria, str) and categoria:
+                contagens = self._manifesto["contagens_por_categoria"]
+                contagens[categoria] = int(contagens.get(categoria, 0)) + 1
             self._manifesto["ultima_captura_utc"] = registro["captura_utc"]
             self._salvar_manifesto()
             return registro

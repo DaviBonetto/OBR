@@ -79,6 +79,15 @@ uv sync --all-extras
 uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
 ```
 
+Para abrir o protocolo separado de captura dos marcadores verdes:
+
+```powershell
+uv run obr-capturar --modo verde --simulacao --host 127.0.0.1 --porta 8080
+```
+
+Nesse modo, `Sem verde / negativo` significa mascara verde vazia. A linha pode e deve continuar
+visivel, pois sua percepcao e independente.
+
 Para preparar a versao congelada do dataset sem alterar os originais:
 
 ```powershell

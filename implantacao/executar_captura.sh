@@ -14,6 +14,7 @@ if [[ -z "$UV_OBR" || ! -x "$UV_OBR" ]]; then
 fi
 
 exec "$UV_OBR" run --locked --extra captura obr-capturar \
+  --modo "${OBR_CAPTURA_MODO:-linha}" \
   --configuracao-camera "${OBR_CAMERA_CONFIGURACAO:-camera_usb.toml}" \
   --origem "${OBR_CAMERA_ORIGEM:-/dev/video0}" \
   --host "${OBR_PAINEL_HOST:-0.0.0.0}" \

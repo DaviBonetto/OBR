@@ -9,7 +9,13 @@ from typing import Any
 import cv2
 from flask import Flask, Response, jsonify, request, send_from_directory
 
-from obr_oficial.captura import ErroCaptura, GerenciadorSessoesCaptura
+from obr_oficial.captura import (
+    ErroCaptura,
+    GerenciadorSessoesCaptura,
+    contexto_quadro_verde,
+    contexto_sessao_verde,
+    esquema_captura_verde,
+)
 from obr_oficial.dispositivos.camera_base import FonteCamera
 
 
@@ -20,6 +26,7 @@ def criar_painel_captura(
     pasta_web: Path | None = None,
     quadros_video_por_segundo: float = 15.0,
     qualidade_jpeg: int = 80,
+    modo: str = "linha",
 ) -> Flask:
     """Monta o painel sem iniciar servidor ou camera implicitamente."""
 
@@ -28,6 +35,9 @@ def criar_painel_captura(
     pasta_web = pasta_web.resolve()
     qualidade_jpeg = max(30, min(int(qualidade_jpeg), 95))
     periodo_video_s = 1.0 / max(float(quadros_video_por_segundo), 1.0)
+    if modo not in {"linha", "verde"}:
+        raise ValueError("modo de captura deve ser linha ou verde")
+    arquivo_inicial = "captura_verde.html" if modo == "verde" else "index.html"
 
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = 64 * 1024
@@ -45,7 +55,7 @@ def criar_painel_captura(
 
     @app.get("/")
     def pagina_inicial():
-        return send_from_directory(pasta_web, "index.html")
+        return send_from_directory(pasta_web, arquivo_inicial)
 
     @app.get("/painel.css")
     def folha_estilo():
@@ -54,6 +64,16 @@ def criar_painel_captura(
     @app.get("/painel.js")
     def codigo_painel():
         return send_from_directory(pasta_web, "painel.js")
+
+    @app.get("/captura-verde.js")
+    def codigo_captura_verde():
+        return send_from_directory(pasta_web, "captura_verde.js")
+
+    @app.get("/api/esquema-captura")
+    def esquema_captura():
+        if modo == "verde":
+            return jsonify({"ok": True, "esquema": esquema_captura_verde()})
+        return jsonify({"ok": True, "esquema": {"tarefa": "linha", "versao": 1}})
 
     @app.get("/api/estado")
     def estado():
@@ -70,6 +90,7 @@ def criar_painel_captura(
         return jsonify(
             {
                 "ok": True,
+                "modo_captura": modo,
                 "camera": fonte_camera.obter_estado().como_dict(),
                 "quadro": estado_quadro,
                 "captura": sessoes.obter_estado(),
@@ -83,6 +104,8 @@ def criar_painel_captura(
         contexto = dados.get("contexto", dados)
         if not isinstance(contexto, dict):
             raise ErroCaptura("contexto deve ser um objeto")
+        if modo == "verde":
+            contexto = contexto_sessao_verde(contexto)
         resultado = sessoes.iniciar(contexto, fonte_camera.obter_estado().como_dict())
         return jsonify({"ok": True, "captura": resultado}), 201
 
@@ -92,7 +115,12 @@ def criar_painel_captura(
         quadro = fonte_camera.obter_ultimo_quadro()
         if quadro is None:
             raise ErroCaptura("A camera ainda nao entregou um quadro")
-        resultado = sessoes.capturar(quadro, dados.get("contexto", dados))
+        contexto = dados.get("contexto", dados)
+        if not isinstance(contexto, dict):
+            raise ErroCaptura("contexto deve ser um objeto")
+        if modo == "verde":
+            contexto = contexto_quadro_verde(contexto)
+        resultado = sessoes.capturar(quadro, contexto)
         return jsonify({"ok": True, "registro": resultado}), 201
 
     @app.post("/api/sessoes/atual/finalizar")

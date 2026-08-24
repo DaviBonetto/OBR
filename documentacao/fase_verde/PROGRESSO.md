@@ -4,7 +4,10 @@ Atualizado em 24 de agosto de 2026.
 
 ## Estado
 
-**Fase Verde 0 concluida. A proxima etapa e a Fase Verde 1: captura.**
+**Fase Verde 1 implementada em software. A proxima etapa e capturar e auditar dados reais.**
+
+O Raspberry Pi estava desligado no fechamento desta entrega. A implantacao e a camera real nao
+foram marcadas como validadas; o comando esta preparado para a proxima conexao.
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto
@@ -88,6 +91,47 @@ A tela continuara mostrando a camera inteira. As categorias classificam o papel 
 comportamento da linha. Sessoes, ambientes e camera permanecerao registrados em manifestos, e as
 divisoes de treino, validacao e teste serao feitas por sessao completa.
 
+### Implementacao entregue
+
+- modo `verde` separado do painel antigo de linha;
+- pasta padrao `dados/brutos/verde`;
+- cinco categorias em botoes grandes com atalhos de `1` a `5`;
+- campo de cruz mista disponivel somente quando existe marcador antes;
+- decisao esperada visivel antes de cada captura;
+- contadores persistentes por categoria no manifesto da sessao;
+- validacao da categoria no servidor, nao apenas no navegador;
+- metadados explicitos de marcador antes, depois, duplo e mascara vazia;
+- imagem PNG original, sem mascara automatica ou IA durante a captura;
+- camera, brilho, exposicao, nitidez, local, piso, iluminacao e LEDs registrados;
+- motores e demais atuadores fora do processo.
+
+Comando local:
+
+```powershell
+uv run obr-capturar --modo verde --simulacao --host 127.0.0.1 --porta 8080
+```
+
+Comando no Raspberry Pi:
+
+```bash
+uv run --locked --extra captura obr-capturar --modo verde \
+  --origem /dev/video0 --host 0.0.0.0 --porta 8080
+```
+
+### Protocolo para cada sessao real
+
+1. usar uma sessao para cada combinacao de local, iluminacao, piso, camera e LEDs;
+2. escolher a categoria antes de iniciar uma sequencia;
+3. mover distancia, angulo e orientacao do robo para evitar quadros quase iguais;
+4. ativar `cruz mista` somente quando houver verde valido antes e verde depois;
+5. usar `depois - ignorar` quando houver marcador oficial somente depois;
+6. usar `sem verde / negativo` quando nao houver marcador oficial valido, mesmo com linha;
+7. finalizar a sessao antes de mudar de ambiente ou condicao de luz.
+
+Objetos verdes que nao sao marcadores oficiais pertencem aos negativos dificeis. A futura mascara
+de marcador sera vazia nesses casos, enquanto um marcador oficial depois continuara tendo mascara
+verde e sera descartado apenas pela geometria.
+
 ## Gates da Fase 0
 
 - [x] linha e verde coexistem no mesmo contrato de quadro;
@@ -102,6 +146,6 @@ divisoes de treino, validacao e teste serao feitas por sessao completa.
 
 ## Limites atuais
 
-Ainda nao existem detector cromatico, modelo neural, mascara verde real, painel de captura verde,
-rastreamento temporal ou benchmark no Raspberry Pi. Os testes desta fase validam apenas contrato
-e geometria sintetica. Luz, camera, latencia e imagens reais pertencem as fases seguintes.
+Ainda nao existem detector cromatico, modelo neural, mascara verde real, rastreamento temporal ou
+benchmark do verde no Raspberry Pi. Os testes atuais validam protocolo HTTP, persistencia,
+contratos e geometria sintetica. Luz e camera so serao medidas depois das capturas fisicas.
