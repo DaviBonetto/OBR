@@ -13,9 +13,7 @@ from obr_oficial.percepcao.pista.verde.configuracao import (
 def test_carrega_configuracao_oficial_com_linha_sempre_ativa() -> None:
     raiz = Path(__file__).resolve().parents[2]
 
-    configuracao = carregar_configuracao_verde(
-        raiz / "configuracoes" / "percepcao_verde.toml"
-    )
+    configuracao = carregar_configuracao_verde(raiz / "configuracoes" / "percepcao_verde.toml")
 
     assert configuracao.versao == 1
     assert configuracao.detector_linha_sempre_ativo is True

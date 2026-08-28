@@ -79,9 +79,10 @@ def test_carrega_configuracao_oficial() -> None:
     assert configuracao.fator_largura_intersecao == 2.2
     assert configuracao.faixas_continuacao_intersecao == 8
     assert configuracao.tolerancia_alinhamento_intersecao == 0.08
-    assert configuracao.arquivo_modelo == (
-        raiz_projeto / "modelos" / "linha" / "lraspp_v2" / "modelo.onnx"
-    ).resolve()
+    assert (
+        configuracao.arquivo_modelo
+        == (raiz_projeto / "modelos" / "linha" / "lraspp_v2" / "modelo.onnx").resolve()
+    )
 
 
 def test_preprocessamento_tem_forma_e_tipo_congelados(tmp_path: Path) -> None:
@@ -212,9 +213,7 @@ def test_gap_temporal_expira_sem_fingir_evidencia(tmp_path: Path) -> None:
     )
 
     primeira = rastreador.atualizar(valida)
-    confirmada = rastreador.atualizar(
-        replace(valida, id_quadro=21, instante_monotonico_s=10.01)
-    )
+    confirmada = rastreador.atualizar(replace(valida, id_quadro=21, instante_monotonico_s=10.01))
     temporal = rastreador.atualizar(perdida)
     expirada = rastreador.atualizar(replace(perdida, id_quadro=22, instante_monotonico_s=10.2))
 
@@ -327,12 +326,12 @@ def test_mascara_quadro_descarta_mancha_superior_desconectada(tmp_path: Path) ->
     probabilidade_superior = np.full((192, 320), 0.02, dtype=np.float32)
     probabilidade_superior[5:45, 20:65] = 0.97
     probabilidade_inferior = _probabilidade_reta()
-    logits_superiores = np.log(
-        probabilidade_superior / (1.0 - probabilidade_superior)
-    )[None, None].astype(np.float32)
-    logits_inferiores = np.log(
-        probabilidade_inferior / (1.0 - probabilidade_inferior)
-    )[None, None].astype(np.float32)
+    logits_superiores = np.log(probabilidade_superior / (1.0 - probabilidade_superior))[
+        None, None
+    ].astype(np.float32)
+    logits_inferiores = np.log(probabilidade_inferior / (1.0 - probabilidade_inferior))[
+        None, None
+    ].astype(np.float32)
     detector = DetectorNeuralLinha(
         _configuracao(tmp_path),
         sessao=_SessaoFalsa((logits_superiores, logits_inferiores)),
@@ -506,9 +505,7 @@ def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
     )
     borda_proxima = visual[400:455, 294:307]
     pixels_proximos = (
-        (borda_proxima[..., 0] > 220)
-        & (borda_proxima[..., 1] > 180)
-        & (borda_proxima[..., 2] < 80)
+        (borda_proxima[..., 0] > 220) & (borda_proxima[..., 1] > 180) & (borda_proxima[..., 2] < 80)
     )
     assert np.count_nonzero(pixels_distantes) > 100
     assert np.count_nonzero(pixels_proximos) > 30

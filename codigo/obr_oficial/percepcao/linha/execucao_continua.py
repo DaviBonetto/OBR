@@ -254,9 +254,7 @@ def _intervalo_ativo_proximo(
     zeros_antes = np.flatnonzero(vetor[:indice] == 0)
     inicio_intervalo = int(zeros_antes[-1] + 1) if len(zeros_antes) else 0
     zeros_depois = np.flatnonzero(vetor[indice + 1 :] == 0)
-    fim_intervalo = (
-        int(indice + zeros_depois[0]) if len(zeros_depois) else len(vetor) - 1
-    )
+    fim_intervalo = int(indice + zeros_depois[0]) if len(zeros_depois) else len(vetor) - 1
     return 0.5 * (inicio_intervalo + fim_intervalo), fim_intervalo - inicio_intervalo + 1
 
 
@@ -480,26 +478,21 @@ def _extrair_rota_visual(
             if len(xs_componente) < 2:
                 continue
             proximidade = float(
-                np.min(
-                    (xs_componente - largura / 2.0) ** 2
-                    + (ys_componente - altura * 1.18) ** 2
-                )
+                np.min((xs_componente - largura / 2.0) ** 2 + (ys_componente - altura * 1.18) ** 2)
             )
             if melhor is None or proximidade < melhor[0]:
                 melhor = (proximidade, ys_componente, xs_componente)
         if melhor is None:
             return None
         _, ys_componente, xs_componente = melhor
-        distancias_robo = (
-            (xs_componente - largura / 2.0) ** 2
-            + (ys_componente - altura * 1.18) ** 2
-        )
+        distancias_robo = (xs_componente - largura / 2.0) ** 2 + (
+            ys_componente - altura * 1.18
+        ) ** 2
         indice_inicio = int(np.argmin(distancias_robo))
         x_inicio = int(xs_componente[indice_inicio])
         y_inicio = int(ys_componente[indice_inicio])
-        pontuacoes = (
-            3.2 * np.maximum(0, y_inicio - ys_componente)
-            - 2.8 * np.abs(xs_componente - x_inicio)
+        pontuacoes = 3.2 * np.maximum(0, y_inicio - ys_componente) - 2.8 * np.abs(
+            xs_componente - x_inicio
         )
         indice_destino = int(np.argmax(pontuacoes))
         caminho_t = np.asarray(
@@ -529,9 +522,7 @@ def _extrair_rota_visual(
         return None
     # O afinamento pode deixar pequenos espinhos isolados nas bordas da
     # mascara. Eles nunca devem roubar as bolinhas da rota central principal.
-    rotulo_principal = 1 + int(
-        np.argmax(estatisticas[1:, cv2.CC_STAT_AREA])
-    )
+    rotulo_principal = 1 + int(np.argmax(estatisticas[1:, cv2.CC_STAT_AREA]))
     esqueleto = np.where(rotulos == rotulo_principal, 255, 0).astype(np.uint8)
     ys, xs = np.nonzero(esqueleto)
     if len(xs) < 2:
@@ -638,12 +629,10 @@ def _eh_cotovelo_ortogonal(rota: np.ndarray) -> bool:
     if len(rota) != 3:
         return False
     horizontal_vertical = (
-        abs(int(rota[0, 1]) - int(rota[1, 1])) <= 2
-        and abs(int(rota[1, 0]) - int(rota[2, 0])) <= 2
+        abs(int(rota[0, 1]) - int(rota[1, 1])) <= 2 and abs(int(rota[1, 0]) - int(rota[2, 0])) <= 2
     )
     vertical_horizontal = (
-        abs(int(rota[0, 0]) - int(rota[1, 0])) <= 2
-        and abs(int(rota[1, 1]) - int(rota[2, 1])) <= 2
+        abs(int(rota[0, 0]) - int(rota[1, 0])) <= 2 and abs(int(rota[1, 1]) - int(rota[2, 1])) <= 2
     )
     return horizontal_vertical or vertical_horizontal
 
@@ -684,10 +673,14 @@ def desenhar_sobreposicao(
         )
         if rota_visual is None:
             pontos = estimativa.centro_linha
-            indice_atual = min(
-                range(len(pontos)),
-                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
-            ) if pontos else 0
+            indice_atual = (
+                min(
+                    range(len(pontos)),
+                    key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
+                )
+                if pontos
+                else 0
+            )
             indice_objetivo = (
                 min(
                     range(len(pontos)),

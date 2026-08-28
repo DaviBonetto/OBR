@@ -89,9 +89,10 @@ def test_exportacao_deterministica(tmp_path: Path) -> None:
         ConfiguracaoExportacaoTreinamento(brutos, rotulos, segunda)
     ).exportar()
 
-    assert hashlib.sha256(primeira.read_bytes()).digest() == hashlib.sha256(
-        segunda.read_bytes()
-    ).digest()
+    assert (
+        hashlib.sha256(primeira.read_bytes()).digest()
+        == hashlib.sha256(segunda.read_bytes()).digest()
+    )
 
 
 def test_recusa_teste_e_saida_existente(tmp_path: Path) -> None:

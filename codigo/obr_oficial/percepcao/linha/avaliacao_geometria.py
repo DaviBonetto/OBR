@@ -103,8 +103,7 @@ def _amostrar_polilinha(polilinha: np.ndarray, quantidade: int = 24) -> np.ndarr
         inicio = acumulados[segmento]
         fracao = (alvo - inicio) / max(comprimentos[segmento], 1e-12)
         amostras.append(
-            polilinha[segmento]
-            + fracao * (polilinha[segmento + 1] - polilinha[segmento])
+            polilinha[segmento] + fracao * (polilinha[segmento + 1] - polilinha[segmento])
         )
     return np.asarray(amostras, dtype=np.float64)
 
@@ -118,14 +117,20 @@ def _erros_centro_humano_pixels(
     if len(prevista.centro_linha) < 2 or len(pontos_humanos) < 2:
         return []
     escala = np.array([largura - 1, altura - 1], dtype=np.float64)
-    prevista_px = np.asarray(
-        [[ponto.x, ponto.y] for ponto in prevista.centro_linha],
-        dtype=np.float64,
-    ) * escala
-    humana_px = np.asarray(
-        [[ponto["x"], ponto["y"]] for ponto in pontos_humanos],
-        dtype=np.float64,
-    ) * escala
+    prevista_px = (
+        np.asarray(
+            [[ponto.x, ponto.y] for ponto in prevista.centro_linha],
+            dtype=np.float64,
+        )
+        * escala
+    )
+    humana_px = (
+        np.asarray(
+            [[ponto["x"], ponto["y"]] for ponto in pontos_humanos],
+            dtype=np.float64,
+        )
+        * escala
+    )
     humana_amostrada = _amostrar_polilinha(humana_px, quantidade=len(prevista_px))
     ida = _distancias_pontos_para_polilinha(prevista_px, humana_px)
     volta = _distancias_pontos_para_polilinha(humana_amostrada, prevista_px)
@@ -438,8 +443,7 @@ def gerar_montagem_diagnostico(
 
     raiz_dataset = raiz_dataset.resolve()
     amostras = {
-        str(item["id_amostra"]): item
-        for item in carregar_indice_dataset(raiz_dataset, "validacao")
+        str(item["id_amostra"]): item for item in carregar_indice_dataset(raiz_dataset, "validacao")
     }
     extrator_referencia = ExtratorGeometriaLinha(detector.configuracao)
     quadros = []

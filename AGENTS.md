@@ -16,9 +16,11 @@ Software oficial do robo OBR de RoboCup Junior Rescue Line (equipe Davi Bonetto)
 Monolito modular em Python 3.11, alvo Raspberry Pi 5, camera USB trocavel.
 Fase atual e entregas exatas: `documentacao/ESTADO_DO_PROJETO.md`.
 
-Modulos existentes hoje: `nucleo`, `dispositivos`, `captura`, `painel` e `aplicacao`
-(dentro de `codigo/obr_oficial/`). Modulos futuros planejados (`percepcao`, `controle`,
-`missao`) so sao criados quando tiverem responsabilidade real implementada.
+Modulos existentes hoje: `nucleo`, `dispositivos`, `captura`, `painel` (inclui o
+submodulo `operacao`, dashboard web com entry point `obr-painel`), `dados`,
+`implantacao`, `percepcao` e `treinamento` (dentro de `codigo/obr_oficial/`).
+Modulos futuros planejados (`controle`, `missao`) so sao criados quando tiverem
+responsabilidade real implementada.
 
 ## Regras inegociaveis de seguranca
 
@@ -67,11 +69,17 @@ Rode a bateria completa antes de considerar qualquer tarefa concluida. CI (GitHu
 Actions `.github/workflows/verificacoes.yml`) executa sync locked, ruff check e pytest;
 se falhar localmente, falhara no CI.
 
-Painel com camera sintetica (sem hardware, seguro):
+Painel de operacao com camera sintetica (sem hardware, seguro):
 
 ```powershell
-uv run obr-capturar --simulacao --host 127.0.0.1 --porta 8080
+uv run obr-painel --simulacao --host 127.0.0.1 --porta 8090
 ```
+
+Documentacao do painel: `documentacao/PAINEL_DE_OPERACAO.md`. O painel e somente
+observador/configurador: nenhum endpoint comanda atuadores; tempos de virada (incluindo
+gap) ficam em `configuracoes/viradas.toml` (vazio = indefinido pelo dono). Capturas
+(foto/video/sequencia) vao para `capturas_operacao/` (fora do Git) e usam sempre o
+quadro bruto, sem overlay.
 
 ## Convencoes de codigo
 

@@ -41,9 +41,7 @@ def carregar_imagens_dataset(raiz_dataset: Path, divisao: str = "validacao") -> 
         try:
             amostra = json.loads(linha)
         except json.JSONDecodeError as erro:
-            raise ErroReproducaoCapturas(
-                f"JSON invalido no indice, linha {numero_linha}"
-            ) from erro
+            raise ErroReproducaoCapturas(f"JSON invalido no indice, linha {numero_linha}") from erro
         if amostra.get("divisao") == "teste":
             raise ErroReproducaoCapturas("Indice contaminado pela divisao de teste")
         if amostra.get("divisao") != divisao:
@@ -54,9 +52,7 @@ def carregar_imagens_dataset(raiz_dataset: Path, divisao: str = "validacao") -> 
             raise ErroReproducaoCapturas(f"Imagem ausente no indice, linha {numero_linha}")
         caminho_imagem = (raiz / caminho_relativo).resolve()
         if not caminho_imagem.is_relative_to(raiz):
-            raise ErroReproducaoCapturas(
-                f"Imagem fora da raiz do dataset, linha {numero_linha}"
-            )
+            raise ErroReproducaoCapturas(f"Imagem fora da raiz do dataset, linha {numero_linha}")
         if not caminho_imagem.is_file():
             raise ErroReproducaoCapturas(f"Imagem nao encontrada: {caminho_imagem}")
         imagens.append(caminho_imagem)

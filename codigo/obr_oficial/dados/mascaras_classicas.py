@@ -220,9 +220,7 @@ class GeradorMascarasClassicas:
                         chave: contagens[chave] for chave in sorted(DIVISOES_PERMITIDAS)
                     },
                     "por_divisao_tipo": {
-                        chave: contagens[chave]
-                        for chave in sorted(contagens)
-                        if ":" in chave
+                        chave: contagens[chave] for chave in sorted(contagens) if ":" in chave
                     },
                 },
                 "presenca_de_linha": {
@@ -264,9 +262,9 @@ class GeradorMascarasClassicas:
         y1 = round(imagem.shape[0] * (cfg.roi_y + cfg.roi_altura))
         roi = cv2.resize(imagem[y0:y1], (cfg.largura, cfg.altura), interpolation=cv2.INTER_AREA)
         visual = roi.copy()
-        visual[mascara > 0] = (
-            0.55 * visual[mascara > 0] + 0.45 * np.array([255, 220, 0])
-        ).astype(np.uint8)
+        visual[mascara > 0] = (0.55 * visual[mascara > 0] + 0.45 * np.array([255, 220, 0])).astype(
+            np.uint8
+        )
         for ponto in pontos:
             x = round(ponto.x * (cfg.largura - 1))
             y = round(ponto.y * (cfg.altura - 1))

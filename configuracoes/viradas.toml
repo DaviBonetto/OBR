@@ -1,0 +1,19 @@
+# Tempos de manobra do robo OBR, em milissegundos.
+# Editavel pelo painel de operacao (obr-painel) ou manualmente.
+
+[viradas.esquerda]
+avanco_ms = 0
+giro_ms = 0
+
+[viradas.direita]
+avanco_ms = 0
+giro_ms = 0
+
+[viradas.verde]
+primeiro_giro_ms = 0
+reverso_ms = 0
+segundo_giro_ms = 0
+
+[viradas.gap]
+avanco_ms = 0
+confirmacao_ms = 0

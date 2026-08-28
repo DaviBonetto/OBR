@@ -61,9 +61,7 @@ def test_consolida_regra_do_usuario_sem_inventar_rotulo(tmp_path: Path) -> None:
     candidatas = _preparar_candidatas(tmp_path)
     saida = tmp_path / "saida"
 
-    manifesto = ConsolidadorRotulos(
-        ConfiguracaoConsolidacaoRotulos(candidatas, saida)
-    ).consolidar()
+    manifesto = ConsolidadorRotulos(ConfiguracaoConsolidacaoRotulos(candidatas, saida)).consolidar()
 
     assert manifesto["quantidades"] == {
         "amostras": 5,
@@ -85,9 +83,7 @@ def test_consolida_regra_do_usuario_sem_inventar_rotulo(tmp_path: Path) -> None:
     }
     assert anotacoes["pendente_linha"]["estado_rotulo"] == "aprovada_por_regra_usuario"
     assert anotacoes["reprocessar_linha"]["mascara"] is None
-    assert anotacoes["reprocessar_negativo"]["estado_rotulo"] == (
-        "aprovada_vazia_por_contrato"
-    )
+    assert anotacoes["reprocessar_negativo"]["estado_rotulo"] == ("aprovada_vazia_por_contrato")
     for identificador in ("vazia_linha", "reprocessar_negativo", "pendente_negativo"):
         caminho = saida / anotacoes[identificador]["mascara"]
         imagem = cv2.imread(str(caminho), cv2.IMREAD_GRAYSCALE)

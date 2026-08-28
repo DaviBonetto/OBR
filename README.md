@@ -6,6 +6,18 @@ Este repositorio reunira, em uma unica base organizada, a percepcao visual, o co
 robo, as estrategias de percurso e resgate, o painel de acompanhamento, o treinamento dos
 modelos e a implantacao no Raspberry Pi 5.
 
+## Abrir o dashboard
+
+No PowerShell, execute:
+
+```powershell
+uv run obr-painel --simulacao --host 127.0.0.1 --porta 8090
+```
+
+O modo de simulacao e seguro e nao usa a camera real. Para usar a camera conectada ao
+Raspberry Pi, remova `--simulacao`. Veja os detalhes em
+[`documentacao/PAINEL_DE_OPERACAO.md`](documentacao/PAINEL_DE_OPERACAO.md).
+
 ## Estado atual
 
 **Linha congelada e Fase Verde 0 concluida — a proxima etapa e a captura do verde.**

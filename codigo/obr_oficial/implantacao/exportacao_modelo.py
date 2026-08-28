@@ -168,9 +168,7 @@ def comparar_onnx(
     try:
         import onnxruntime as ort
     except (ImportError, ModuleNotFoundError) as erro:
-        raise ErroExportacaoModelo(
-            "ONNX Runtime ausente; instale o extra 'implantacao'"
-        ) from erro
+        raise ErroExportacaoModelo("ONNX Runtime ausente; instale o extra 'implantacao'") from erro
     sessao = ort.InferenceSession(
         str(modelo_onnx.resolve()),
         providers=["CPUExecutionProvider"],
@@ -216,9 +214,7 @@ def benchmark_onnx(
     try:
         import onnxruntime as ort
     except (ImportError, ModuleNotFoundError) as erro:
-        raise ErroExportacaoModelo(
-            "ONNX Runtime ausente; instale o extra 'implantacao'"
-        ) from erro
+        raise ErroExportacaoModelo("ONNX Runtime ausente; instale o extra 'implantacao'") from erro
     sessao = ort.InferenceSession(
         str(modelo_onnx.resolve()),
         providers=["CPUExecutionProvider"],

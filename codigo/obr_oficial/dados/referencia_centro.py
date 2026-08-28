@@ -203,9 +203,7 @@ class RepositorioReferenciaCentro:
         por_tipo: dict[str, dict[str, int]] = {}
         for tipo in TIPOS_REFERENCIA:
             ids = [
-                str(item["id_amostra"])
-                for item in self._amostras
-                if item["tipo_quadro"] == tipo
+                str(item["id_amostra"]) for item in self._amostras if item["tipo_quadro"] == tipo
             ]
             anotadas = sum(id_amostra in self._anotacoes for id_amostra in ids)
             por_tipo[tipo] = {
@@ -270,8 +268,7 @@ class RepositorioReferenciaCentro:
                 raise ErroReferenciaCentro("Coordenada humana fora da imagem")
             validados.append({"x": round(float(x), 7), "y": round(float(y), 7)})
         comprimento = sum(
-            ((atual["x"] - anterior["x"]) ** 2 + (atual["y"] - anterior["y"]) ** 2)
-            ** 0.5
+            ((atual["x"] - anterior["x"]) ** 2 + (atual["y"] - anterior["y"]) ** 2) ** 0.5
             for anterior, atual in pairwise(validados)
         )
         if comprimento < 0.25:

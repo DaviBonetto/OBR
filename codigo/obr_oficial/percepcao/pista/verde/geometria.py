@@ -115,9 +115,7 @@ class InterpretadorGeometricoVerde:
             estado = EstadoVerde.CANDIDATA
             confianca = max(marcador.confianca for marcador in direitas)
             motivo = "marcador_valido_antes_a_direita"
-        elif any(
-            marcador.posicao is PosicaoMarcadorVerde.AMBIGUA for marcador in marcadores
-        ):
+        elif any(marcador.posicao is PosicaoMarcadorVerde.AMBIGUA for marcador in marcadores):
             estado = EstadoVerde.AMBIGUA
             confianca = max((marcador.confianca for marcador in marcadores), default=0.0)
             motivo = "marcadores_sem_posicao_geometrica_valida"

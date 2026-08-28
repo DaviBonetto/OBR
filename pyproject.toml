@@ -62,6 +62,7 @@ obr-exportar-modelo-linha = "obr_oficial.aplicacao.exportar_modelo_linha:main"
 obr-percepcao-linha = "obr_oficial.aplicacao.executar_percepcao_linha:main"
 obr-avaliar-geometria-linha = "obr_oficial.aplicacao.avaliar_geometria_linha:main"
 obr-referenciar-centro-fase4 = "obr_oficial.aplicacao.referenciar_centro_fase4:main"
+obr-painel = "obr_oficial.painel.operacao.servidor:main"
 
 [tool.setuptools]
 package-dir = { "" = "codigo" }
@@ -71,6 +72,13 @@ where = ["codigo"]
 
 [tool.setuptools.package-data]
 "obr_oficial.painel" = ["web/*.css", "web/*.html", "web/*.js"]
+"obr_oficial.painel.operacao" = [
+    "web/*.css",
+    "web/*.html",
+    "web/*.js",
+    "web/*.png",
+    "web/fontes/*.woff2",
+]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers"

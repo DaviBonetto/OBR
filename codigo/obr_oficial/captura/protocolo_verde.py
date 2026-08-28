@@ -145,9 +145,7 @@ def contexto_quadro_verde(contexto: dict[str, Any]) -> dict[str, Any]:
             "marcador_antes_presente": definicao.marcador_antes,
             "marcador_depois_presente": definicao.marcador_depois or cruz_mista,
             "dois_marcadores_antes": definicao.dois_marcadores_antes,
-            "mascara_marcador_verde_esperada_vazia": (
-                definicao.mascara_marcador_esperada_vazia
-            ),
+            "mascara_marcador_verde_esperada_vazia": (definicao.mascara_marcador_esperada_vazia),
             "cruz_mista": cruz_mista,
         }
     )

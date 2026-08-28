@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OBR · Operação</title>
+    <link rel="preload" href="/fontes/departure-mono-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fontes/sora-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fontes/sora-semibold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/painel.css">
+    <script src="/painel.js" defer></script>
+  </head>
+  <body>
+    <!-- ======== TOPO (Imagem 3): logo · métricas · cronômetro · recolher ======== -->
+    <header class="topo">
+      <div class="marca">
+        <span
+          class="pulso"
+          id="pulso-conexao"
+          data-estado="atencao"
+          title="estado do sistema"
+          aria-hidden="true"
+        ></span>
+        <img
+          class="logo-equipe"
+          src="/logo-equipe.png"
+          alt="Logo da equipe"
+          width="128"
+          height="128"
+        >
+        <span class="marca-texto">OBR</span>
+      </div>
+
+      <div class="topo-metricas" role="list" aria-label="Métricas ao vivo">
+        <span class="metrica-topo" role="listitem">
+          <em>FPS</em><b id="m-fps" class="mono">—</b>
+        </span>
+        <span class="metrica-topo" role="listitem">
+          <em>QUADRO</em><b id="m-quadro" class="mono">—</b>
+        </span>
+        <span class="metrica-topo" role="listitem">
+          <em>LATÊNCIA</em><b id="m-latencia" class="mono">—</b>
+        </span>
+      </div>
+
+      <div class="topo-acoes">
+        <button
+          id="cronometro"
+          class="cronometro mono"
+          type="button"
+          title="Clique: iniciar/pausar · Duplo clique: zerar"
+          aria-label="Cronômetro da tentativa. Clique inicia ou pausa; duplo clique zera"
+        >00:00:00</button>
+        <button
+          id="alternar-laterais"
+          class="botao-icone"
+          type="button"
+          aria-label="Ocultar barras laterais"
+          aria-expanded="true"
+          aria-controls="lateral-esquerda lateral-direita"
+        >
+          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" fill="none">
+            <rect x="2.5" y="4" width="15" height="12" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M7.5 4v12M12.5 4v12" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="palco">
+      <!-- ======== BARRA ESQUERDA: controles verdes + estado + sistema ======== -->
+      <aside class="lateral lateral-esquerda" id="lateral-esquerda" aria-label="Controles verdes e estado">
+        <section class="cartao bloco bloco-verde" aria-labelledby="titulo-verde-90">
+          <h2 id="titulo-verde-90" class="bloco-titulo cor-menta">Verde · 90°</h2>
+          <div class="campos" data-grupo-viradas="verde90"></div>
+        </section>
+
+        <section class="cartao bloco bloco-180" aria-labelledby="titulo-verde-180">
+          <h2 id="titulo-verde-180" class="bloco-titulo cor-menta">Verde · 180°</h2>
+          <div class="campos" data-grupo-viradas="verde"></div>
+        </section>
+
+        <section class="cartao bloco bloco-estado-robo" aria-labelledby="titulo-estado-robo">
+          <h2 id="titulo-estado-robo" class="bloco-titulo cor-giz">Estado do robô</h2>
+          <dl class="sistema" aria-label="Estado seguro e disponibilidade do robô">
+            <div class="linha-sistema">
+              <dt>Bateria</dt>
+              <dd class="tag-indisponivel" title="A leitura depende de um sensor de bateria ainda não integrado">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                  <rect x="2" y="4" width="10.5" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M12.5 6.5H14v3h-1.5M5 6.5l4 4M9 6.5l-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                <span>sem leitura</span>
+              </dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Motores</dt>
+              <dd class="tag-motores-desabilitados">desabilitados</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Câmera</dt>
+              <dd id="s-camera" class="mono">—</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Percepção</dt>
+              <dd id="s-percepcao" class="mono">—</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="cartao bloco bloco-sistema" aria-labelledby="titulo-sistema">
+          <h2 id="titulo-sistema" class="bloco-titulo cor-giz">Sistema</h2>
+          <dl class="sistema" aria-label="Informações do sistema">
+            <div class="linha-sistema">
+              <dt>Perfil</dt>
+              <dd id="s-perfil" class="mono">—</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Resolução</dt>
+              <dd id="s-resolucao" class="mono">—</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Quadros IA</dt>
+              <dd id="s-processados" class="mono">—</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Ativo</dt>
+              <dd id="s-ativo" class="mono">—</dd>
+            </div>
+            <div class="linha-sistema">
+              <dt>Disco livre</dt>
+              <dd id="s-disco" class="mono">—</dd>
+            </div>
+          </dl>
+          <div class="cameras-painel" role="group" aria-label="Configuração e estado das câmeras">
+            <span class="cameras-subtitulo">Câmeras</span>
+            <section class="camera-config" aria-labelledby="titulo-cam-0">
+              <header class="camera-config-cabecalho">
+                <span id="titulo-cam-0">CAM/DISP 0</span>
+                <span id="s-cam0-estado" class="tag-camera" data-estado="aguardando">aguardando</span>
+              </header>
+              <div class="camera-config-linha">
+                <span>Fonte</span><b id="s-cam0-fonte" class="mono">—</b>
+              </div>
+              <div class="camera-config-linha">
+                <span>Vídeo</span><b id="s-cam0-video" class="mono">—</b>
+              </div>
+            </section>
+            <section class="camera-config" aria-labelledby="titulo-cam-1">
+              <header class="camera-config-cabecalho">
+                <span id="titulo-cam-1">CAM/DISP 1</span>
+                <span class="tag-camera" data-estado="inativa">não configurada</span>
+              </header>
+              <div class="camera-config-linha">
+                <span>Fonte</span><b class="mono">—</b>
+              </div>
+              <div class="camera-config-linha">
+                <span>Vídeo</span><b class="mono">—</b>
+              </div>
+            </section>
+          </div>
+          <div class="raspberry-painel" role="group" aria-label="Saúde elétrica do Raspberry Pi">
+            <span class="cameras-subtitulo">Raspberry Pi</span>
+            <div class="raspberry-linha">
+              <span>Subtensão</span><b id="s-rasp-subtensao" class="tag-rasp" data-estado="aguardando">sem leitura</b>
+            </div>
+            <div class="raspberry-linha">
+              <span>Núcleo</span><b id="s-rasp-nucleo" class="mono">—</b>
+            </div>
+            <div class="raspberry-linha">
+              <span>CPU</span><b id="s-rasp-cpu" class="mono">—</b>
+            </div>
+            <div class="raspberry-linha">
+              <span>RAM livre</span><b id="s-rasp-ram" class="mono">—</b>
+            </div>
+          </div>
+          <button
+            id="copiar-comando-painel"
+            class="botao-copiar-comando"
+            type="button"
+            title="Copia o comando para abrir o painel em simulação"
+            aria-label="Copiar comando para abrir o painel em simulação"
+          >
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none">
+              <rect x="5.5" y="4.5" width="7.5" height="8.5" rx="1.4" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M10.5 4V3.2A1.7 1.7 0 0 0 8.8 1.5H3.7A1.7 1.7 0 0 0 2 3.2v5.1A1.7 1.7 0 0 0 3.7 10h1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span id="texto-copiar-comando">Copiar início</span>
+          </button>
+          <p id="status-comando-painel" class="status-comando mono" role="status" aria-live="polite"></p>
+        </section>
+      </aside>
+
+      <!-- ======== CENTRO: imagens + o que está acontecendo ======== -->
+      <section class="centro" aria-label="Imagens ao vivo e estado da missão">
+        <div class="visoes modo-unica" id="conteiner-visoes" data-crua="false">
+          <figure class="painel-video" id="painel-processada">
+            <header class="painel-video-cabecalho">
+              <span class="dot-cor" aria-hidden="true"></span>
+              <span class="painel-video-titulo">PROCESSADA · IA</span>
+            </header>
+            <div class="painel-video-feed">
+              <img id="video" src="/video.mjpg" alt="Imagem processada pela IA">
+              <div id="aviso-video" class="aviso-video oculto" role="status"></div>
+            </div>
+          </figure>
+
+          <figure class="painel-video" id="painel-crua">
+            <header class="painel-video-cabecalho">
+              <span class="dot-cor dot-crua" aria-hidden="true"></span>
+              <span class="painel-video-titulo">CÂMERA CRUA</span>
+            </header>
+            <div class="painel-video-feed">
+              <img id="video-cru" src="/video-bruto.mjpg" alt="Imagem crua da câmera">
+            </div>
+          </figure>
+        </div>
+
+        <div class="estado-central" aria-live="polite">
+          <span class="estado-dot" id="estado-dot" data-cor="neutro" aria-hidden="true"></span>
+          <span id="estado-texto" class="estado-texto" data-cor="neutro">EM ESPERA</span>
+          <span class="estado-confianca mono" id="estado-confianca">confiança —</span>
+        </div>
+      </section>
+
+      <!-- ======== BARRA DIREITA: captura + 90 graus + gap ======== -->
+      <aside class="lateral lateral-direita" id="lateral-direita" aria-label="Captura, viradas de 90 graus e gap">
+        <section class="cartao bloco bloco-captura" aria-labelledby="titulo-captura">
+          <h2 id="titulo-captura" class="bloco-titulo cor-rosa">
+            <svg class="icone-bloco" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none">
+              <rect x="2" y="4.5" width="8.5" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="m10.5 7.5 3.5-2v5l-3.5-2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            Captura de imagens
+          </h2>
+
+          <div class="captura-botoes">
+            <button id="captura-foto" class="botao-captura" type="button">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none">
+                <rect x="2.5" y="5.5" width="11" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="m13.5 9 4-2.5v7l-4-2.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+              <span>Foto</span>
+            </button>
+            <button id="captura-video" class="botao-captura" type="button" data-ativo="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none">
+                <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="10" cy="10" r="2.5" fill="currentColor"/>
+              </svg>
+              <span>Vídeo</span>
+            </button>
+            <button id="captura-sequencia" class="botao-captura" type="button" data-ativo="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none">
+                <rect x="2.5" y="2.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="8.5" y="8.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <span>Sequência</span>
+            </button>
+          </div>
+
+          <div class="captura-grade-config">
+            <div class="captura-item-config">
+              <span class="captura-rotulo">Intervalo</span>
+              <div class="captura-campo-unidade">
+                <input id="captura-intervalo" class="mono" type="number" value="250" min="50" max="5000" step="50">
+                <span class="unidade">ms</span>
+              </div>
+            </div>
+            <div class="captura-item-config">
+              <span class="captura-rotulo">Quantidade</span>
+              <div class="captura-campo-unidade">
+                <input id="captura-quantidade" class="mono" type="number" value="20" min="0" max="9999" step="10">
+                <span class="unidade">fotos</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="captura-rodape">
+            <div class="captura-status-linha">
+              <span class="captura-dot" id="captura-dot" aria-hidden="true"></span>
+              <span id="captura-status" class="captura-status-texto mono" data-tipo="" role="status" aria-live="polite">PRONTO</span>
+            </div>
+            <span id="captura-ultimo" class="captura-arquivo mono" title="último arquivo salvo">nenhum arquivo salvo</span>
+          </div>
+        </section>
+
+        <section class="cartao bloco bloco-esquerda" aria-labelledby="titulo-90-esquerda">
+          <h2 id="titulo-90-esquerda" class="bloco-titulo cor-ciano">Curva 90° · esquerda</h2>
+          <div class="campos" data-grupo-viradas="esquerda"></div>
+        </section>
+
+        <section class="cartao bloco bloco-direita" aria-labelledby="titulo-90-direita">
+          <h2 id="titulo-90-direita" class="bloco-titulo cor-laranja">Curva 90° · direita</h2>
+          <div class="campos" data-grupo-viradas="direita"></div>
+        </section>
+
+        <section class="cartao bloco bloco-gap" aria-labelledby="titulo-gap">
+          <h2 id="titulo-gap" class="bloco-titulo cor-ambar">
+            <svg class="icone-bloco" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none">
+              <path d="M2 8h3.4M10.6 8H14M6.6 4.5 9.4 11.5" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Gap
+          </h2>
+          <div class="campos" data-grupo-viradas="gap"></div>
+        </section>
+
+        <section class="cartao bloco bloco-controle" aria-labelledby="titulo-controle">
+          <h2 id="titulo-controle" class="bloco-titulo cor-verde">
+            <svg class="icone-bloco" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none">
+              <rect x="2" y="3.5" width="12" height="9" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="5.5" cy="8" r="1.2" fill="currentColor"/>
+              <path d="M10 6.5v3M8.5 8h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Controle manual
+          </h2>
+
+          <div class="controle-secao">
+            <span class="controle-subtitulo">Motores</span>
+            <div class="controle-grade-motores">
+              <button id="ctrl-avancar" class="botao-ctrl ctrl-avancar" type="button" title="Avançar em linha reta">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                  <path d="M8 12V4M4.5 7.5 8 4l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Avançar</span>
+              </button>
+              <button id="ctrl-parar" class="botao-ctrl ctrl-parar" type="button" title="Parar motores imediatamente">
+                <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor">
+                  <rect x="3" y="3" width="10" height="10" rx="1.5"/>
+                </svg>
+                <span>Parar</span>
+              </button>
+              <button id="ctrl-recuar" class="botao-ctrl ctrl-recuar" type="button" title="Recuar / Ré">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                  <path d="M8 4v8M4.5 8.5 8 12l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Recuar</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="controle-secao">
+            <span class="controle-subtitulo">Iluminação</span>
+            <div class="controle-grade-led">
+              <button id="ctrl-led-on" class="botao-ctrl ctrl-led-on" type="button" title="Ligar LED de iluminação">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                  <path d="M8 2a4 4 0 0 0-4 4c0 1.8 1.2 3.3 2.5 3.8V11h3V9.8C10.8 9.3 12 7.8 12 6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M6.5 13.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                <span>LED ON</span>
+              </button>
+              <button id="ctrl-led-off" class="botao-ctrl ctrl-led-off" type="button" title="Desligar LED de iluminação">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                  <path d="M8 2a4 4 0 0 0-4 4c0 1.8 1.2 3.3 2.5 3.8V11h3V9.8C10.8 9.3 12 7.8 12 6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 2"/>
+                  <path d="m3 3 10 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                <span>LED OFF</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="controle-secao">
+            <span class="controle-subtitulo">Câmera</span>
+            <button id="btn-toggle-crua" class="botao-ctrl ctrl-camera ctrl-full" type="button" aria-pressed="false" title="Alternar exibição da Câmera Crua">
+              <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none">
+                <rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/>
+                <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+              </svg>
+              <span>Câmera Crua</span>
+              <span id="badge-crua" class="badge-toggle-crua mono">OFF</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="cartao bloco bloco-terminal" aria-labelledby="titulo-terminal">
+          <h2 id="titulo-terminal" class="bloco-titulo cor-menta">
+            <svg class="icone-bloco" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none">
+              <rect x="1.8" y="2.5" width="12.4" height="11" rx="1.8" stroke="currentColor" stroke-width="1.4"/>
+              <path d="m4.2 6 2.2 2-2.2 2M8.5 10h3.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Registro de operação
+          </h2>
+          <ul id="registro-operacao" class="terminal-registro" aria-label="Eventos recentes do painel"></ul>
+        </section>
+
+        <p id="status-viradas" class="status-viradas" role="status" aria-live="polite"></p>
+      </aside>
+    </main>
+  </body>
+</html>

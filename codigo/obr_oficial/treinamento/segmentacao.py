@@ -418,8 +418,7 @@ class AcumuladorMetricas:
             "iou": self.tp / (self.tp + self.fp + self.fn + suave),
             "precisao": self.tp / (self.tp + self.fp + suave),
             "recall": self.tp / (self.tp + self.fn + suave),
-            "taxa_falso_positivo_negativos": self.negativos_falsos
-            / (self.negativos + suave),
+            "taxa_falso_positivo_negativos": self.negativos_falsos / (self.negativos + suave),
             "taxa_falso_positivo_negativos_significativos": (
                 self.negativos_falsos_significativos / (self.negativos + suave)
             ),
@@ -455,9 +454,7 @@ def criar_carregadores(
     amostrador = None
     if configuracao.peso_amostra_negativa > 1.0:
         pesos = [
-            configuracao.peso_amostra_negativa
-            if item["tipo_quadro"] == "sem_linha"
-            else 1.0
+            configuracao.peso_amostra_negativa if item["tipo_quadro"] == "sem_linha" else 1.0
             for item in dataset_treino.amostras
         ]
         amostrador = WeightedRandomSampler(
@@ -586,9 +583,11 @@ def treinar(
             configuracao.limiar,
             configuracao.area_minima_negativo,
         )
-        pontuacao = metricas["dice"] - configuracao.peso_fpr_selecao * metricas[
-            "taxa_falso_positivo_negativos_significativos"
-        ]
+        pontuacao = (
+            metricas["dice"]
+            - configuracao.peso_fpr_selecao
+            * metricas["taxa_falso_positivo_negativos_significativos"]
+        )
         registro = {
             "epoca": epoca,
             "perda_treino": float(np.mean(perdas_treino)),
@@ -601,9 +600,7 @@ def treinar(
         if pontuacao > melhor_pontuacao:
             melhor_dice = metricas["dice"]
             melhor_pontuacao = pontuacao
-            melhor_fpr_significativo = metricas[
-                "taxa_falso_positivo_negativos_significativos"
-            ]
+            melhor_fpr_significativo = metricas["taxa_falso_positivo_negativos_significativos"]
             sem_melhora = 0
             torch.save(
                 {

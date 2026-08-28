@@ -150,9 +150,7 @@ def consolidar_dataset_v2(
             item["estado_rotulo"] = "corrigida_intersecao_otsu_auditada"
             contagens["intersecoes_reconstruidas"] += 1
         else:
-            raise ErroDatasetV2(
-                f"Decisao sem consolidacao segura: {id_amostra} ({decisao})"
-            )
+            raise ErroDatasetV2(f"Decisao sem consolidacao segura: {id_amostra} ({decisao})")
         _gravar_png(caminho_mascara, mascara_nova)
         item["sha256_mascara"] = _sha256_arquivo(caminho_mascara)
         item["auditoria_fase3_v2"] = {

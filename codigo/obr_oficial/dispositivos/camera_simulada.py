@@ -114,14 +114,4 @@ class CameraSimulada:
             x = int(self._largura / 2 + deslocamento * progresso * progresso)
             pontos.append((x, y))
         cv2.polylines(imagem, [np.array(pontos, dtype=np.int32)], False, (15, 15, 15), 34)
-        cv2.putText(
-            imagem,
-            "SIMULACAO - SEM CAMERA REAL",
-            (18, 34),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 60, 210),
-            2,
-            cv2.LINE_AA,
-        )
         return imagem

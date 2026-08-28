@@ -39,9 +39,7 @@ def test_materializa_semantica_da_categoria(
 
 
 def test_cruz_mista_preserva_decisao_de_antes_e_registra_depois() -> None:
-    contexto = contexto_quadro_verde(
-        {"categoria_verde": "antes_direita", "cruz_mista": True}
-    )
+    contexto = contexto_quadro_verde({"categoria_verde": "antes_direita", "cruz_mista": True})
 
     assert contexto["decisao_verde_esperada"] == "virar_direita"
     assert contexto["marcador_antes_presente"] is True

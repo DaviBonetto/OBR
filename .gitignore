@@ -40,3 +40,6 @@ modelos/**/*.pth
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Capturas rapidas do painel de operacao
+capturas_operacao/

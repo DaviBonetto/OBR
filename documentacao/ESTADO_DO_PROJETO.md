@@ -104,6 +104,13 @@ camera provisoria opera em `/dev/video0`, 640 x 480 e aproximadamente 10 FPS.
 
 Nenhum motor sera usado nesta fase.
 
+## Painel de operacao
+
+- [x] disponibilizar dashboard web com video, telemetria de percepcao e configuracao de tempos;
+- [x] registrar capturas, eventos de operacao e estado das duas portas de camera;
+- [x] manter o painel seguro: nenhum endpoint habilita ou comanda atuadores;
+- [ ] validar a camera real, a telemetria do Raspberry Pi e a estabilidade do painel no hardware.
+
 ## Entregas da Fase Verde 0
 
 - [x] congelar por hash o modelo, a configuracao e a implementacao aprovada da linha;

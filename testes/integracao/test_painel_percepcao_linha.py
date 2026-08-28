@@ -18,9 +18,7 @@ class _SessaoLinhaReta:
     def __init__(self) -> None:
         probabilidade = np.full((192, 320), 0.02, dtype=np.float32)
         probabilidade[:, 150:170] = 0.97
-        self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(
-            np.float32
-        )
+        self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(np.float32)
         self.chamadas = 0
 
     def run(self, _saidas, _entradas):
