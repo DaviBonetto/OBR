@@ -8,7 +8,7 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Linha congelada e Fase Verde 0 concluida — a proxima etapa e a captura do verde.**
+**Linha congelada e dataset verde V1 auditado — a próxima etapa são as máscaras verdes.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
 A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
@@ -23,6 +23,10 @@ Motores e mecanismos de resgate continuam sem acionamento.
 O novo contrato de pista processa linha e verde no mesmo quadro. Quando nao ha verde valido, a
 decisao verde e neutra e o seguimento da linha continua normalmente. Consulte
 [`documentacao/fase_verde/PROGRESSO.md`](documentacao/fase_verde/PROGRESSO.md).
+As 4.125 capturas verdes foram preservadas em um snapshot com SHA-256, verificadas pixel a
+pixel e curadas por sobreposição de metadados. O índice V1 contém 3.268 quadros selecionados,
+separados por ambiente, e está pronto para a criação e revisão das máscaras — ainda não para
+treinamento.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -87,6 +91,18 @@ uv run obr-capturar --modo verde --simulacao --host 127.0.0.1 --porta 8080
 
 Nesse modo, `Sem verde / negativo` significa mascara verde vazia. A linha pode e deve continuar
 visivel, pois sua percepcao e independente.
+
+Para reproduzir a auditoria e a curadoria do dataset verde sem alterar os originais:
+
+```powershell
+uv sync --extra dados
+uv run obr-curar-dataset-verde
+```
+
+O plano de correções é versionado em
+[`dados/manifestos/curadoria_verde_v1.json`](dados/manifestos/curadoria_verde_v1.json), e o
+relatório completo está em
+[`documentacao/fase_verde/AUDITORIA_DATASET_V1.md`](documentacao/fase_verde/AUDITORIA_DATASET_V1.md).
 
 Para preparar a versao congelada do dataset sem alterar os originais:
 

@@ -1,13 +1,16 @@
 # Percepcao verde
 
-Atualizado em 24 de agosto de 2026.
+Atualizado em 28 de agosto de 2026.
 
 ## Estado
 
-**Fase Verde 1 implementada em software. A proxima etapa e capturar e auditar dados reais.**
+**Fase Verde 1 capturada e auditada. A próxima etapa é produzir as máscaras verdes.**
 
-O Raspberry Pi estava desligado no fechamento desta entrega. A implantacao e a camera real nao
-foram marcadas como validadas; o comando esta preparado para a proxima conexao.
+O painel foi executado no Raspberry Pi 5 com a câmera USB provisória. Cinco sessões físicas, em
+quatro locais, produziram 4.125 imagens. O snapshot bruto foi copiado e verificado por SHA-256;
+nenhum PNG está ausente, ilegível, corrompido ou duplicado exatamente. A curadoria V1 selecionou
+3.268 quadros sem alterar os originais. Consulte
+[`AUDITORIA_DATASET_V1.md`](AUDITORIA_DATASET_V1.md).
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto
@@ -105,6 +108,18 @@ divisoes de treino, validacao e teste serao feitas por sessao completa.
 - camera, brilho, exposicao, nitidez, local, piso, iluminacao e LEDs registrados;
 - motores e demais atuadores fora do processo.
 
+### Captura e auditoria concluídas
+
+- 5 sessões físicas e 4.125 PNGs preservados;
+- 4.125 hashes individuais verificados;
+- 151 rótulos de cruz mista corrigidos com confirmação humana e visual;
+- 8 quadros sem marcador reclassificados como negativos;
+- 10 quadros geometricamente ambíguos excluídos do índice;
+- 847 quase duplicatas temporais retiradas apenas do índice;
+- 3.268 quadros selecionados para a etapa de máscaras;
+- treino, validação e teste separados por sessão e ambiente completos;
+- teste mantido fora das decisões de máscara e treinamento.
+
 Comando local:
 
 ```powershell
@@ -146,6 +161,7 @@ verde e sera descartado apenas pela geometria.
 
 ## Limites atuais
 
-Ainda nao existem detector cromatico, modelo neural, mascara verde real, rastreamento temporal ou
-benchmark do verde no Raspberry Pi. Os testes atuais validam protocolo HTTP, persistencia,
-contratos e geometria sintetica. Luz e camera so serao medidas depois das capturas fisicas.
+Ainda não existem máscaras verdes supervisionadas, modelo neural verde, rastreamento temporal ou
+benchmark do detector verde no Raspberry Pi. A câmera provisória foi usada na captura, mas essa
+evidência não prova generalização para a câmera oficial. O dataset está pronto para anotação, não
+para treinamento; essa fronteira é registrada pelo manifesto gerado.

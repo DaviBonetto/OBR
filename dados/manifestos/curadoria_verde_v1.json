@@ -1,0 +1,67 @@
+{
+  "correcoes": [
+    {
+      "acao": "corrigir_contexto",
+      "alteracoes": {
+        "cruz_mista": false
+      },
+      "id": "lugar3_cruz_mista_ativada_por_engano",
+      "motivo": "Usuario confirmou que havia somente um marcador antes; revisao visual confirmou a ausencia de marcador depois.",
+      "numero_fim": 151,
+      "numero_inicio": 1,
+      "sessao": "20260828T164709Z_verde_sessao_02_e0a67f"
+    },
+    {
+      "acao": "corrigir_contexto",
+      "alteracoes": {
+        "categoria_verde": "sem_verde_negativo",
+        "cruz_mista": false
+      },
+      "id": "lugar4_fim_depois_sem_marcador_visivel",
+      "motivo": "Os oito quadros finais da sequencia depois nao contem marcador verde e pertencem ao negativo iniciado logo em seguida.",
+      "numero_fim": 1085,
+      "numero_inicio": 1078,
+      "sessao": "20260828T171459Z_verde_sessao_03_041cde"
+    },
+    {
+      "acao": "excluir",
+      "alteracoes": {},
+      "id": "lugar3_verde_movido_durante_negativo",
+      "motivo": "O marcador oficial entra e sai do quadro durante uma sequencia rotulada como sem verde; a intencao geometrica nao e confiavel.",
+      "numero_fim": 1157,
+      "numero_inicio": 1148,
+      "sessao": "20260828T164709Z_verde_sessao_02_e0a67f"
+    }
+  ],
+  "divisoes": {
+    "teste": [
+      "20260828T171459Z_verde_sessao_03_041cde"
+    ],
+    "treino": [
+      "20260826T193939Z_verde_sessao_01_3b4ed4",
+      "20260826T194104Z_verde_sessao_01_9bc403",
+      "20260828T162650Z_verde_sessao_01_54119b"
+    ],
+    "validacao": [
+      "20260828T164709Z_verde_sessao_02_e0a67f"
+    ]
+  },
+  "nome": "verde_v1",
+  "selecao_temporal": {
+    "categorias_sem_reducao": [
+      "depois_ignorar",
+      "sem_verde_negativo"
+    ],
+    "intervalo_nova_sequencia_s": 5.0,
+    "limiar_diferenca_media_64x48": 2.0
+  },
+  "sessoes_recuperadas": [
+    "20260826T194104Z_verde_sessao_01_9bc403"
+  ],
+  "snapshot": {
+    "arquivo": "OBR_BACKUP_VERDE_BRUTO_20260828T1430.tar",
+    "capturas": 4125,
+    "sha256": "72a5bd2728742c083fb4e50e8b2dce21879942d53cc24061b1c4a3b2a0d5c249"
+  },
+  "versao": 1
+}

@@ -50,6 +50,7 @@ desenvolvimento = [
 
 [project.scripts]
 obr-capturar = "obr_oficial.aplicacao.executar_captura:main"
+obr-curar-dataset-verde = "obr_oficial.aplicacao.curar_dataset_verde:main"
 obr-consolidar-rotulos = "obr_oficial.aplicacao.consolidar_rotulos:main"
 obr-consolidar-dataset-v2 = "obr_oficial.aplicacao.consolidar_dataset_v2:main"
 obr-auditar-rotulos-fase3 = "obr_oficial.aplicacao.auditar_rotulos_fase3:main"

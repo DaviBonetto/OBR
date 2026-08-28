@@ -1,5 +1,11 @@
 """Preparacao, versionamento e contratos dos conjuntos de dados."""
 
+from obr_oficial.dados.auditoria_verde import (
+    CuradorDatasetVerde,
+    ErroAuditoriaVerde,
+    PlanoCuradoriaVerde,
+    carregar_plano_curadoria_verde,
+)
 from obr_oficial.dados.consolidacao_rotulos import (
     ConfiguracaoConsolidacaoRotulos,
     ConsolidadorRotulos,
@@ -27,13 +33,17 @@ __all__ = [
     "ConfiguracaoDataset",
     "ConfiguracaoGeracaoMascaras",
     "ConsolidadorRotulos",
+    "CuradorDatasetVerde",
+    "ErroAuditoriaVerde",
     "ErroConsolidacaoRotulos",
     "ErroGeracaoMascaras",
     "ErroPreparacaoDataset",
     "ErroReferenciaCentro",
     "GeradorMascarasClassicas",
+    "PlanoCuradoriaVerde",
     "PreparadorDataset",
     "RepositorioReferenciaCentro",
     "carregar_configuracao_dataset",
+    "carregar_plano_curadoria_verde",
     "preparar_selecao_referencia",
 ]

@@ -1,13 +1,14 @@
 # Estado do projeto
 
-Atualizado em: 24 de agosto de 2026.
+Atualizado em: 28 de agosto de 2026.
 
 ## Fase atual
 
-**Fase Verde 1 implementada; proxima etapa: captura e auditoria do dataset verde.**
+**Fase Verde 1 capturada e auditada; próxima etapa: máscaras do dataset verde.**
 
-O Raspberry Pi estava desligado ao final da implementacao. A implantacao do painel verde e a
-captura pela camera real permanecem pendentes e serao executadas quando ele voltar a rede.
+O painel verde foi validado no Raspberry Pi com a câmera USB provisória. As 4.125 imagens foram
+copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bruto permanece intacto,
+e o conjunto ainda não está liberado para treinamento.
 
 ## Entregas da Fase 0
 
@@ -119,9 +120,15 @@ Nenhum motor sera usado nesta fase.
 - [x] separar sessoes verdes em `dados/brutos/verde` sem alterar as sessoes da linha;
 - [x] validar no servidor as cinco categorias, cruz mista e decisao esperada;
 - [x] persistir contagens por categoria no manifesto da sessao;
-- [ ] implantar e abrir o painel verde no Raspberry Pi quando ele estiver ligado;
-- [ ] capturar, rotular, treinar e validar o detector visual do verde;
+- [x] implantar e abrir o painel verde no Raspberry Pi;
+- [x] capturar 4.125 imagens em cinco sessões físicas;
+- [x] congelar o bruto e verificar hashes, legibilidade, numeração e duplicatas;
+- [x] corrigir rótulos comprovadamente errados sem alterar os registros originais;
+- [x] separar treino, validação e teste por sessão e ambiente completos;
+- [ ] gerar e revisar as máscaras supervisionadas do verde;
+- [ ] treinar e validar o detector visual do verde;
 - [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
 
-O detalhamento esta em `documentacao/fase_verde/PROGRESSO.md`. Os testes da Fase Verde 0 usam
-geometria sintetica; ainda nao provam deteccao por camera, iluminacao ou latencia fisica.
+O detalhamento está em `documentacao/fase_verde/PROGRESSO.md`. As capturas cobrem variação física
+de local, pose e luz, mas ainda não provam a precisão de um detector, generalização para a câmera
+oficial ou latência física.
