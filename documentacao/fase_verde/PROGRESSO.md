@@ -4,13 +4,18 @@ Atualizado em 28 de agosto de 2026.
 
 ## Estado
 
-**Fase Verde 1 capturada e auditada. A próxima etapa é produzir as máscaras verdes.**
+**Fase Verde 2 em revisão. As máscaras candidatas e a fila essencial foram produzidas.**
 
 O painel foi executado no Raspberry Pi 5 com a câmera USB provisória. Cinco sessões físicas, em
 quatro locais, produziram 4.125 imagens. O snapshot bruto foi copiado e verificado por SHA-256;
 nenhum PNG está ausente, ilegível, corrompido ou duplicado exatamente. A curadoria V1 selecionou
 3.268 quadros sem alterar os originais. Consulte
 [`AUDITORIA_DATASET_V1.md`](AUDITORIA_DATASET_V1.md).
+
+O bootstrap V1 processou somente os 2.356 quadros de treino/validação, mantendo o teste fechado.
+Foram produzidas 1.674 candidatas normais, 324 máscaras negativas vazias por contrato e 358 casos
+prioritários. A revisão inicial foi reduzida a 75 representantes temporais sem aprovar
+automaticamente seus vizinhos. Consulte [`MASCARAS_VERDES_V1.md`](MASCARAS_VERDES_V1.md).
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto
@@ -161,7 +166,8 @@ verde e sera descartado apenas pela geometria.
 
 ## Limites atuais
 
-Ainda não existem máscaras verdes supervisionadas, modelo neural verde, rastreamento temporal ou
-benchmark do detector verde no Raspberry Pi. A câmera provisória foi usada na captura, mas essa
-evidência não prova generalização para a câmera oficial. O dataset está pronto para anotação, não
-para treinamento; essa fronteira é registrada pelo manifesto gerado.
+As máscaras atuais são candidatas, não rótulos supervisionados consolidados. Ainda não existe
+modelo neural verde, rastreamento temporal ou benchmark do detector verde no Raspberry Pi. A
+câmera provisória foi usada na captura, mas essa evidência não prova generalização para a câmera
+oficial. A fila essencial precisa ser revisada antes de liberar o primeiro treinamento; essa
+fronteira é registrada no manifesto gerado.

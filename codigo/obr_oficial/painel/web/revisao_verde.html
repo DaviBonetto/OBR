@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBR · Máscaras verdes</title>
+    <link rel="stylesheet" href="/revisao_verde.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="rotulo">FASE VERDE 2 · TREINO E VALIDAÇÃO</p>
+          <h1>Revisão das máscaras verdes</h1>
+          <p class="subtitulo">Amarelo é a máscara candidata. O teste permanece fechado.</p>
+        </div>
+        <div id="progresso" class="progresso">Carregando…</div>
+      </header>
+
+      <section class="filtros" aria-label="Filtros">
+        <label>Divisão
+          <select id="divisao">
+            <option value="todas">Treino + validação</option>
+            <option value="treino">Treino</option>
+            <option value="validacao">Validação</option>
+          </select>
+        </label>
+        <label>Categoria
+          <select id="categoria">
+            <option value="todas">Todas</option>
+            <option value="antes_esquerda">Antes · esquerda</option>
+            <option value="antes_direita">Antes · direita</option>
+            <option value="dois_antes_180">Dois antes · 180°</option>
+            <option value="depois_ignorar">Depois · ignorar</option>
+            <option value="sem_verde_negativo">Sem verde · negativo</option>
+          </select>
+        </label>
+        <label>Prioridade
+          <select id="prioridade">
+            <option value="fila">Fila essencial · representantes</option>
+            <option value="prioritarias">Todas as prioritárias</option>
+            <option value="normal">Normais</option>
+            <option value="contrato">Vazias por contrato</option>
+            <option value="todas">Todas</option>
+          </select>
+        </label>
+        <label>Revisão
+          <select id="revisao">
+            <option value="pendente">Pendentes</option>
+            <option value="todas">Todas</option>
+            <option value="aprovada">Aprovadas</option>
+            <option value="mascara_vazia">Marcadas vazias</option>
+            <option value="reprocessar">Precisam de correção</option>
+            <option value="aprovada_vazia_por_contrato">Vazias por contrato</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="conteudo">
+        <div class="visualizacao">
+          <div class="topo-visual">
+            <div>
+              <strong id="nome-categoria">—</strong>
+              <span id="metadados">—</span>
+            </div>
+            <div class="modos" role="group" aria-label="Modo da imagem">
+              <button data-modo="origem">Original</button>
+              <button data-modo="mascara">Máscara</button>
+              <button class="ativo" data-modo="sobreposicao">Sobreposição</button>
+            </div>
+          </div>
+          <div class="quadro">
+            <img id="imagem" alt="Quadro verde em revisão" />
+            <p id="vazio">Nenhuma amostra neste filtro.</p>
+          </div>
+        </div>
+
+        <aside>
+          <div class="metricas">
+            <div><span>Confiança</span><strong id="confianca">—</strong></div>
+            <div><span>Área</span><strong id="area">—</strong></div>
+            <div><span>Esperados</span><strong id="esperados">—</strong></div>
+            <div><span>Selecionados</span><strong id="selecionados">—</strong></div>
+          </div>
+          <div class="diagnostico">
+            <span>Diagnóstico automático</span>
+            <strong id="prioridade-atual">—</strong>
+            <p id="motivos">—</p>
+          </div>
+          <div class="diagnostico">
+            <span>Revisão atual</span>
+            <strong id="decisao-atual">Pendente</strong>
+            <p id="grupo-revisao">—</p>
+          </div>
+          <label class="observacao">Observação opcional
+            <textarea id="observacao" maxlength="500" rows="3" placeholder="Descreva apenas o erro visível."></textarea>
+          </label>
+          <div class="acoes">
+            <button class="primario" data-decisao="aprovada">A · Máscara correta</button>
+            <button data-decisao="mascara_vazia">V · Deve ficar vazia</button>
+            <button class="perigo" data-decisao="reprocessar">R · Precisa corrigir</button>
+          </div>
+          <p class="atalhos">Atalhos: A aprova · V esvazia · R corrige · ← → navegam</p>
+          <p class="aviso">A fila essencial mostra um representante por sequência. Aprovar este quadro não aprova os vizinhos. Isto não treina, não abre o teste e não controla o robô.</p>
+        </aside>
+      </section>
+
+      <nav>
+        <button id="anterior">← Anterior</button>
+        <span id="posicao">0 / 0</span>
+        <button id="proxima">Próxima →</button>
+      </nav>
+      <div id="mensagem" role="status"></div>
+    </main>
+    <script src="/revisao_verde.js"></script>
+  </body>
+</html>

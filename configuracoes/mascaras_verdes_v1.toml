@@ -1,0 +1,25 @@
+[mascaras_verdes]
+versao = 1
+
+[cor]
+# Faixa ampla de verde da camera provisoria. A selecao geometrica remove regioes espurias.
+matiz_minima = 32
+matiz_maxima = 100
+saturacao_minima = 35
+valor_minimo = 15
+excesso_verde_minimo = 12
+diferenca_verde_vermelho_minima = 3
+
+[morfologia]
+# Os marcadores ocupam dezenas de milhares de pixels em 640 x 480. A abertura forte elimina
+# reflexos e trilhas finas sem apagar o quadrado oficial.
+abertura_px = 15
+fechamento_px = 7
+area_componente_minima = 0.0008
+
+[confianca]
+penalidade_borda = 0.90
+limiar_prioridade = 0.70
+razao_ambiguidade = 0.65
+area_por_marcador_minima = 0.02
+area_por_marcador_maxima = 0.32

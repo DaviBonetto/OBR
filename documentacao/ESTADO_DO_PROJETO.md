@@ -4,11 +4,13 @@ Atualizado em: 28 de agosto de 2026.
 
 ## Fase atual
 
-**Fase Verde 1 capturada e auditada; próxima etapa: máscaras do dataset verde.**
+**Fase Verde 2 em revisão: máscaras candidatas geradas e teste preservado.**
 
 O painel verde foi validado no Raspberry Pi com a câmera USB provisória. As 4.125 imagens foram
-copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bruto permanece intacto,
-e o conjunto ainda não está liberado para treinamento.
+copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bootstrap processou
+2.356 imagens de treino/validação, gerou 1.674 candidatas normais, 324 negativas vazias por
+contrato e separou 358 casos prioritários. A fila essencial tem 75 representantes. O bruto e o
+teste permanecem intactos, e o conjunto ainda não está liberado para treinamento.
 
 ## Entregas da Fase 0
 
@@ -125,7 +127,10 @@ Nenhum motor sera usado nesta fase.
 - [x] congelar o bruto e verificar hashes, legibilidade, numeração e duplicatas;
 - [x] corrigir rótulos comprovadamente errados sem alterar os registros originais;
 - [x] separar treino, validação e teste por sessão e ambiente completos;
-- [ ] gerar e revisar as máscaras supervisionadas do verde;
+- [x] gerar máscaras candidatas do verde somente em treino e validação;
+- [x] separar reflexos e casos difíceis em uma fila essencial auditável;
+- [x] criar painel dedicado de revisão sem teste, treinamento ou motores;
+- [ ] revisar a fila essencial e consolidar as máscaras supervisionadas do verde;
 - [ ] treinar e validar o detector visual do verde;
 - [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
 
