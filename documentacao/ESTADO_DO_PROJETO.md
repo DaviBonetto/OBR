@@ -1,16 +1,17 @@
 # Estado do projeto
 
-Atualizado em: 28 de agosto de 2026.
+Atualizado em: 4 de setembro de 2026.
 
 ## Fase atual
 
-**Fase Verde 2 em revisão: máscaras candidatas geradas e teste preservado.**
+**Fase Verde 2 concluída para o treino inicial; teste preservado.**
 
 O painel verde foi validado no Raspberry Pi com a câmera USB provisória. As 4.125 imagens foram
 copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bootstrap processou
-2.356 imagens de treino/validação, gerou 1.674 candidatas normais, 324 negativas vazias por
-contrato e separou 358 casos prioritários. A fila essencial tem 75 representantes. O bruto e o
-teste permanecem intactos, e o conjunto ainda não está liberado para treinamento.
+2.356 imagens de treino/validação, gerou 1.689 candidatas normais, 324 negativas vazias por
+contrato e separou 343 casos prioritários. Os 80 representantes da fila essencial foram revisados;
+72 foram aprovados e oito rejeitados. A consolidação conservadora liberou 2.085 rótulos para o
+treino inicial e reteve 271 casos difíceis. O bruto e o teste permanecem intactos.
 
 ## Entregas da Fase 0
 
@@ -130,7 +131,10 @@ Nenhum motor sera usado nesta fase.
 - [x] gerar máscaras candidatas do verde somente em treino e validação;
 - [x] separar reflexos e casos difíceis em uma fila essencial auditável;
 - [x] criar painel dedicado de revisão sem teste, treinamento ou motores;
-- [ ] revisar a fila essencial e consolidar as máscaras supervisionadas do verde;
+- [x] revisar visualmente os 80 representantes da fila essencial;
+- [x] corrigir reflexos, buracos de brilho e falsos componentes sistemáticos;
+- [x] reproduzir as 2.356 máscaras com zero divergência;
+- [x] consolidar 2.085 rótulos verdes seguros e isolar 271 casos difíceis;
 - [ ] treinar e validar o detector visual do verde;
 - [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
 

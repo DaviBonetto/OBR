@@ -11,6 +11,11 @@ from obr_oficial.dados.consolidacao_rotulos import (
     ConsolidadorRotulos,
     ErroConsolidacaoRotulos,
 )
+from obr_oficial.dados.consolidacao_verde import (
+    ConfiguracaoConsolidacaoVerde,
+    ConsolidadorRotulosVerdes,
+    ErroConsolidacaoVerde,
+)
 from obr_oficial.dados.mascaras_classicas import (
     ConfiguracaoGeracaoMascaras,
     ErroGeracaoMascaras,
@@ -39,15 +44,18 @@ from obr_oficial.dados.referencia_centro import (
 
 __all__ = [
     "ConfiguracaoConsolidacaoRotulos",
+    "ConfiguracaoConsolidacaoVerde",
     "ConfiguracaoDataset",
     "ConfiguracaoGeracaoMascaras",
     "ConfiguracaoGeracaoMascarasVerdes",
     "ConfiguracaoMascarasVerdes",
     "ConsolidadorRotulos",
+    "ConsolidadorRotulosVerdes",
     "CuradorDatasetVerde",
     "DetectorCromaticoVerde",
     "ErroAuditoriaVerde",
     "ErroConsolidacaoRotulos",
+    "ErroConsolidacaoVerde",
     "ErroGeracaoMascaras",
     "ErroMascarasVerdes",
     "ErroPreparacaoDataset",

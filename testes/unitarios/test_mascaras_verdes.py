@@ -92,6 +92,41 @@ def test_mascara_cromatica_nao_muda_com_papel_antes_ou_depois() -> None:
     assert np.array_equal(antes.mascara, depois.mascara)
 
 
+def test_detector_prefere_marcador_claro_a_reflexo_escuro_maior() -> None:
+    detector = DetectorCromaticoVerde(_configuracao())
+    imagem = np.full((180, 220, 3), 225, dtype=np.uint8)
+    cv2.rectangle(imagem, (25, 15), (95, 80), (35, 180, 45), -1)
+    cv2.rectangle(imagem, (105, 90), (205, 175), (20, 70, 25), -1)
+
+    resultado = detector.processar(imagem, categoria="antes_esquerda", cruz_mista=False)
+
+    assert resultado.mascara[45, 55] == 255
+    assert resultado.mascara[130, 155] == 0
+
+
+def test_detector_suprime_reflexo_inferior_mais_regular() -> None:
+    detector = DetectorCromaticoVerde(_configuracao())
+    imagem = np.full((220, 240, 3), 225, dtype=np.uint8)
+    cv2.rectangle(imagem, (90, 0), (225, 68), (65, 170, 75), -1)
+    cv2.rectangle(imagem, (20, 115), (180, 219), (8, 105, 18), -1)
+
+    resultado = detector.processar(imagem, categoria="antes_esquerda", cruz_mista=False)
+
+    assert resultado.mascara[30, 160] == 255
+    assert resultado.mascara[165, 90] == 0
+    assert "componente_extra_ambiguo" in resultado.motivos_prioridade
+
+
+def test_detector_preenche_brilho_interno_na_silhueta_do_marcador() -> None:
+    detector = DetectorCromaticoVerde(_configuracao())
+    imagem = _imagem_com_quadrados(1)
+    cv2.rectangle(imagem, (38, 62), (51, 91), (250, 250, 250), -1)
+
+    resultado = detector.processar(imagem, categoria="antes_esquerda", cruz_mista=False)
+
+    assert resultado.mascara[75, 45] == 255
+
+
 def test_fila_essencial_escolhe_menor_confianca_por_sequencia() -> None:
     def registro(quadro: int, confianca: float) -> dict[str, object]:
         return {

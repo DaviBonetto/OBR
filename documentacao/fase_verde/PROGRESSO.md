@@ -1,10 +1,10 @@
 # Percepcao verde
 
-Atualizado em 28 de agosto de 2026.
+Atualizado em 4 de setembro de 2026.
 
 ## Estado
 
-**Fase Verde 2 em revisão. As máscaras candidatas e a fila essencial foram produzidas.**
+**Fase Verde 2 concluída para o treino inicial. A Fase Verde 3 é o próximo passo.**
 
 O painel foi executado no Raspberry Pi 5 com a câmera USB provisória. Cinco sessões físicas, em
 quatro locais, produziram 4.125 imagens. O snapshot bruto foi copiado e verificado por SHA-256;
@@ -12,10 +12,12 @@ nenhum PNG está ausente, ilegível, corrompido ou duplicado exatamente. A curad
 3.268 quadros sem alterar os originais. Consulte
 [`AUDITORIA_DATASET_V1.md`](AUDITORIA_DATASET_V1.md).
 
-O bootstrap V1 processou somente os 2.356 quadros de treino/validação, mantendo o teste fechado.
-Foram produzidas 1.674 candidatas normais, 324 máscaras negativas vazias por contrato e 358 casos
-prioritários. A revisão inicial foi reduzida a 75 representantes temporais sem aprovar
-automaticamente seus vizinhos. Consulte [`MASCARAS_VERDES_V1.md`](MASCARAS_VERDES_V1.md).
+O bootstrap processou somente os 2.356 quadros de treino/validação, mantendo o teste fechado.
+Após a correção de reflexos, brilho interno e seleção de componentes, foram produzidas 1.689
+candidatas normais, 324 máscaras negativas vazias por contrato e 343 casos prioritários. Os 80
+representantes temporais foram auditados em alta resolução: 72 foram aprovados e oito rejeitados.
+A consolidação liberou 2.085 rótulos seguros e reteve 271 casos para active learning, sem aprovação
+automática de vizinhos. Consulte [`MASCARAS_VERDES_V1.md`](MASCARAS_VERDES_V1.md).
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto
@@ -166,8 +168,8 @@ verde e sera descartado apenas pela geometria.
 
 ## Limites atuais
 
-As máscaras atuais são candidatas, não rótulos supervisionados consolidados. Ainda não existe
-modelo neural verde, rastreamento temporal ou benchmark do detector verde no Raspberry Pi. A
-câmera provisória foi usada na captura, mas essa evidência não prova generalização para a câmera
-oficial. A fila essencial precisa ser revisada antes de liberar o primeiro treinamento; essa
-fronteira é registrada no manifesto gerado.
+O conjunto inicial está liberado para treinamento, mas isso não transforma preanotações
+calibradas em verdade absoluta: os 271 casos difíceis continuam fora do treino e voltarão por
+active learning. Ainda não existe modelo neural verde, rastreamento temporal ou benchmark do
+detector verde no Raspberry Pi. A câmera provisória foi usada na captura, mas essa evidência não
+prova generalização para a câmera oficial. O teste final continua fechado.

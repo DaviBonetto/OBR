@@ -90,6 +90,7 @@ class ComponenteVerde:
     proporcao_quadrada: float
     centro_y_normalizado: float
     saturacao_mediana: float
+    valor_mediano: float
     excesso_verde_mediano: float
     bordas_tocadas: int
     pontuacao: float
@@ -184,11 +185,11 @@ class DetectorCromaticoVerde:
                 motivos_prioridade=("mascara_vazia_por_contrato",),
             )
 
-        ordenados = sorted(componentes, key=lambda item: item.pontuacao, reverse=True)
+        ordenados = _ordenar_componentes(componentes, esperada)
         selecionados = tuple(ordenados[:esperada])
         mascara = np.zeros(bruta.shape, dtype=np.uint8)
         for componente in selecionados:
-            mascara[rotulos == componente.rotulo] = 255
+            _preencher_silhueta_convexa(mascara, rotulos, componente.rotulo)
         area_mascara = float(np.count_nonzero(mascara) / mascara.size)
         confianca, motivos = self._avaliar(
             selecionados,
@@ -239,6 +240,7 @@ class DetectorCromaticoVerde:
         area_imagem = float(mascara.size)
         hsv = cv2.cvtColor(imagem, cv2.COLOR_BGR2HSV)
         saturacao = hsv[..., 1]
+        valor = hsv[..., 2]
         azul, verde, vermelho = cv2.split(imagem.astype(np.int16))
         excesso_verde = 2 * verde - vermelho - azul
         componentes: list[ComponenteVerde] = []
@@ -259,13 +261,16 @@ class DetectorCromaticoVerde:
             )
             pixels = rotulos == rotulo
             saturacao_mediana = float(np.median(saturacao[pixels]))
+            valor_mediano = float(np.median(valor[pixels]))
             excesso_verde_mediano = float(np.median(excesso_verde[pixels]))
             pureza_cor = 0.25 + 0.75 * saturacao_mediana / 255.0
+            evidencia_luminosa = 0.20 + 0.80 * valor_mediano / 255.0
             pontuacao = (
                 area_normalizada
                 * (0.35 + 0.65 * retangularidade)
                 * (0.55 + 0.45 * proporcao_quadrada)
                 * pureza_cor
+                * evidencia_luminosa
                 * self.configuracao.penalidade_borda**bordas
             )
             componentes.append(
@@ -281,6 +286,7 @@ class DetectorCromaticoVerde:
                     proporcao_quadrada=round(proporcao_quadrada, 6),
                     centro_y_normalizado=round((y + altura / 2.0) / altura_imagem, 6),
                     saturacao_mediana=round(saturacao_mediana, 3),
+                    valor_mediano=round(valor_mediano, 3),
                     excesso_verde_mediano=round(excesso_verde_mediano, 3),
                     bordas_tocadas=bordas,
                     pontuacao=round(pontuacao, 8),
@@ -482,11 +488,51 @@ def _quantidade_marcadores(categoria: str, cruz_mista: bool) -> int:
     return quantidade + int(cruz_mista)
 
 
+def _ordenar_componentes(
+    componentes: list[ComponenteVerde],
+    quantidade_esperada: int,
+) -> list[ComponenteVerde]:
+    """Suprime uma copia refletida abaixo quando existe um unico marcador fisico esperado."""
+
+    ordenados = sorted(componentes, key=lambda item: item.pontuacao, reverse=True)
+    if quantidade_esperada != 1 or len(ordenados) < 2:
+        return ordenados
+    melhor = ordenados[0]
+    superiores_plausiveis = [
+        item
+        for item in ordenados[1:]
+        if item.centro_y_normalizado + 0.20 < melhor.centro_y_normalizado
+        and item.area_normalizada >= max(0.01, 0.45 * melhor.area_normalizada)
+        and item.pontuacao >= 0.45 * melhor.pontuacao
+        and item.valor_mediano >= 0.80 * melhor.valor_mediano
+    ]
+    if not superiores_plausiveis:
+        return ordenados
+    fisico = max(superiores_plausiveis, key=lambda item: item.pontuacao)
+    return [fisico, *(item for item in ordenados if item is not fisico)]
+
+
 def _gravar_png(caminho: Path, imagem: NDArray[np.uint8]) -> None:
     sucesso, codificada = cv2.imencode(".png", imagem)
     if not sucesso:
         raise ErroMascarasVerdes(f"Falha ao codificar mascara: {caminho}")
     caminho.write_bytes(codificada.tobytes())
+
+
+def _preencher_silhueta_convexa(
+    destino: NDArray[np.uint8],
+    rotulos: NDArray[np.int32],
+    rotulo: int,
+) -> None:
+    """Preenche brilhos e sombras internos sem extrapolar o casco dos pixels observados."""
+
+    componente = np.where(rotulos == rotulo, 255, 0).astype(np.uint8)
+    contornos, _ = cv2.findContours(componente, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contornos:
+        return
+    pontos = np.concatenate(contornos, axis=0)
+    casco = cv2.convexHull(pontos)
+    cv2.fillConvexPoly(destino, casco, 255, lineType=cv2.LINE_8)
 
 
 def _marcar_fila_revisao_essencial(registros: list[dict[str, Any]]) -> int:
