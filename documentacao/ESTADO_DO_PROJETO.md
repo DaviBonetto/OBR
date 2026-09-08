@@ -4,14 +4,13 @@ Atualizado em: 8 de setembro de 2026.
 
 ## Fase atual
 
-**Fase Verde 3 preparada para a T4; teste preservado.**
+**Fase Verde 3 auditada; LR-ASPP candidato pronto para a Fase Verde 4.**
 
-O painel verde foi validado no Raspberry Pi com a câmera USB provisória. As 4.125 imagens foram
-copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bootstrap processou
-2.356 imagens de treino/validação, gerou 1.689 candidatas normais, 324 negativas vazias por
-contrato e separou 343 casos prioritários. Os 80 representantes da fila essencial foram revisados;
-72 foram aprovados e oito rejeitados. A consolidação conservadora liberou 2.085 rótulos para o
-treino inicial e reteve 271 casos difíceis. O bruto e o teste permanecem intactos.
+O resultado da T4 foi auditado por hash, conteúdo, métricas e inspeção visual. A curadoria V2
+corrigiu, por sobreposição, os quadros 158 a 327 da sessão 2/lugar 3, registrados sem a opção de
+cruz mista apesar de conterem a cruz. O treino permaneceu idêntico ao da T4; a validação corrigida
+possui 787 amostras. O LR-ASPP passou pelos quatro gates no limiar `0,75`, foi exportado para ONNX
+e obteve contagem correta de marcadores em 784/787 quadros. O bruto e o teste permanecem intactos.
 
 ## Entregas da Fase 0
 
@@ -137,9 +136,12 @@ Nenhum motor sera usado nesta fase.
 - [x] consolidar 2.085 rótulos verdes seguros e isolar 271 casos difíceis;
 - [x] exportar e reproduzir o pacote determinístico da Fase Verde 3;
 - [x] preparar configuração, comparação de arquiteturas, calibração e notebook Colab;
-- [ ] treinar e validar o detector visual do verde;
+- [x] treinar LinhaNet e LR-ASPP na T4 e auditar o pacote recebido;
+- [x] corrigir a validação V2 sem alterar o bruto ou o treino usado na T4;
+- [x] calibrar o LR-ASPP no limiar 0,75 e exportar o candidato para ONNX;
+- [x] verificar paridade PyTorch/ONNX e contagem de instâncias na validação;
 - [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
 
-O detalhamento está em `documentacao/fase_verde/PROGRESSO.md`. As capturas cobrem variação física
-de local, pose e luz, mas ainda não provam a precisão de um detector, generalização para a câmera
-oficial ou latência física.
+O detalhamento está em `documentacao/fase_verde/PROGRESSO.md` e a evidência da T4 em
+`documentacao/fase_verde/AUDITORIA_T4_V1.md`. O candidato ainda não prova generalização para a
+câmera oficial, decisão geométrica final ou latência física no Raspberry Pi 5.

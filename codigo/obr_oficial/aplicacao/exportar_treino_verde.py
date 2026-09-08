@@ -20,17 +20,17 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--rotulos",
         type=Path,
-        default=raiz / "dados" / "rotulados" / "verde_v1_rotulos_iniciais",
+        default=raiz / "dados" / "rotulados" / "verde_v2_rotulos_iniciais",
     )
     parser.add_argument(
         "--saida",
         type=Path,
-        default=raiz / "artefatos" / "fase_verde_3_dataset_v1.zip",
+        default=raiz / "artefatos" / "fase_verde_3_dataset_v2.zip",
     )
     parser.add_argument(
         "--manifesto-publico",
         type=Path,
-        default=raiz / "dados" / "manifestos" / "fase_verde_3_dataset_v1.json",
+        default=raiz / "dados" / "manifestos" / "fase_verde_3_dataset_v2.json",
     )
     opcoes = parser.parse_args(argumentos)
     resultado = ExportadorDatasetTreinamento(
@@ -40,11 +40,14 @@ def main(argumentos: list[str] | None = None) -> int:
             arquivo_saida=opcoes.saida.resolve(),
         )
     ).exportar()
+    manifesto_rotulos = json.loads((opcoes.rotulos / "manifesto.json").read_text(encoding="utf-8"))
     manifesto = {
         **resultado,
         "fase": "verde_3",
         "tarefa": "segmentacao_binaria_de_marcadores_verdes",
-        "casos_active_learning_fora_do_pacote": 271,
+        "casos_active_learning_fora_do_pacote": manifesto_rotulos["quantidades"][
+            "fila_active_learning"
+        ],
     }
     opcoes.manifesto_publico.parent.mkdir(parents=True, exist_ok=True)
     opcoes.manifesto_publico.write_text(

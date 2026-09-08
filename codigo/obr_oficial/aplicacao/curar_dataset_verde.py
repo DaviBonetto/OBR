@@ -20,12 +20,12 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--plano",
         type=Path,
-        default=raiz / "dados" / "manifestos" / "curadoria_verde_v1.json",
+        default=raiz / "dados" / "manifestos" / "curadoria_verde_v2.json",
     )
     parser.add_argument(
         "--saida",
         type=Path,
-        default=raiz / "dados" / "processados" / "verde_v1",
+        default=raiz / "dados" / "processados" / "verde_v2",
     )
     opcoes = parser.parse_args(argumentos)
 

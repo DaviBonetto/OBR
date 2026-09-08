@@ -8,7 +8,7 @@ modelos e a implantacao no Raspberry Pi 5.
 
 ## Estado atual
 
-**Linha congelada e Fase Verde 2 pronta para o primeiro treinamento neural.**
+**Linha congelada e detector verde candidato pronto para a Fase Verde 4.**
 
 A Fase 1 foi concluida com camera USB substituivel, painel de captura e 29 sessoes fisicas.
 A Fase 2 foi executada com copia de seguranca, verificacao de hashes, curadoria deterministica e
@@ -23,13 +23,13 @@ Motores e mecanismos de resgate continuam sem acionamento.
 O novo contrato de pista processa linha e verde no mesmo quadro. Quando nao ha verde valido, a
 decisao verde e neutra e o seguimento da linha continua normalmente. Consulte
 [`documentacao/fase_verde/PROGRESSO.md`](documentacao/fase_verde/PROGRESSO.md).
-As 4.125 capturas verdes foram preservadas em um snapshot com SHA-256, verificadas pixel a
-pixel e curadas por sobreposição de metadados. O índice V1 contém 3.268 quadros selecionados e
-separados por ambiente. O bootstrap corrigido gerou 2.356 máscaras somente em treino/validação.
-Os 80 representantes difíceis foram auditados em alta resolução, 72 aprovados e oito rejeitados.
-A consolidação conservadora liberou 2.085 rótulos iniciais e manteve 271 casos fora do treino para
-active learning. O pacote determinístico e o notebook da Fase Verde 3 estão prontos para a T4. O
-teste segue fechado.
+As 4.125 capturas verdes foram preservadas em um snapshot com SHA-256 e curadas por sobreposição
+de metadados. A auditoria da T4 encontrou o segundo lote de cruz mista registrado com a opção
+desativada e gerou o dataset V2 sem alterar os originais. Como as 1.302 amostras de treino não
+mudaram, o LR-ASPP já treinado foi reavaliado na validação corrigida: no limiar `0,75`, atingiu
+Dice `0,95067`, precisão `0,97078`, recall `0,93138` e zero falso positivo nos 142 negativos. O
+ONNX passou pela paridade numérica e foi promovido apenas a candidato da Fase Verde 4. Geometria,
+Raspberry Pi 5, câmera oficial e teste fechado continuam pendentes.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -102,8 +102,8 @@ uv sync --extra dados
 uv run obr-curar-dataset-verde
 ```
 
-O plano de correções é versionado em
-[`dados/manifestos/curadoria_verde_v1.json`](dados/manifestos/curadoria_verde_v1.json), e o
+O plano de correções atual é versionado em
+[`dados/manifestos/curadoria_verde_v2.json`](dados/manifestos/curadoria_verde_v2.json), e o
 relatório completo está em
 [`documentacao/fase_verde/AUDITORIA_DATASET_V1.md`](documentacao/fase_verde/AUDITORIA_DATASET_V1.md).
 
@@ -126,6 +126,8 @@ uv run obr-exportar-treino-verde
 
 O notebook e os gates estão documentados em
 [`documentacao/fase_verde/TREINAMENTO_VERDE_V1.md`](documentacao/fase_verde/TREINAMENTO_VERDE_V1.md).
+A auditoria do resultado real, a correção V2 e a promoção do candidato estão em
+[`documentacao/fase_verde/AUDITORIA_T4_V1.md`](documentacao/fase_verde/AUDITORIA_T4_V1.md).
 
 Para preparar a versao congelada do dataset sem alterar os originais:
 

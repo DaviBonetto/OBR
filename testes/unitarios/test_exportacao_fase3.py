@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import pytest
 
+from obr_oficial.aplicacao.exportar_treino_verde import main as exportar_treino_verde
 from obr_oficial.treinamento.exportacao_dataset import (
     ConfiguracaoExportacaoTreinamento,
     ErroExportacaoTreinamento,
@@ -137,3 +138,30 @@ def test_recusa_teste_e_saida_existente(tmp_path: Path) -> None:
     saida.write_bytes(b"existente")
     with pytest.raises(ErroExportacaoTreinamento, match="ja existe"):
         exportador.exportar()
+
+
+def test_manifesto_verde_publica_fila_active_learning_real(tmp_path: Path) -> None:
+    brutos, rotulos = _preparar(tmp_path)
+    (rotulos / "manifesto.json").write_text(
+        json.dumps({"quantidades": {"fila_active_learning": 7}}),
+        encoding="utf-8",
+    )
+    saida = tmp_path / "verde.zip"
+    manifesto_publico = tmp_path / "verde.json"
+
+    codigo = exportar_treino_verde(
+        [
+            "--brutos",
+            str(brutos),
+            "--rotulos",
+            str(rotulos),
+            "--saida",
+            str(saida),
+            "--manifesto-publico",
+            str(manifesto_publico),
+        ]
+    )
+
+    assert codigo == 0
+    manifesto = json.loads(manifesto_publico.read_text(encoding="utf-8"))
+    assert manifesto["casos_active_learning_fora_do_pacote"] == 7

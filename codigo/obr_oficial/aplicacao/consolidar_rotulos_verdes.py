@@ -19,12 +19,12 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--candidatas",
         type=Path,
-        default=raiz / "dados" / "rotulados" / "verde_v1_candidatas",
+        default=raiz / "dados" / "rotulados" / "verde_v2_candidatas",
     )
     parser.add_argument(
         "--saida",
         type=Path,
-        default=raiz / "dados" / "rotulados" / "verde_v1_rotulos_iniciais",
+        default=raiz / "dados" / "rotulados" / "verde_v2_rotulos_iniciais",
     )
     opcoes = parser.parse_args(argumentos)
     manifesto = ConsolidadorRotulosVerdes(

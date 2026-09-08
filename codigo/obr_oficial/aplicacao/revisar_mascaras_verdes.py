@@ -25,7 +25,7 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--candidatas",
         type=Path,
-        default=raiz / "dados" / "rotulados" / "verde_v1_candidatas",
+        default=raiz / "dados" / "rotulados" / "verde_v2_candidatas",
     )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--porta", type=int, default=8094)

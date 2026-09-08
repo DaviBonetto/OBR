@@ -76,9 +76,8 @@ O dataset verde auditado é exportado separadamente para não misturar os rótul
 uv run obr-exportar-treino-verde
 ```
 
-O pacote local `artefatos/fase_verde_3_dataset_v1.zip` contém 2.085 pares de treino/validação,
-preserva as cinco categorias como metadados e mantém 271 casos difíceis fora do treinamento. O
-notebook `treinamento/fase_verde_3/treinar_verde_no_colab.ipynb` compara LinhaNet e LR-ASPP em
-quadro inteiro, calibra o limiar somente na validação e baixa
-`OBR_VERDE_FASE3_RESULTADOS_T4.zip`. Consulte
-`documentacao/fase_verde/TREINAMENTO_VERDE_V1.md` para hashes e gates.
+O resultado da T4 foi auditado e a correção de metadados V2 preservou integralmente as 1.302
+amostras de treino. O pacote `artefatos/fase_verde_3_dataset_v2.zip` contém 2.089 pares, mantém
+267 casos difíceis fora do treinamento e não inclui teste. O LR-ASPP passou os gates na validação
+V2 no limiar `0,75` e foi exportado como candidato ONNX. Consulte
+`documentacao/fase_verde/AUDITORIA_T4_V1.md` para hashes, métricas e limites.

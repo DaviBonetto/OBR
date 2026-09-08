@@ -1,0 +1,73 @@
+{
+  "ambiente_exportacao": {
+    "plataforma": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch": "2.13.0+cpu"
+  },
+  "arquitetura": "lraspp_mobilenet_v3_large",
+  "auditoria": {
+    "benchmark_raspberry_pi_5_executado": false,
+    "motores_acionados": false,
+    "teste_aberto": false
+  },
+  "benchmark_onnx": {
+    "escopo": "computador_local; nao_e_benchmark_do_raspberry_pi_5",
+    "iteracoes": 50,
+    "media_ms": 10.466852001845837,
+    "p50_ms": 10.524249999434687,
+    "p95_ms": 10.83012001181487
+  },
+  "entrada": {
+    "dimensoes": [
+      1,
+      3,
+      240,
+      320
+    ],
+    "formato": "NCHW_RGB_normalizado_imagenet",
+    "roi_y": 0.0
+  },
+  "estado": "candidato_fase_verde_4; geometria_e_raspberry_pendentes",
+  "gates_validacao": {
+    "aprovado": true,
+    "dice_minimo": 0.95,
+    "fpr_significativo_maximo": 0.05,
+    "precisao_minima": 0.97,
+    "recall_minimo": 0.93
+  },
+  "onnx": {
+    "arquivo": "modelo.onnx",
+    "opset": 18,
+    "paridade": {
+      "amostras": 9,
+      "aprovado": true,
+      "concordancia_mascaras": 1.0,
+      "diferenca_absoluta_maxima_logits": 2.5272369384765625e-05,
+      "diferenca_absoluta_media_logits": 3.013564158512357e-06,
+      "gate_concordancia_mascaras": 0.999,
+      "gate_diferenca_maxima": 0.001
+    },
+    "sha256": "3970535c47d9b599bdf730bd00559e4b91a6394ca66c7764c6c47017fdcbd451"
+  },
+  "origem": {
+    "checkpoint": "melhor.pt",
+    "sha256_checkpoint": "c76a6cc67180cd4753d5d52b48868c7f94b62ff3513427cf5e647d8699f04ae4",
+    "sha256_dataset_v2": "473ae40feb5614dd686893d584c3f47df4c570aff391759180d098162d18877a",
+    "sha256_pacote_resultados_t4": "8030558bb818f184bb2d7dbaa883993abba1e09b94e171740a568258695f2c8c"
+  },
+  "pos_processamento": {
+    "limiar": 0.75,
+    "sigmoid": true
+  },
+  "tarefa": "segmentacao_binaria_de_marcadores_verdes",
+  "validacao_limiar_calibrado": {
+    "area_media_prevista_negativos": 0.0,
+    "dice": 0.9506710655506001,
+    "iou": 0.9059800357544059,
+    "precisao": 0.9707822702633648,
+    "recall": 0.9313762161075244,
+    "taxa_falso_positivo_negativos": 0.0,
+    "taxa_falso_positivo_negativos_significativos": 0.0
+  },
+  "versao_manifesto": 1
+}

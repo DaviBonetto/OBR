@@ -28,7 +28,7 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=raiz / "dados" / "processados" / "verde_v1",
+        default=raiz / "dados" / "processados" / "verde_v2",
     )
     parser.add_argument(
         "--configuracao",
@@ -38,7 +38,7 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument(
         "--saida",
         type=Path,
-        default=raiz / "dados" / "rotulados" / "verde_v1_candidatas",
+        default=raiz / "dados" / "rotulados" / "verde_v2_candidatas",
     )
     opcoes = parser.parse_args(argumentos)
     detector = DetectorCromaticoVerde(carregar_configuracao_mascaras_verdes(opcoes.configuracao))

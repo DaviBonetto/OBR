@@ -1,0 +1,19 @@
+{
+  "arquivo": "fase_verde_3_dataset_v2.zip",
+  "bytes": 502793213,
+  "casos_active_learning_fora_do_pacote": 267,
+  "divisao_teste_incluida": false,
+  "fase": "verde_3",
+  "quantidades": {
+    "total": 2089,
+    "treino": 1302,
+    "validacao": 787
+  },
+  "sha256_arquivo": "473ae40feb5614dd686893d584c3f47df4c570aff391759180d098162d18877a",
+  "sha256_indice": "5b6a1f7528c53365e6b8d8f81e268672b3e01880e5197ea302f75053a29545d2",
+  "sha256_manifesto_rotulos": "a85948b230a4271deba778aefad4440e8d36a6aff58c955fcf22b5d3c09d7f95",
+  "tarefa": "segmentacao_binaria_de_marcadores_verdes",
+  "tipo": "dataset_segmentacao_fase3_inicial",
+  "uso": "treino_inicial_e_active_learning; nao_e_treino_final",
+  "versao_manifesto": 1
+}

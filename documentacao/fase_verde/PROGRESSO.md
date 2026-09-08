@@ -4,7 +4,7 @@ Atualizado em 8 de setembro de 2026.
 
 ## Estado
 
-**Fase Verde 3 preparada. O próximo passo é executar o treinamento na T4.**
+**Fase Verde 3 auditada. O próximo passo é integrar o candidato na Fase Verde 4.**
 
 O painel foi executado no Raspberry Pi 5 com a câmera USB provisória. Cinco sessões físicas, em
 quatro locais, produziram 4.125 imagens. O snapshot bruto foi copiado e verificado por SHA-256;
@@ -23,6 +23,12 @@ O pacote transportável de 501.481.335 bytes foi reproduzido com SHA-256
 `c2d1badc4dd8224c06a186dad7ce5264ccb7b3996917b06bd1c3332e649042ec`. O notebook compara
 LinhaNet e LR-ASPP, usa o quadro inteiro e calibra o limiar somente na validação. Consulte
 [`TREINAMENTO_VERDE_V1.md`](TREINAMENTO_VERDE_V1.md).
+
+A auditoria do resultado T4 detectou uma segunda inversão de `cruz_mista` nos quadros 158 a 327
+da sessão 2/lugar 3. A curadoria V2 corrigiu somente os metadados derivados; as 1.302 amostras de
+treino permaneceram idênticas. Na validação V2, o LR-ASPP passou pelos quatro gates no limiar
+`0,75` e foi exportado para ONNX. A contagem de marcadores ficou correta em 784 de 787 quadros.
+Consulte [`AUDITORIA_T4_V1.md`](AUDITORIA_T4_V1.md).
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto
@@ -173,8 +179,8 @@ verde e sera descartado apenas pela geometria.
 
 ## Limites atuais
 
-O conjunto inicial está liberado para treinamento, mas isso não transforma preanotações
-calibradas em verdade absoluta: os 271 casos difíceis continuam fora do treino e voltarão por
-active learning. Ainda não existe modelo neural verde, rastreamento temporal ou benchmark do
-detector verde no Raspberry Pi. A câmera provisória foi usada na captura, mas essa evidência não
-prova generalização para a câmera oficial. O teste final continua fechado.
+O LR-ASPP é um candidato neural, não o detector final. Os 267 casos difíceis continuam fora do
+treino para active learning. Três dos 787 quadros de validação ainda exigem tratamento geométrico
+de componentes fundidos, partidos ou espúrios. Ainda não existem integração simultânea real com a
+linha, rastreamento temporal nem benchmark no Raspberry Pi. A câmera provisória foi usada na
+captura, mas isso não prova generalização para a câmera oficial. O teste final continua fechado.

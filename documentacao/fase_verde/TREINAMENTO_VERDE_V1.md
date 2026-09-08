@@ -4,9 +4,10 @@ Atualizado em 8 de setembro de 2026.
 
 ## Estado
 
-A Fase Verde 3 está preparada para execução na T4. Ainda não existe um modelo neural verde
-aprovado: esta entrega contém o pacote auditado, a configuração, o notebook e os gates que serão
-usados para escolher um candidato somente pela validação.
+O treinamento foi concluído na T4 e o resultado foi auditado. Uma inconsistência conhecida de
+metadados na validação exigiu a curadoria V2; como o treino não mudou, o checkpoint LR-ASPP foi
+reavaliado sem repetir o treinamento. Ele é agora candidato da Fase Verde 4, não modelo final.
+Consulte [`AUDITORIA_T4_V1.md`](AUDITORIA_T4_V1.md).
 
 ## Dataset transportável
 
