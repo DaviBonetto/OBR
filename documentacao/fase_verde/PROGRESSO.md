@@ -1,10 +1,10 @@
 # Percepcao verde
 
-Atualizado em 4 de setembro de 2026.
+Atualizado em 8 de setembro de 2026.
 
 ## Estado
 
-**Fase Verde 2 concluída para o treino inicial. A Fase Verde 3 é o próximo passo.**
+**Fase Verde 3 preparada. O próximo passo é executar o treinamento na T4.**
 
 O painel foi executado no Raspberry Pi 5 com a câmera USB provisória. Cinco sessões físicas, em
 quatro locais, produziram 4.125 imagens. O snapshot bruto foi copiado e verificado por SHA-256;
@@ -18,6 +18,11 @@ candidatas normais, 324 máscaras negativas vazias por contrato e 343 casos prio
 representantes temporais foram auditados em alta resolução: 72 foram aprovados e oito rejeitados.
 A consolidação liberou 2.085 rótulos seguros e reteve 271 casos para active learning, sem aprovação
 automática de vizinhos. Consulte [`MASCARAS_VERDES_V1.md`](MASCARAS_VERDES_V1.md).
+
+O pacote transportável de 501.481.335 bytes foi reproduzido com SHA-256
+`c2d1badc4dd8224c06a186dad7ce5264ccb7b3996917b06bd1c3332e649042ec`. O notebook compara
+LinhaNet e LR-ASPP, usa o quadro inteiro e calibra o limiar somente na validação. Consulte
+[`TREINAMENTO_VERDE_V1.md`](TREINAMENTO_VERDE_V1.md).
 
 Esta frente amplia a percepcao da pista sem substituir, pausar ou retreinar o detector de linha.
 O modelo e a configuracao aprovados da linha foram congelados no manifesto

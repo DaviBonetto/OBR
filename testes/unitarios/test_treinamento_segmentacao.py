@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 import cv2
@@ -15,6 +16,7 @@ from obr_oficial.treinamento.segmentacao import (
     LinhaNet,
     PerdaBceDice,
     SegmentadorLRASPP,
+    avaliar_limiares_checkpoint,
     carregar_indice_dataset,
 )
 
@@ -151,3 +153,28 @@ def test_metrica_distingue_qualquer_pixel_de_falso_positivo_significativo() -> N
 
     assert metricas["taxa_falso_positivo_negativos"] == pytest.approx(1.0)
     assert metricas["taxa_falso_positivo_negativos_significativos"] == pytest.approx(0.5)
+
+
+def test_avalia_grade_de_limiares_sem_teste(tmp_path: Path) -> None:
+    raiz = _dataset(tmp_path)
+    registro_treino = json.loads((raiz / "indice.jsonl").read_text())
+    registro_validacao = {**registro_treino, "id_amostra": "amostra:2", "divisao": "validacao"}
+    (raiz / "indice.jsonl").write_text(
+        json.dumps(registro_treino) + "\n" + json.dumps(registro_validacao) + "\n",
+        encoding="utf-8",
+    )
+    checkpoint = tmp_path / "modelo.pt"
+    torch.save(
+        {
+            "arquitetura": "linhanet",
+            "estado_modelo": LinhaNet().state_dict(),
+            "configuracao": asdict(_configuracao()),
+        },
+        checkpoint,
+    )
+
+    avaliacao = avaliar_limiares_checkpoint(raiz, checkpoint, [0.4, 0.6])
+
+    assert avaliacao["teste_aberto"] is False
+    assert [item["limiar"] for item in avaliacao["resultados"]] == [0.4, 0.6]
+    assert len(avaliacao["sha256_checkpoint"]) == 64

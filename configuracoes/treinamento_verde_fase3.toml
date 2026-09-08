@@ -1,0 +1,26 @@
+# Segmentacao verde V1: quadro inteiro, hard negatives e teste fechado.
+[entrada]
+largura = 320
+altura = 240
+roi_y = 0.0
+
+[treinamento]
+epocas = 100
+lote = 32
+taxa_aprendizado = 0.0002
+decaimento_peso = 0.0001
+paciencia = 18
+trabalhadores = 2
+semente = 20260908
+limiar = 0.50
+aumentos_fortes = true
+area_minima_negativo = 0.002
+peso_fpr_selecao = 0.40
+peso_amostra_negativa = 3.0
+
+[perda]
+peso_bce = 0.35
+peso_dice = 0.65
+peso_presenca = 0.35
+peso_negativo_presenca = 4.0
+fracao_topk_presenca = 0.002

@@ -1,10 +1,10 @@
 # Estado do projeto
 
-Atualizado em: 4 de setembro de 2026.
+Atualizado em: 8 de setembro de 2026.
 
 ## Fase atual
 
-**Fase Verde 2 concluída para o treino inicial; teste preservado.**
+**Fase Verde 3 preparada para a T4; teste preservado.**
 
 O painel verde foi validado no Raspberry Pi com a câmera USB provisória. As 4.125 imagens foram
 copiadas, congeladas por hash e curadas em um índice de 3.268 quadros. O bootstrap processou
@@ -135,6 +135,8 @@ Nenhum motor sera usado nesta fase.
 - [x] corrigir reflexos, buracos de brilho e falsos componentes sistemáticos;
 - [x] reproduzir as 2.356 máscaras com zero divergência;
 - [x] consolidar 2.085 rótulos verdes seguros e isolar 271 casos difíceis;
+- [x] exportar e reproduzir o pacote determinístico da Fase Verde 3;
+- [x] preparar configuração, comparação de arquiteturas, calibração e notebook Colab;
 - [ ] treinar e validar o detector visual do verde;
 - [ ] integrar o detector visual e medir a percepcao completa no Raspberry Pi 5.
 

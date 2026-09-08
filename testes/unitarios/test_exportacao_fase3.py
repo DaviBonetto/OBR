@@ -89,9 +89,40 @@ def test_exportacao_deterministica(tmp_path: Path) -> None:
         ConfiguracaoExportacaoTreinamento(brutos, rotulos, segunda)
     ).exportar()
 
-    assert hashlib.sha256(primeira.read_bytes()).digest() == hashlib.sha256(
-        segunda.read_bytes()
-    ).digest()
+    assert (
+        hashlib.sha256(primeira.read_bytes()).digest()
+        == hashlib.sha256(segunda.read_bytes()).digest()
+    )
+
+
+def test_exporta_semantica_verde_sem_campos_da_linha(tmp_path: Path) -> None:
+    brutos, rotulos = _preparar(tmp_path)
+    caminho = rotulos / "anotacoes.jsonl"
+    anotacoes = [json.loads(linha) for linha in caminho.read_text().splitlines()]
+    anotacoes[0].pop("tipo_quadro")
+    anotacoes[0].pop("trajetoria_desejada")
+    anotacoes[0].update(
+        {
+            "categoria_verde": "antes_esquerda",
+            "cruz_mista": True,
+            "decisao_verde_esperada": "virar_esquerda",
+        }
+    )
+    caminho.write_text(
+        "".join(json.dumps(item) + "\n" for item in anotacoes),
+        encoding="utf-8",
+    )
+    saida = tmp_path / "verde.zip"
+
+    ExportadorDatasetTreinamento(
+        ConfiguracaoExportacaoTreinamento(brutos, rotulos, saida)
+    ).exportar()
+
+    with zipfile.ZipFile(saida) as arquivo:
+        indice = json.loads(arquivo.read("indice.jsonl"))
+    assert indice["categoria_verde"] == "antes_esquerda"
+    assert indice["cruz_mista"] is True
+    assert "tipo_quadro" not in indice
 
 
 def test_recusa_teste_e_saida_existente(tmp_path: Path) -> None:

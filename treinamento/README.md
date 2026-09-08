@@ -67,3 +67,18 @@ O pacote resultante e `artefatos/fase3_dataset_v2.zip`. Seu tamanho e hash ficam
 O teste fechado continua fora do pacote e da selecao do modelo. A Fase 4 comeca somente depois
 que um checkpoint V2 passar pelos gates e pela auditoria visual. O benchmark no Raspberry Pi 5
 pertence a Fase 5 e e obrigatorio antes de promover o candidato a modelo final.
+
+## Fase Verde 3
+
+O dataset verde auditado é exportado separadamente para não misturar os rótulos da linha:
+
+```powershell
+uv run obr-exportar-treino-verde
+```
+
+O pacote local `artefatos/fase_verde_3_dataset_v1.zip` contém 2.085 pares de treino/validação,
+preserva as cinco categorias como metadados e mantém 271 casos difíceis fora do treinamento. O
+notebook `treinamento/fase_verde_3/treinar_verde_no_colab.ipynb` compara LinhaNet e LR-ASPP em
+quadro inteiro, calibra o limiar somente na validação e baixa
+`OBR_VERDE_FASE3_RESULTADOS_T4.zip`. Consulte
+`documentacao/fase_verde/TREINAMENTO_VERDE_V1.md` para hashes e gates.

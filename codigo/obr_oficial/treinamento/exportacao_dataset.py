@@ -81,18 +81,28 @@ class ExportadorDatasetTreinamento:
             imagem_zip = (PurePosixPath("imagens") / origem_relativa).as_posix()
             mascara_zip = (PurePosixPath("rotulos") / mascara_relativa).as_posix()
             arquivos.extend(((imagem_zip, imagem), (mascara_zip, mascara)))
-            registro = {
+            registro: dict[str, object] = {
                 "versao": 1,
                 "id_amostra": anotacao["id_amostra"],
                 "divisao": divisao,
-                "tipo_quadro": anotacao["tipo_quadro"],
-                "trajetoria_desejada": anotacao["trajetoria_desejada"],
                 "imagem": imagem_zip,
                 "mascara": mascara_zip,
                 "sha256_imagem": _sha256(imagem),
                 "sha256_mascara": _sha256(mascara),
                 "estado_rotulo": anotacao["estado_rotulo"],
             }
+            campos_semanticos = (
+                "tipo_quadro",
+                "trajetoria_desejada",
+                "categoria_verde",
+                "cruz_mista",
+                "decisao_verde_esperada",
+            )
+            for campo in campos_semanticos:
+                if campo in anotacao:
+                    registro[campo] = anotacao[campo]
+            if "tipo_quadro" not in registro and "categoria_verde" not in registro:
+                raise ErroExportacaoTreinamento(f"Semantica ausente para {anotacao['id_amostra']}")
             registros_saida.append(json.dumps(registro, ensure_ascii=False, sort_keys=True))
             por_divisao[divisao] += 1
 

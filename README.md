@@ -28,7 +28,8 @@ pixel e curadas por sobreposição de metadados. O índice V1 contém 3.268 quad
 separados por ambiente. O bootstrap corrigido gerou 2.356 máscaras somente em treino/validação.
 Os 80 representantes difíceis foram auditados em alta resolução, 72 aprovados e oito rejeitados.
 A consolidação conservadora liberou 2.085 rótulos iniciais e manteve 271 casos fora do treino para
-active learning. O teste segue fechado.
+active learning. O pacote determinístico e o notebook da Fase Verde 3 estão prontos para a T4. O
+teste segue fechado.
 
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
@@ -116,6 +117,15 @@ uv run obr-consolidar-rotulos-verdes
 
 Os critérios, hashes e limites dessa saída estão em
 [`documentacao/fase_verde/MASCARAS_VERDES_V1.md`](documentacao/fase_verde/MASCARAS_VERDES_V1.md).
+
+Para reproduzir o pacote do treinamento verde:
+
+```powershell
+uv run obr-exportar-treino-verde
+```
+
+O notebook e os gates estão documentados em
+[`documentacao/fase_verde/TREINAMENTO_VERDE_V1.md`](documentacao/fase_verde/TREINAMENTO_VERDE_V1.md).
 
 Para preparar a versao congelada do dataset sem alterar os originais:
 

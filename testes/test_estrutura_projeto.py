@@ -12,6 +12,7 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "configuracoes/percepcao_linha_neural.toml",
         "configuracoes/percepcao_verde.toml",
         "configuracoes/mascaras_verdes_v1.toml",
+        "configuracoes/treinamento_verde_fase3.toml",
         "configuracoes/painel_percepcao.toml",
         "configuracoes/controle.toml",
         "configuracoes/dataset_fase2.toml",
@@ -28,8 +29,11 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "codigo/obr_oficial/dados/preparacao_dataset.py",
         "dados/manifestos/fase2_v1.json",
         "dados/manifestos/fase_verde_0.json",
+        "dados/manifestos/fase_verde_3_dataset_v1.json",
         "documentacao/fase_verde/PROGRESSO.md",
         "documentacao/fase_verde/MASCARAS_VERDES_V1.md",
+        "documentacao/fase_verde/TREINAMENTO_VERDE_V1.md",
+        "treinamento/fase_verde_3/treinar_verde_no_colab.ipynb",
     )
 
     ausentes = [caminho for caminho in caminhos if not (raiz / caminho).is_file()]

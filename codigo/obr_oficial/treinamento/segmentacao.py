@@ -1,4 +1,4 @@
-"""Pipeline PyTorch da segmentacao neural da linha."""
+"""Pipeline PyTorch da segmentacao neural binaria."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ class ConfiguracaoTreinamento:
 
 
 def carregar_configuracao_treinamento(caminho: Path) -> ConfiguracaoTreinamento:
-    """Carrega o TOML versionado da Fase 3."""
+    """Carrega o TOML versionado do experimento."""
 
     with caminho.open("rb") as arquivo:
         dados = tomllib.load(arquivo)
@@ -418,8 +418,7 @@ class AcumuladorMetricas:
             "iou": self.tp / (self.tp + self.fp + self.fn + suave),
             "precisao": self.tp / (self.tp + self.fp + suave),
             "recall": self.tp / (self.tp + self.fn + suave),
-            "taxa_falso_positivo_negativos": self.negativos_falsos
-            / (self.negativos + suave),
+            "taxa_falso_positivo_negativos": self.negativos_falsos / (self.negativos + suave),
             "taxa_falso_positivo_negativos_significativos": (
                 self.negativos_falsos_significativos / (self.negativos + suave)
             ),
@@ -455,9 +454,7 @@ def criar_carregadores(
     amostrador = None
     if configuracao.peso_amostra_negativa > 1.0:
         pesos = [
-            configuracao.peso_amostra_negativa
-            if item["tipo_quadro"] == "sem_linha"
-            else 1.0
+            configuracao.peso_amostra_negativa if _amostra_negativa(item) else 1.0
             for item in dataset_treino.amostras
         ]
         amostrador = WeightedRandomSampler(
@@ -482,6 +479,13 @@ def criar_carregadores(
     return treino, validacao
 
 
+def _amostra_negativa(item: dict[str, Any]) -> bool:
+    return (
+        item.get("tipo_quadro") == "sem_linha"
+        or item.get("categoria_verde") == "sem_verde_negativo"
+    )
+
+
 def _avaliar(
     modelo: nn.Module,
     carregador: DataLoader,
@@ -501,6 +505,53 @@ def _avaliar(
             perdas.append(float(perda_fn(logits, mascaras)))
             acumulador.adicionar(logits, mascaras)
     return float(np.mean(perdas)), acumulador.calcular()
+
+
+def avaliar_limiares_checkpoint(
+    raiz_dataset: Path,
+    checkpoint: Path,
+    limiares: list[float],
+) -> dict[str, object]:
+    """Avalia uma grade de limiares somente na validacao fechada do pacote."""
+
+    if not limiares or any(not 0.0 < limiar < 1.0 for limiar in limiares):
+        raise ErroTreinamentoSegmentacao("Limiares devem estar estritamente entre zero e um")
+    pacote = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    arquitetura = str(pacote.get("arquitetura", ""))
+    configuracao = ConfiguracaoTreinamento(**pacote["configuracao"])
+    dispositivo = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    modelo = criar_modelo(arquitetura, pretreinado=False).to(dispositivo)
+    modelo.load_state_dict(pacote["estado_modelo"])
+    validacao = DataLoader(
+        DatasetSegmentacaoLinha(raiz_dataset, configuracao, "validacao"),
+        batch_size=configuracao.lote,
+        shuffle=False,
+        num_workers=configuracao.trabalhadores,
+        pin_memory=dispositivo.type == "cuda",
+        worker_init_fn=_semear_trabalhador,
+        generator=torch.Generator().manual_seed(configuracao.semente),
+        persistent_workers=configuracao.trabalhadores > 0,
+    )
+    acumuladores = {
+        limiar: AcumuladorMetricas(limiar, configuracao.area_minima_negativo) for limiar in limiares
+    }
+    modelo.eval()
+    with torch.inference_mode():
+        for imagens, mascaras in validacao:
+            imagens = imagens.to(dispositivo, non_blocking=True)
+            mascaras = mascaras.to(dispositivo, non_blocking=True)
+            logits = modelo(imagens)
+            for acumulador in acumuladores.values():
+                acumulador.adicionar(logits, mascaras)
+    return {
+        "arquitetura": arquitetura,
+        "sha256_checkpoint": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+        "dispositivo": str(dispositivo),
+        "teste_aberto": False,
+        "resultados": [
+            {"limiar": limiar, **acumuladores[limiar].calcular()} for limiar in limiares
+        ],
+    }
 
 
 def treinar(
@@ -586,9 +637,11 @@ def treinar(
             configuracao.limiar,
             configuracao.area_minima_negativo,
         )
-        pontuacao = metricas["dice"] - configuracao.peso_fpr_selecao * metricas[
-            "taxa_falso_positivo_negativos_significativos"
-        ]
+        pontuacao = (
+            metricas["dice"]
+            - configuracao.peso_fpr_selecao
+            * metricas["taxa_falso_positivo_negativos_significativos"]
+        )
         registro = {
             "epoca": epoca,
             "perda_treino": float(np.mean(perdas_treino)),
@@ -601,9 +654,7 @@ def treinar(
         if pontuacao > melhor_pontuacao:
             melhor_dice = metricas["dice"]
             melhor_pontuacao = pontuacao
-            melhor_fpr_significativo = metricas[
-                "taxa_falso_positivo_negativos_significativos"
-            ]
+            melhor_fpr_significativo = metricas["taxa_falso_positivo_negativos_significativos"]
             sem_melhora = 0
             torch.save(
                 {
