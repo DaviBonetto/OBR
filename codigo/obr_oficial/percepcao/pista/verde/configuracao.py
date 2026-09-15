@@ -67,6 +67,7 @@ class ConfiguracaoDetectorVerde:
     largura: int
     altura: int
     limiar_mascara: float
+    threads_onnx: int = 2
 
     def __post_init__(self) -> None:
         if self.largura < 32 or self.altura < 32:
@@ -75,6 +76,8 @@ class ConfiguracaoDetectorVerde:
             raise ErroConfiguracaoVerde("sha256 do modelo verde deve ter 64 caracteres")
         if not isfinite(self.limiar_mascara) or not 0.0 < self.limiar_mascara < 1.0:
             raise ErroConfiguracaoVerde("limiar_mascara deve estar estritamente entre zero e um")
+        if not 1 <= self.threads_onnx <= 4:
+            raise ErroConfiguracaoVerde("threads_onnx deve estar entre um e quatro")
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +137,7 @@ def carregar_configuracao_verde(
                 largura=int(_numero(modelo, "largura", int)),
                 altura=int(_numero(modelo, "altura", int)),
                 limiar_mascara=float(_numero(modelo, "limiar_mascara", float)),
+                threads_onnx=int(_numero(modelo, "threads_onnx", int)),
             ),
             geometria=ConfiguracaoGeometriaVerde(
                 confianca_minima=float(_numero(geometria, "confianca_minima", float)),

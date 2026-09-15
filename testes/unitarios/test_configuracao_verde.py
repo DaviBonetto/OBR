@@ -53,6 +53,7 @@ arquivo = "modelos/verde/lraspp_v1/modelo.onnx"
 sha256 = "3970535c47d9b599bdf730bd00559e4b91a6394ca66c7764c6c47017fdcbd451"
 largura = 320
 altura = 240
+threads_onnx = 2
 limiar_mascara = 0.75
 [geometria]
 confianca_minima = 0.75

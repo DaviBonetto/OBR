@@ -88,7 +88,15 @@ class DetectorNeuralVerde:
                 import onnxruntime as ort
             except (ImportError, ModuleNotFoundError) as erro:
                 raise ErroDetectorVerde("ONNX Runtime nao esta instalado") from erro
-            sessao = ort.InferenceSession(str(caminho), providers=["CPUExecutionProvider"])
+            opcoes = ort.SessionOptions()
+            opcoes.intra_op_num_threads = configuracao.threads_onnx
+            opcoes.inter_op_num_threads = 1
+            opcoes.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+            sessao = ort.InferenceSession(
+                str(caminho),
+                sess_options=opcoes,
+                providers=["CPUExecutionProvider"],
+            )
         self._sessao = sessao
 
     def processar(self, quadro_bgr: np.ndarray) -> ResultadoDetectorVerde:

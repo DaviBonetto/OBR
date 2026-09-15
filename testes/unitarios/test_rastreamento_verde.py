@@ -67,12 +67,21 @@ def _rastreador() -> RastreadorVerde:
 def test_confirma_tres_observacoes_consecutivas_no_t() -> None:
     rastreador = _rastreador()
 
-    primeira = rastreador.atualizar(_estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA))
-    segunda = rastreador.atualizar(_estimativa(2, 1.03, DecisaoVerde.VIRAR_ESQUERDA))
-    terceira = rastreador.atualizar(_estimativa(3, 1.06, DecisaoVerde.VIRAR_ESQUERDA))
+    primeira = rastreador.atualizar(
+        _estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=False,
+    )
+    segunda = rastreador.atualizar(
+        _estimativa(2, 1.03, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=False,
+    )
+    terceira = rastreador.atualizar(
+        _estimativa(3, 1.06, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=True,
+    )
 
-    assert primeira.estado is EstadoVerde.CANDIDATA
-    assert segunda.estado is EstadoVerde.CANDIDATA
+    assert primeira.decisao is DecisaoVerde.NENHUMA
+    assert segunda.decisao is DecisaoVerde.NENHUMA
     assert terceira.estado is EstadoVerde.CONFIRMADA
     assert terceira.fonte is FonteEstimativa.TEMPORAL
     assert terceira.confianca == 0.9
@@ -81,30 +90,77 @@ def test_confirma_tres_observacoes_consecutivas_no_t() -> None:
 def test_troca_de_lado_nao_reaproveita_confirmacoes() -> None:
     rastreador = _rastreador()
 
-    rastreador.atualizar(_estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA))
-    rastreador.atualizar(_estimativa(2, 1.03, DecisaoVerde.VIRAR_DIREITA))
-    resultado = rastreador.atualizar(_estimativa(3, 1.06, DecisaoVerde.VIRAR_DIREITA))
+    rastreador.atualizar(
+        _estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=False,
+    )
+    rastreador.atualizar(
+        _estimativa(2, 1.03, DecisaoVerde.VIRAR_DIREITA),
+        intersecao_detectada=False,
+    )
+    resultado = rastreador.atualizar(
+        _estimativa(3, 1.06, DecisaoVerde.VIRAR_DIREITA),
+        intersecao_detectada=True,
+    )
 
-    assert resultado.estado is EstadoVerde.CANDIDATA
-    assert resultado.decisao is DecisaoVerde.VIRAR_DIREITA
+    assert resultado.estado is EstadoVerde.AMBIGUA
+    assert resultado.decisao is DecisaoVerde.NENHUMA
 
 
-def test_observacao_neutra_descarta_a_memoria() -> None:
+def test_observacao_neutra_mantem_memoria_curta_ate_o_t() -> None:
     rastreador = _rastreador()
 
-    rastreador.atualizar(_estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA))
-    neutra = rastreador.atualizar(_estimativa(2, 1.03, DecisaoVerde.NENHUMA))
-    resultado = rastreador.atualizar(_estimativa(3, 1.06, DecisaoVerde.VIRAR_ESQUERDA))
+    for quadro in range(1, 4):
+        rastreador.atualizar(
+            _estimativa(quadro, 1.0 + quadro * 0.02, DecisaoVerde.VIRAR_ESQUERDA),
+            intersecao_detectada=False,
+        )
+    neutra = rastreador.atualizar(
+        _estimativa(4, 1.08, DecisaoVerde.NENHUMA),
+        intersecao_detectada=False,
+    )
+    resultado = rastreador.atualizar(
+        _estimativa(5, 1.10, DecisaoVerde.NENHUMA),
+        intersecao_detectada=True,
+    )
 
     assert neutra.decisao is DecisaoVerde.NENHUMA
-    assert resultado.estado is EstadoVerde.CANDIDATA
+    assert neutra.motivo == "evidencia_verde_antes_do_t_virar_esquerda"
+    assert resultado.estado is EstadoVerde.CONFIRMADA
+    assert resultado.decisao is DecisaoVerde.VIRAR_ESQUERDA
 
 
 def test_memoria_expirada_nao_confirma() -> None:
     rastreador = _rastreador()
 
-    rastreador.atualizar(_estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA))
-    rastreador.atualizar(_estimativa(2, 1.20, DecisaoVerde.VIRAR_ESQUERDA))
-    resultado = rastreador.atualizar(_estimativa(3, 1.23, DecisaoVerde.VIRAR_ESQUERDA))
+    rastreador.atualizar(
+        _estimativa(1, 1.00, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=False,
+    )
+    rastreador.atualizar(
+        _estimativa(2, 1.20, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=False,
+    )
+    resultado = rastreador.atualizar(
+        _estimativa(3, 1.23, DecisaoVerde.VIRAR_ESQUERDA),
+        intersecao_detectada=True,
+    )
 
-    assert resultado.estado is EstadoVerde.CANDIDATA
+    assert resultado.estado is EstadoVerde.AMBIGUA
+
+
+def test_t_confirma_evidencia_anterior_quando_o_marcador_ja_saiu_do_quadro() -> None:
+    rastreador = _rastreador()
+    for quadro in range(1, 4):
+        rastreador.atualizar(
+            _estimativa(quadro, 1.0 + quadro * 0.03, DecisaoVerde.RETORNAR_180),
+            intersecao_detectada=False,
+        )
+
+    resultado = rastreador.atualizar(
+        _estimativa(4, 1.12, DecisaoVerde.NENHUMA),
+        intersecao_detectada=True,
+    )
+
+    assert resultado.estado is EstadoVerde.CONFIRMADA
+    assert resultado.decisao is DecisaoVerde.RETORNAR_180

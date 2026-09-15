@@ -23,13 +23,27 @@ function atualizarEstado(dados) {
   $("#inferencia").textContent = numero(estimativa.tempos.inferencia_ms, 2, " ms");
   $("#geometria").textContent = numero(estimativa.tempos.geometria_ms, 2, " ms");
   $("#tempo-total").textContent = numero(estimativa.tempos.total_ms, 2, " ms");
-  $("#intersecao").textContent = diagnostico.intersecao_detectada ? "SIM · RETO" : "NÃO";
+  $("#intersecao").textContent = diagnostico.intersecao_detectada
+    ? "SIM · LINHA RETA"
+    : "NÃO";
   $("#cobertura").textContent = percentual(diagnostico.cobertura_faixas);
   $("#area").textContent = percentual(diagnostico.area_mascara);
   $("#idade").textContent = numero(estimativa.idade_observacao_ms, 0, " ms");
   const verde = dados.percepcao.verde;
-  $("#verde-estado").textContent = verde ? rotulo(verde.estado) : "INDISPONÍVEL";
-  $("#verde-decisao").textContent = verde ? rotulo(verde.decisao) : "—";
+  const evidenciaPrevia = verde?.motivo?.startsWith("evidencia_verde_antes_do_t_");
+  const decisaoPrevia = evidenciaPrevia
+    ? verde.motivo.replace("evidencia_verde_antes_do_t_", "")
+    : null;
+  $("#verde-estado").textContent = evidenciaPrevia
+    ? "PRÉ-T DETECTADO"
+    : verde
+      ? rotulo(verde.estado)
+      : "INDISPONÍVEL";
+  $("#verde-decisao").textContent = decisaoPrevia
+    ? `AGUARDANDO T · ${rotulo(decisaoPrevia)}`
+    : verde
+      ? rotulo(verde.decisao)
+      : "—";
   $("#verde-marcadores").textContent = verde ? String(verde.marcadores.length) : "—";
   $("#verde-confianca").textContent = verde ? percentual(verde.confianca) : "—";
   $("#verde-inferencia").textContent = verde

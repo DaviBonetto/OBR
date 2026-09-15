@@ -58,6 +58,7 @@ class ConfiguracaoDetectorNeural:
     faixas_continuacao_borda_intersecao: int = 7
     tolerancia_alinhamento_largura_intersecao: float = 0.55
     tolerancia_alinhamento_intersecao: float = 0.08
+    threads_onnx: int = 2
 
     def __post_init__(self) -> None:
         if self.largura < 32 or self.altura < 32:
@@ -112,6 +113,8 @@ class ConfiguracaoDetectorNeural:
             raise ErroDetectorNeural("idade_maxima_temporal_ms deve ser positiva")
         if self.quadros_confirmacao < 1:
             raise ErroDetectorNeural("quadros_confirmacao deve ser ao menos um")
+        if not 1 <= self.threads_onnx <= 4:
+            raise ErroDetectorNeural("threads_onnx deve estar entre um e quatro")
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +128,7 @@ class DiagnosticoGeometria:
     largura_referencia: float
     largura_maxima: float
     intersecao_detectada: bool
+    intersecao_verde_detectada: bool
     centro_intersecao: PontoNormalizado | None = None
 
 
@@ -230,6 +234,7 @@ def carregar_configuracao_detector_neural(
             "tolerancia_alinhamento_intersecao",
             float,
         ),
+        threads_onnx=_numero(modelo, "threads_onnx", int),
         distancia_objetivo_reta=_numero(geometria, "distancia_objetivo_reta", float),
         distancia_objetivo_curva=_numero(geometria, "distancia_objetivo_curva", float),
         angulo_reta_graus=_numero(geometria, "angulo_reta_graus", float),
@@ -410,8 +415,10 @@ class ExtratorGeometriaLinha:
         mascara_topologia = mascara if mascara_quadro is None else mascara_quadro
         if mascara_topologia.ndim != 2 or mascara_topologia.size == 0:
             raise ErroDetectorNeural("mascara_quadro deve ser uma matriz bidimensional nao vazia")
-        centro_intersecao = self._localizar_intersecao_t(mascara_topologia)
-        intersecao = centro_intersecao is not None
+        centro_intersecao_t, centro_intersecao_verde = self._localizar_intersecoes(
+            mascara_topologia
+        )
+        intersecao = centro_intersecao_t is not None
         pontos, larguras, alargamento_curva = self._extrair_centro(
             mascara,
             intersecao_confirmada=intersecao,
@@ -433,7 +440,8 @@ class ExtratorGeometriaLinha:
             largura_referencia=largura_referencia / cfg.largura,
             largura_maxima=largura_maxima / cfg.largura,
             intersecao_detectada=intersecao,
-            centro_intersecao=centro_intersecao,
+            intersecao_verde_detectada=centro_intersecao_verde is not None,
+            centro_intersecao=centro_intersecao_verde,
         )
         confianca = float(
             np.clip(0.55 * probabilidade_media + 0.30 * cobertura + 0.15 * continuidade, 0, 1)
@@ -513,7 +521,15 @@ class ExtratorGeometriaLinha:
             )
         return tuple(reversed(pontos)), larguras, alargamento_curva
 
-    def _localizar_intersecao_t(self, mascara: np.ndarray) -> PontoNormalizado | None:
+    def _localizar_intersecoes(
+        self,
+        mascara: np.ndarray,
+    ) -> tuple[PontoNormalizado | None, PontoNormalizado | None]:
+        """Separa o T da linha do alargamento que ancora o verde.
+
+        Um retorno sem continuacao frontal nao manda a linha seguir reto, mas
+        ainda e uma intersecao fisica valida para consumir uma intencao verde.
+        """
         cfg = self.configuracao
         altura, largura_quadro = mascara.shape
         ys = np.linspace(
@@ -539,7 +555,7 @@ class ExtratorGeometriaLinha:
 
         bootstrap = cfg.bootstrap_faixas_intersecao
         if len(faixas) < bootstrap + cfg.persistencia_alargamento_intersecao:
-            return None
+            return None, None
         observacoes: list[tuple[int, float, float, int, int]] = []
         x_rastreio: float | None = None
         for y, perfil, grupos in faixas[:bootstrap]:
@@ -575,8 +591,10 @@ class ExtratorGeometriaLinha:
         limite_continuacao = largura_tronco * cfg.fator_largura_continuacao_intersecao
         alargadas_consecutivas = 0
         alargamento_confirmado = False
+        alargamento_bilateral_confirmado = False
         continuacao_consecutiva = 0
         faixas_alargadas: list[int] = []
+        faixas_bilaterais: list[int] = []
 
         for y, centro, largura, x_minimo, x_maximo in observacoes[bootstrap:]:
             contem_tronco = x_minimo - tolerancia <= x_tronco <= x_maximo + tolerancia
@@ -586,6 +604,14 @@ class ExtratorGeometriaLinha:
                 faixas_alargadas.append(y)
                 if alargadas_consecutivas >= cfg.persistencia_alargamento_intersecao:
                     alargamento_confirmado = True
+                margem_ramo = max(largura_tronco, tolerancia)
+                if (
+                    x_minimo <= x_tronco - margem_ramo
+                    and x_maximo >= x_tronco + margem_ramo
+                ):
+                    faixas_bilaterais.append(y)
+                    if len(faixas_bilaterais) >= cfg.persistencia_alargamento_intersecao:
+                        alargamento_bilateral_confirmado = True
                 continue
             if not alargamento_confirmado:
                 alargadas_consecutivas = 0
@@ -595,22 +621,34 @@ class ExtratorGeometriaLinha:
             if estreita and alinhada:
                 continuacao_consecutiva += 1
                 if continuacao_consecutiva >= cfg.faixas_continuacao_intersecao:
-                    return self._centro_intersecao(
+                    centro = self._centro_intersecao(
                         x_tronco,
                         faixas_alargadas,
                         largura_quadro,
                         altura,
                     )
+                    return centro, centro
                 if y == 0 and continuacao_consecutiva >= cfg.faixas_continuacao_borda_intersecao:
-                    return self._centro_intersecao(
+                    centro = self._centro_intersecao(
                         x_tronco,
                         faixas_alargadas,
                         largura_quadro,
                         altura,
                     )
+                    return centro, centro
             else:
                 continuacao_consecutiva = 0
-        return None
+        if alargamento_bilateral_confirmado:
+            return (
+                None,
+                self._centro_intersecao(
+                    x_tronco,
+                    faixas_bilaterais,
+                    largura_quadro,
+                    altura,
+                ),
+            )
+        return None, None
 
     @staticmethod
     def _centro_intersecao(
@@ -740,8 +778,13 @@ class DetectorNeuralLinha:
                 import onnxruntime as ort
             except (ImportError, ModuleNotFoundError) as erro:
                 raise ErroDetectorNeural("ONNX Runtime nao esta instalado") from erro
+            opcoes = ort.SessionOptions()
+            opcoes.intra_op_num_threads = configuracao.threads_onnx
+            opcoes.inter_op_num_threads = 1
+            opcoes.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
             sessao = ort.InferenceSession(
                 str(configuracao.arquivo_modelo),
+                sess_options=opcoes,
                 providers=["CPUExecutionProvider"],
             )
         self._sessao = sessao

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import socket
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,12 @@ def main(argumentos: list[str] | None = None) -> int:
         default="validacao",
     )
     analisador.add_argument("--fps-reproducao", type=float, default=5.0)
+    analisador.add_argument(
+        "--fps-processamento",
+        type=float,
+        default=3.0,
+        help="limita a inferencia para preservar CPU; nao altera a camera",
+    )
     analisador.add_argument("--configuracao-camera", default="camera_usb.toml")
     analisador.add_argument(
         "--configuracao-percepcao",
@@ -77,6 +84,9 @@ def main(argumentos: list[str] | None = None) -> int:
     qualidade = exigir_secao(configuracao_camera, "qualidade")
     servidor = exigir_secao(configuracao_painel, "servidor")
     video = exigir_secao(configuracao_painel, "video")
+    host = opcoes.host or str(servidor["endereco"])
+    porta = opcoes.porta or int(servidor["porta"])
+    _exigir_porta_livre(host, porta)
 
     if opcoes.reproduzir_capturas is not None:
         caminho_dataset = opcoes.reproduzir_capturas
@@ -124,6 +134,7 @@ def main(argumentos: list[str] | None = None) -> int:
         detector_verde,
         interpretador_verde,
         rastreador_verde,
+        quadros_por_segundo_maximo=opcoes.fps_processamento,
     )
     painel = criar_painel_percepcao_linha(
         fonte,
@@ -131,9 +142,6 @@ def main(argumentos: list[str] | None = None) -> int:
         quadros_video_por_segundo=float(video["quadros_por_segundo_maximo"]),
         qualidade_jpeg=int(video["qualidade_jpeg"]),
     )
-    host = opcoes.host or str(servidor["endereco"])
-    porta = opcoes.porta or int(servidor["porta"])
-
     fonte.iniciar()
     processador.iniciar()
     print("ATUADORES: DESABILITADOS", flush=True)
@@ -157,6 +165,19 @@ def _converter_origem(valor_cli: str | None, valor_configuracao: Any) -> int | s
     if texto.isdigit():
         return int(texto)
     return texto
+
+
+def _exigir_porta_livre(host: str, porta: int) -> None:
+    """Evita iniciar outra inferencia quando o dashboard ja esta aberto."""
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as soquete:
+        try:
+            soquete.bind((host, porta))
+        except OSError as erro:
+            raise RuntimeError(
+                f"Ja existe um dashboard usando http://{host}:{porta}; "
+                "feche-o antes de abrir outra instancia."
+            ) from erro
 
 
 if __name__ == "__main__":

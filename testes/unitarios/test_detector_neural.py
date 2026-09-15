@@ -124,6 +124,7 @@ def test_intersecao_t_preserva_continuacao_frontal(tmp_path: Path) -> None:
     )
 
     assert diagnostico.intersecao_detectada is True
+    assert diagnostico.intersecao_verde_detectada is True
     assert diagnostico.centro_intersecao is not None
     assert diagnostico.centro_intersecao.x == pytest.approx(0.5, abs=0.02)
     assert diagnostico.centro_intersecao.y == pytest.approx(0.38, abs=0.08)
@@ -161,6 +162,7 @@ def test_curva_em_l_nao_e_confundida_com_t(
     )
 
     assert diagnostico.intersecao_detectada is False
+    assert diagnostico.intersecao_verde_detectada is False
     assert diagnostico.centro_intersecao is None
     assert estimativa.tipo_curva is tipo_esperado
     assert estimativa.motivo == "evidencia_neural_atual"
@@ -516,9 +518,7 @@ def test_sobreposicao_suave_nao_altera_mascara_logica(tmp_path: Path) -> None:
     )
     assert np.count_nonzero(pixels_distantes) > 100
     assert np.count_nonzero(pixels_proximos) > 30
-    rota = _extrair_rota_visual(resultado.mascara_quadro, intersecao_t=False)
-    assert rota is not None
-    atual_x, atual_y = rota[0]
-    objetivo_x, objetivo_y = rota[-1]
-    assert tuple(int(canal) for canal in visual[atual_y, atual_x]) == (255, 230, 0)
-    assert tuple(int(canal) for canal in visual[objetivo_y, objetivo_x]) == (165, 55, 10)
+    cor_atual = np.all(visual == (255, 230, 0), axis=2)
+    cor_objetivo = np.all(visual == (165, 55, 10), axis=2)
+    assert np.count_nonzero(cor_atual) > 20
+    assert np.count_nonzero(cor_objetivo) > 20

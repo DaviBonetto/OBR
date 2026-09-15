@@ -712,45 +712,26 @@ def desenhar_sobreposicao(
     if estimativa.ponto_atual is not None and estimativa.ponto_objetivo is not None:
         atual = pixel(estimativa.ponto_atual)
         objetivo = pixel(estimativa.ponto_objetivo)
-        rota_visual = _extrair_rota_visual(
-            mascara_visual,
-            intersecao_t=resultado.diagnostico.intersecao_detectada,
-        )
-        if rota_visual is None:
-            pontos = estimativa.centro_linha
-            indice_atual = (
-                min(
-                    range(len(pontos)),
-                    key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
-                )
-                if pontos
-                else 0
+        pontos = estimativa.centro_linha
+        rota_visual = None
+        if len(pontos) >= 2:
+            indice_atual = min(
+                range(len(pontos)),
+                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
             )
-            indice_objetivo = (
-                min(
-                    range(len(pontos)),
-                    key=lambda indice: abs(pontos[indice].y - estimativa.ponto_objetivo.y),
-                )
-                if pontos
-                else 0
+            indice_objetivo = min(
+                range(len(pontos)),
+                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_objetivo.y),
             )
-            if len(pontos) >= 2:
-                if indice_objetivo <= indice_atual:
-                    trecho = list(pontos[indice_objetivo : indice_atual + 1])
-                else:
-                    trecho = list(reversed(pontos[indice_atual : indice_objetivo + 1]))
-                centro_bruto = np.array([pixel(ponto) for ponto in trecho], dtype=np.int32)
-                centro_bruto[0] = objetivo
-                centro_bruto[-1] = atual
-                rota_visual = _suavizar_polilinha(centro_bruto)
+            if indice_objetivo <= indice_atual:
+                trecho = pontos[indice_objetivo : indice_atual + 1]
+            else:
+                trecho = tuple(reversed(pontos[indice_atual : indice_objetivo + 1]))
+            rota_visual = np.array([pixel(ponto) for ponto in trecho], dtype=np.int32)
+            rota_visual[0] = objetivo
+            rota_visual[-1] = atual
         if rota_visual is not None and len(rota_visual) >= 2:
-            atual = tuple(int(valor) for valor in rota_visual[0])
-            objetivo = tuple(int(valor) for valor in rota_visual[-1])
-            rota_desenho = (
-                rota_visual
-                if _eh_cotovelo_ortogonal(rota_visual)
-                else _suavizar_polilinha(rota_visual)
-            )
+            rota_desenho = _suavizar_polilinha(rota_visual)
             cv2.polylines(imagem, [rota_desenho], False, (8, 11, 16), 5, cv2.LINE_AA)
             cv2.polylines(imagem, [rota_desenho], False, (35, 45, 245), 2, cv2.LINE_AA)
         _desenhar_marcador(imagem, objetivo, (165, 55, 10))
@@ -789,17 +770,21 @@ class ProcessadorContinuoLinha:
         detector_verde: DetectorNeuralVerde | None = None,
         interpretador_verde: InterpretadorGeometricoVerde | None = None,
         rastreador_verde: RastreadorVerde | None = None,
+        quadros_por_segundo_maximo: float = 20.0,
     ) -> None:
         if (detector_verde is None) != (interpretador_verde is None):
             raise ValueError("detector e interpretador verde devem ser fornecidos juntos")
         if rastreador_verde is not None and detector_verde is None:
             raise ValueError("rastreador verde exige detector e interpretador verde")
+        if quadros_por_segundo_maximo <= 0.0:
+            raise ValueError("quadros_por_segundo_maximo deve ser positivo")
         self._fonte = fonte_camera
         self._detector = detector
         self._rastreador = rastreador
         self._detector_verde = detector_verde
         self._interpretador_verde = interpretador_verde
         self._rastreador_verde = rastreador_verde
+        self._periodo_processamento_s = 1.0 / quadros_por_segundo_maximo
         self._condicao = Condition()
         self._lock_estado = Lock()
         self._parar = Event()
@@ -868,7 +853,12 @@ class ProcessadorContinuoLinha:
 
     def _executar(self) -> None:
         ultimo_id: int | None = None
+        proximo_processamento_s = 0.0
         while not self._parar.is_set():
+            restante = proximo_processamento_s - monotonic()
+            if restante > 0.0:
+                self._parar.wait(restante)
+                continue
             quadro = self._fonte.obter_ultimo_quadro(depois_de=ultimo_id, timeout_s=0.5)
             if quadro is None:
                 continue
@@ -879,6 +869,7 @@ class ProcessadorContinuoLinha:
                 with self._lock_estado:
                     self._total_falhas += 1
                     self._ultimo_erro = str(erro)
+            proximo_processamento_s = monotonic() + self._periodo_processamento_s
 
     def _processar_quadro(self, quadro: QuadroCamera) -> None:
         resultado = self._detector.processar(
@@ -896,7 +887,7 @@ class ProcessadorContinuoLinha:
         verde, mascara_verde, estimativa_pista = self._processar_verde(
             quadro,
             estimativa,
-            intersecao_detectada=resultado.diagnostico.intersecao_detectada,
+            intersecao_verde_detectada=resultado.diagnostico.intersecao_verde_detectada,
             centro_intersecao=resultado.diagnostico.centro_intersecao,
         )
         if verde is not None and mascara_verde is not None:
@@ -925,7 +916,7 @@ class ProcessadorContinuoLinha:
         quadro: QuadroCamera,
         linha: EstimativaLinha,
         *,
-        intersecao_detectada: bool,
+        intersecao_verde_detectada: bool,
         centro_intersecao: PontoNormalizado | None,
     ) -> tuple[EstimativaVerde | None, np.ndarray | None, EstimativaPista | None]:
         if self._detector_verde is None or self._interpretador_verde is None:
@@ -966,7 +957,12 @@ class ProcessadorContinuoLinha:
                     inferencia_ms=resultado.inferencia_ms,
                 ),
             )
-            if not intersecao_detectada:
+            if self._rastreador_verde is not None:
+                verde = self._rastreador_verde.atualizar(
+                    verde,
+                    intersecao_detectada=intersecao_verde_detectada,
+                )
+            elif not intersecao_verde_detectada:
                 verde = replace(
                     verde,
                     estado=EstadoVerde.AUSENTE,
@@ -974,6 +970,4 @@ class ProcessadorContinuoLinha:
                     confianca=0.0,
                     motivo="marcadores_verdes_aguardando_intersecao",
                 )
-            if self._rastreador_verde is not None:
-                verde = self._rastreador_verde.atualizar(verde)
         return verde, resultado.mascara, EstimativaPista(linha=linha, verde=verde)

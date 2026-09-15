@@ -5,6 +5,7 @@ arquivo = "modelos/linha/lraspp_v2/modelo.onnx"
 sha256 = "fc01a35bd1415ee1a27ff43d800f1e43f91d36f482ceca4ba179f93df4f2c7cd"
 largura = 320
 altura = 192
+threads_onnx = 1
 roi_y = 0.30
 limiar_mascara = 0.80
 limiar_mascara_visual = 0.55
