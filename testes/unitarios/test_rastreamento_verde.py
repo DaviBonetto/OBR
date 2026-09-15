@@ -164,3 +164,27 @@ def test_t_confirma_evidencia_anterior_quando_o_marcador_ja_saiu_do_quadro() -> 
 
     assert resultado.estado is EstadoVerde.CONFIRMADA
     assert resultado.decisao is DecisaoVerde.RETORNAR_180
+
+
+def test_retorno_confirma_sem_t_apos_tres_pares_alinhados() -> None:
+    rastreador = _rastreador()
+
+    primeira = rastreador.atualizar(
+        _estimativa(1, 1.00, DecisaoVerde.RETORNAR_180),
+        intersecao_detectada=False,
+    )
+    segunda = rastreador.atualizar(
+        _estimativa(2, 1.03, DecisaoVerde.RETORNAR_180),
+        intersecao_detectada=False,
+    )
+    terceira = rastreador.atualizar(
+        _estimativa(3, 1.06, DecisaoVerde.RETORNAR_180),
+        intersecao_detectada=False,
+    )
+
+    assert primeira.estado is EstadoVerde.CANDIDATA
+    assert primeira.decisao is DecisaoVerde.RETORNAR_180
+    assert segunda.estado is EstadoVerde.CANDIDATA
+    assert terceira.estado is EstadoVerde.CONFIRMADA
+    assert terceira.decisao is DecisaoVerde.RETORNAR_180
+    assert terceira.motivo == "retorno_confirmado_temporalmente"

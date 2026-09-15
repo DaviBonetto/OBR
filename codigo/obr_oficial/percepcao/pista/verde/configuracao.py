@@ -23,6 +23,9 @@ class ConfiguracaoGeometriaVerde:
     area_normalizada_maxima: float
     margem_antes_depois: float
     margem_lateral: float
+    tolerancia_alinhamento_180: float = 0.32
+    margem_lateral_retorno: float = 0.10
+    diferenca_vertical_maxima_retorno: float = 0.10
 
     def __post_init__(self) -> None:
         if not isfinite(self.confianca_minima) or not 0.0 <= self.confianca_minima <= 1.0:
@@ -39,6 +42,21 @@ class ConfiguracaoGeometriaVerde:
             raise ErroConfiguracaoVerde("margem_antes_depois invalida")
         if not isfinite(self.margem_lateral) or not 0.0 <= self.margem_lateral < 0.25:
             raise ErroConfiguracaoVerde("margem_lateral invalida")
+        if (
+            not isfinite(self.tolerancia_alinhamento_180)
+            or not 0.0 < self.tolerancia_alinhamento_180 <= 0.5
+        ):
+            raise ErroConfiguracaoVerde("tolerancia_alinhamento_180 invalida")
+        if (
+            not isfinite(self.margem_lateral_retorno)
+            or not self.margem_lateral <= self.margem_lateral_retorno <= 0.5
+        ):
+            raise ErroConfiguracaoVerde("margem_lateral_retorno invalida")
+        if (
+            not isfinite(self.diferenca_vertical_maxima_retorno)
+            or not 0.0 < self.diferenca_vertical_maxima_retorno <= 0.5
+        ):
+            raise ErroConfiguracaoVerde("diferenca_vertical_maxima_retorno invalida")
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +163,15 @@ def carregar_configuracao_verde(
                 area_normalizada_maxima=float(_numero(geometria, "area_normalizada_maxima", float)),
                 margem_antes_depois=float(_numero(geometria, "margem_antes_depois", float)),
                 margem_lateral=float(_numero(geometria, "margem_lateral", float)),
+                tolerancia_alinhamento_180=float(
+                    _numero(geometria, "tolerancia_alinhamento_180", float)
+                ),
+                margem_lateral_retorno=float(
+                    _numero(geometria, "margem_lateral_retorno", float)
+                ),
+                diferenca_vertical_maxima_retorno=float(
+                    _numero(geometria, "diferenca_vertical_maxima_retorno", float)
+                ),
             ),
             temporal=ConfiguracaoTemporalVerde(
                 janela_quadros=int(_numero(temporal, "janela_quadros", int)),

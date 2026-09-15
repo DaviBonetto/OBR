@@ -3,6 +3,7 @@ import pytest
 from obr_oficial.nucleo.contratos import (
     DecisaoVerde,
     EstadoVerde,
+    MarcadorVerde,
     PontoNormalizado,
     PosicaoMarcadorVerde,
 )
@@ -115,6 +116,70 @@ def test_dois_verdes_antes_em_lados_opostos_pedem_retorno(
 
     assert resultado.decisao is DecisaoVerde.RETORNAR_180
     assert resultado.confianca == pytest.approx(0.91)
+
+
+def test_dois_verdes_alinhados_pedem_retorno_sem_ancora_do_t(
+    interpretador: InterpretadorGeometricoVerde,
+) -> None:
+    referencial_sem_t = ReferencialIntersecao(
+        centro=PontoNormalizado(0.50, 0.82),
+        direcao_avanco_x=0.0,
+        direcao_avanco_y=-1.0,
+    )
+
+    resultado = _interpretar(
+        interpretador,
+        referencial_sem_t,
+        _candidato(0.20, 0.70, 0.98),
+        _candidato(0.84, 0.71, 0.91),
+    )
+
+    assert resultado.decisao is DecisaoVerde.RETORNAR_180
+    assert resultado.motivo == "dois_marcadores_opostos_alinhados_para_retorno"
+
+
+def test_marcador_quase_sobre_a_linha_nao_inventa_retorno(
+    interpretador: InterpretadorGeometricoVerde,
+) -> None:
+    referencial_sem_t = ReferencialIntersecao(
+        centro=PontoNormalizado(0.50, 0.82),
+        direcao_avanco_x=0.0,
+        direcao_avanco_y=-1.0,
+    )
+
+    resultado = _interpretar(
+        interpretador,
+        referencial_sem_t,
+        _candidato(0.46, 0.70),
+        _candidato(0.84, 0.70),
+    )
+
+    assert resultado.decisao is DecisaoVerde.NENHUMA
+
+
+def test_cartoes_em_alturas_muito_diferentes_nao_inventam_retorno(
+    interpretador: InterpretadorGeometricoVerde,
+) -> None:
+    marcadores = (
+        MarcadorVerde(
+            centro=PontoNormalizado(0.59, 0.21),
+            confianca=0.95,
+            area_normalizada=0.08,
+            posicao=PosicaoMarcadorVerde.ANTES_DIREITA,
+            deslocamento_longitudinal=0.13,
+            deslocamento_lateral=-0.55,
+        ),
+        MarcadorVerde(
+            centro=PontoNormalizado(0.15, 0.81),
+            confianca=0.95,
+            area_normalizada=0.08,
+            posicao=PosicaoMarcadorVerde.ANTES_ESQUERDA,
+            deslocamento_longitudinal=-0.17,
+            deslocamento_lateral=0.12,
+        ),
+    )
+
+    assert interpretador._retorno_180_alinhado(marcadores) is None
 
 
 def test_cruz_mista_obedece_antes_e_descarta_depois(

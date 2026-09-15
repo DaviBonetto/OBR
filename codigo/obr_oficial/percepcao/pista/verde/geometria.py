@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from math import hypot, isfinite
 from time import perf_counter
 
@@ -117,12 +117,30 @@ class InterpretadorGeometricoVerde:
             for marcador in marcadores
             if marcador.posicao is PosicaoMarcadorVerde.ANTES_DIREITA
         )
+        retorno_180 = self._retorno_180_alinhado(marcadores)
+        if retorno_180 is not None:
+            marcadores = tuple(
+                replace(
+                    marcador,
+                    posicao=(
+                        PosicaoMarcadorVerde.ANTES_ESQUERDA
+                        if marcador.deslocamento_lateral > 0.0
+                        else PosicaoMarcadorVerde.ANTES_DIREITA
+                    ),
+                )
+                for marcador in marcadores
+            )
 
         decisao = DecisaoVerde.NENHUMA
         estado = EstadoVerde.AUSENTE
         confianca = 0.0
         motivo = "sem_marcador_verde"
-        if esquerdas and direitas:
+        if retorno_180 is not None:
+            decisao = DecisaoVerde.RETORNAR_180
+            estado = EstadoVerde.CANDIDATA
+            confianca = retorno_180
+            motivo = "dois_marcadores_opostos_alinhados_para_retorno"
+        elif esquerdas and direitas:
             decisao = DecisaoVerde.RETORNAR_180
             estado = EstadoVerde.CANDIDATA
             confianca = min(
@@ -159,6 +177,49 @@ class InterpretadorGeometricoVerde:
             motivo=motivo,
             tempos=TemposProcessamento(geometria_ms=tempo_geometria),
         )
+
+    def _retorno_180_alinhado(self, marcadores: tuple[MarcadorVerde, ...]) -> float | None:
+        """Reconhece os dois cartões do retorno sem depender da ancora do T."""
+
+        cfg = self._configuracao
+        plausiveis = tuple(
+            marcador
+            for marcador in marcadores
+            if (
+                marcador.confianca >= cfg.confianca_minima
+                and cfg.area_normalizada_minima
+                <= marcador.area_normalizada
+                <= cfg.area_normalizada_maxima
+            )
+        )
+        if len(plausiveis) < 2:
+            return None
+        primeiro, segundo = sorted(
+            plausiveis,
+            key=lambda marcador: (marcador.area_normalizada, marcador.confianca),
+            reverse=True,
+        )[:2]
+        if (
+            abs(primeiro.deslocamento_lateral) < cfg.margem_lateral_retorno
+            or abs(segundo.deslocamento_lateral) < cfg.margem_lateral_retorno
+        ):
+            return None
+        if (
+            primeiro.deslocamento_lateral * segundo.deslocamento_lateral
+            >= -(cfg.margem_lateral**2)
+        ):
+            return None
+        if (
+            abs(primeiro.deslocamento_longitudinal - segundo.deslocamento_longitudinal)
+            > cfg.tolerancia_alinhamento_180
+        ):
+            return None
+        if (
+            abs(primeiro.centro.y - segundo.centro.y)
+            > cfg.diferenca_vertical_maxima_retorno
+        ):
+            return None
+        return min(primeiro.confianca, segundo.confianca)
 
     def _classificar(
         self,

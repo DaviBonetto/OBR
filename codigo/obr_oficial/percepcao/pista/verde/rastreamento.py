@@ -48,6 +48,12 @@ class RastreadorVerde:
         self._historico.append(observacao)
         self._expirar(observacao.instante_monotonico_s)
 
+        if (
+            observacao.decisao is DecisaoVerde.RETORNAR_180
+            and not intersecao_detectada
+        ):
+            return self._com_tempo(self._confirmar_retorno_sem_t(observacao), inicio)
+
         if not intersecao_detectada:
             return self._com_tempo(
                 replace(
@@ -61,6 +67,27 @@ class RastreadorVerde:
             )
 
         return self._com_tempo(self._confirmar_memoria(observacao), inicio)
+
+    def _confirmar_retorno_sem_t(self, observacao: EstimativaVerde) -> EstimativaVerde:
+        """Publica retorno só após confirmação temporal do par oposto."""
+
+        if len(self._historico) < self._configuracao.confirmacoes_minimas:
+            return replace(
+                observacao,
+                estado=EstadoVerde.CANDIDATA,
+                motivo="retorno_aguardando_confirmacao_temporal",
+            )
+
+        ultima = self._historico[-1]
+        return replace(
+            ultima,
+            id_quadro=observacao.id_quadro,
+            instante_monotonico_s=observacao.instante_monotonico_s,
+            estado=EstadoVerde.CONFIRMADA,
+            confianca=min(item.confianca for item in self._historico),
+            fonte=FonteEstimativa.TEMPORAL,
+            motivo="retorno_confirmado_temporalmente",
+        )
 
     def _confirmar_memoria(self, observacao: EstimativaVerde) -> EstimativaVerde:
         if not self._historico:

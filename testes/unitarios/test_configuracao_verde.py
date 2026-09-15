@@ -61,6 +61,9 @@ area_normalizada_minima = 0.0001
 area_normalizada_maxima = 0.08
 margem_antes_depois = 0.01
 margem_lateral = 0.015
+tolerancia_alinhamento_180 = 0.32
+margem_lateral_retorno = 0.10
+diferenca_vertical_maxima_retorno = 0.10
 [temporal]
 janela_quadros = 5
 confirmacoes_minimas = 3

@@ -17,6 +17,15 @@ area_normalizada_minima = 0.0001
 area_normalizada_maxima = 0.30
 margem_antes_depois = 0.01
 margem_lateral = 0.015
+# Dois cartões opostos alinhados no sentido de avanço significam retorno,
+# mesmo antes de a linha localizar o centro da cruz.
+tolerancia_alinhamento_180 = 0.32
+# Cada cartão precisa estar afastado da linha. Evita confundir uma cruz mista
+# inclinada com dois cartões laterais de retorno.
+margem_lateral_retorno = 0.10
+# Os dois cartões de retorno aparecem na mesma altura da câmera; este limite
+# separa esse par da cruz mista, cujos cartões ficam em alturas diferentes.
+diferenca_vertical_maxima_retorno = 0.10
 
 [temporal]
 janela_quadros = 5
