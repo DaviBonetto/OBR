@@ -23,6 +23,12 @@ from obr_oficial.percepcao.linha import (
     RastreadorLinha,
     carregar_configuracao_detector_neural,
 )
+from obr_oficial.percepcao.pista.verde import (
+    DetectorNeuralVerde,
+    InterpretadorGeometricoVerde,
+    RastreadorVerde,
+)
+from obr_oficial.percepcao.pista.verde.configuracao import carregar_configuracao_verde
 
 
 def main(argumentos: list[str] | None = None) -> int:
@@ -48,6 +54,7 @@ def main(argumentos: list[str] | None = None) -> int:
         "--configuracao-percepcao",
         default="percepcao_linha_neural.toml",
     )
+    analisador.add_argument("--configuracao-verde", default="percepcao_verde.toml")
     analisador.add_argument("--origem", help="indice ou /dev/videoX da camera")
     analisador.add_argument("--host")
     analisador.add_argument("--porta", type=int)
@@ -59,6 +66,10 @@ def main(argumentos: list[str] | None = None) -> int:
     caminho_percepcao = raiz / "configuracoes" / opcoes.configuracao_percepcao
     configuracao_percepcao = carregar_configuracao_detector_neural(
         caminho_percepcao,
+        raiz=raiz,
+    )
+    configuracao_verde = carregar_configuracao_verde(
+        raiz / "configuracoes" / opcoes.configuracao_verde,
         raiz=raiz,
     )
     dispositivo = exigir_secao(configuracao_camera, "dispositivo")
@@ -102,8 +113,18 @@ def main(argumentos: list[str] | None = None) -> int:
         )
 
     detector = DetectorNeuralLinha(configuracao_percepcao)
+    detector_verde = DetectorNeuralVerde(configuracao_verde.detector)
     rastreador = RastreadorLinha(configuracao_percepcao)
-    processador = ProcessadorContinuoLinha(fonte, detector, rastreador)
+    interpretador_verde = InterpretadorGeometricoVerde(configuracao_verde.geometria)
+    rastreador_verde = RastreadorVerde(configuracao_verde.temporal)
+    processador = ProcessadorContinuoLinha(
+        fonte,
+        detector,
+        rastreador,
+        detector_verde,
+        interpretador_verde,
+        rastreador_verde,
+    )
     painel = criar_painel_percepcao_linha(
         fonte,
         processador,
@@ -116,7 +137,8 @@ def main(argumentos: list[str] | None = None) -> int:
     fonte.iniciar()
     processador.iniciar()
     print("ATUADORES: DESABILITADOS", flush=True)
-    print(f"Modelo: {configuracao_percepcao.arquivo_modelo.name}", flush=True)
+    print(f"Modelo linha: {configuracao_percepcao.arquivo_modelo.name}", flush=True)
+    print(f"Modelo verde: {configuracao_verde.detector.arquivo_modelo.name}", flush=True)
     print(f"Fonte: {fonte.obter_estado().origem}", flush=True)
     print(f"Painel de percepcao: http://{host}:{porta}", flush=True)
     try:

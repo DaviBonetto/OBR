@@ -125,6 +125,7 @@ class DiagnosticoGeometria:
     largura_referencia: float
     largura_maxima: float
     intersecao_detectada: bool
+    centro_intersecao: PontoNormalizado | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -409,7 +410,8 @@ class ExtratorGeometriaLinha:
         mascara_topologia = mascara if mascara_quadro is None else mascara_quadro
         if mascara_topologia.ndim != 2 or mascara_topologia.size == 0:
             raise ErroDetectorNeural("mascara_quadro deve ser uma matriz bidimensional nao vazia")
-        intersecao = self._confirmar_intersecao_t(mascara_topologia)
+        centro_intersecao = self._localizar_intersecao_t(mascara_topologia)
+        intersecao = centro_intersecao is not None
         pontos, larguras, alargamento_curva = self._extrair_centro(
             mascara,
             intersecao_confirmada=intersecao,
@@ -431,6 +433,7 @@ class ExtratorGeometriaLinha:
             largura_referencia=largura_referencia / cfg.largura,
             largura_maxima=largura_maxima / cfg.largura,
             intersecao_detectada=intersecao,
+            centro_intersecao=centro_intersecao,
         )
         confianca = float(
             np.clip(0.55 * probabilidade_media + 0.30 * cobertura + 0.15 * continuidade, 0, 1)
@@ -510,7 +513,7 @@ class ExtratorGeometriaLinha:
             )
         return tuple(reversed(pontos)), larguras, alargamento_curva
 
-    def _confirmar_intersecao_t(self, mascara: np.ndarray) -> bool:
+    def _localizar_intersecao_t(self, mascara: np.ndarray) -> PontoNormalizado | None:
         cfg = self.configuracao
         altura, largura_quadro = mascara.shape
         ys = np.linspace(
@@ -536,7 +539,7 @@ class ExtratorGeometriaLinha:
 
         bootstrap = cfg.bootstrap_faixas_intersecao
         if len(faixas) < bootstrap + cfg.persistencia_alargamento_intersecao:
-            return False
+            return None
         observacoes: list[tuple[int, float, float, int, int]] = []
         x_rastreio: float | None = None
         for y, perfil, grupos in faixas[:bootstrap]:
@@ -573,12 +576,14 @@ class ExtratorGeometriaLinha:
         alargadas_consecutivas = 0
         alargamento_confirmado = False
         continuacao_consecutiva = 0
+        faixas_alargadas: list[int] = []
 
         for y, centro, largura, x_minimo, x_maximo in observacoes[bootstrap:]:
             contem_tronco = x_minimo - tolerancia <= x_tronco <= x_maximo + tolerancia
             if largura >= limite_alargamento and contem_tronco:
                 alargadas_consecutivas += 1
                 continuacao_consecutiva = 0
+                faixas_alargadas.append(y)
                 if alargadas_consecutivas >= cfg.persistencia_alargamento_intersecao:
                     alargamento_confirmado = True
                 continue
@@ -590,12 +595,37 @@ class ExtratorGeometriaLinha:
             if estreita and alinhada:
                 continuacao_consecutiva += 1
                 if continuacao_consecutiva >= cfg.faixas_continuacao_intersecao:
-                    return True
+                    return self._centro_intersecao(
+                        x_tronco,
+                        faixas_alargadas,
+                        largura_quadro,
+                        altura,
+                    )
                 if y == 0 and continuacao_consecutiva >= cfg.faixas_continuacao_borda_intersecao:
-                    return True
+                    return self._centro_intersecao(
+                        x_tronco,
+                        faixas_alargadas,
+                        largura_quadro,
+                        altura,
+                    )
             else:
                 continuacao_consecutiva = 0
-        return False
+        return None
+
+    @staticmethod
+    def _centro_intersecao(
+        x_tronco: float,
+        faixas_alargadas: list[int],
+        largura: int,
+        altura: int,
+    ) -> PontoNormalizado:
+        """Estima o centro do T pelas faixas largas do ramo transversal."""
+
+        y = float(np.median(faixas_alargadas))
+        return PontoNormalizado(
+            x=float(np.clip(x_tronco / max(1, largura - 1), 0.0, 1.0)),
+            y=float(np.clip(y / max(1, altura - 1), 0.0, 1.0)),
+        )
 
     @staticmethod
     def _continuidade(pontos: tuple[PontoNormalizado, ...]) -> float:

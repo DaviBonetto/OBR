@@ -31,6 +31,11 @@ Dice `0,95067`, precisão `0,97078`, recall `0,93138` e zero falso positivo nos 
 ONNX passou pela paridade numérica e foi promovido apenas a candidato da Fase Verde 4. Geometria,
 Raspberry Pi 5, câmera oficial e teste fechado continuam pendentes.
 
+A primeira integração da Fase Verde 4 já executa linha e verde no mesmo quadro do dashboard. Ela
+desenha o verde em amarelo, mantém decisão neutra fora de uma interseção confirmada e exige três
+leituras consecutivas no T antes de confirmar uma intenção. Consulte
+[`documentacao/fase_verde/INTEGRACAO_FASE4.md`](documentacao/fase_verde/INTEGRACAO_FASE4.md).
+
 Consulte [`documentacao/ESTADO_DO_PROJETO.md`](documentacao/ESTADO_DO_PROJETO.md) para o
 registro exato do que esta pronto e do que ainda depende de validacao fisica.
 

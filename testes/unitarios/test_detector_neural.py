@@ -124,6 +124,9 @@ def test_intersecao_t_preserva_continuacao_frontal(tmp_path: Path) -> None:
     )
 
     assert diagnostico.intersecao_detectada is True
+    assert diagnostico.centro_intersecao is not None
+    assert diagnostico.centro_intersecao.x == pytest.approx(0.5, abs=0.02)
+    assert diagnostico.centro_intersecao.y == pytest.approx(0.38, abs=0.08)
     assert estimativa.tipo_curva is TipoCurva.RETA
     assert estimativa.ponto_atual is not None
     assert estimativa.ponto_objetivo is not None
@@ -158,6 +161,7 @@ def test_curva_em_l_nao_e_confundida_com_t(
     )
 
     assert diagnostico.intersecao_detectada is False
+    assert diagnostico.centro_intersecao is None
     assert estimativa.tipo_curva is tipo_esperado
     assert estimativa.motivo == "evidencia_neural_atual"
 

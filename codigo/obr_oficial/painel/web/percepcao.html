@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OBR · Percepção da linha</title>
+    <title>OBR · Percepção da pista</title>
     <link rel="stylesheet" href="/percepcao.css" />
   </head>
   <body>
@@ -12,7 +12,7 @@
         <header class="topo">
           <div>
             <p class="sobretitulo">OBR · FASE 4</p>
-            <h1>Percepção da linha</h1>
+            <h1>Percepção da pista</h1>
           </div>
           <div class="estado-global">
             <span id="indicador" class="indicador"></span>
@@ -28,6 +28,7 @@
           <span><i class="cor objetivo"></i>ponto objetivo</span>
           <span><i class="cor centro"></i>trajetória até o objetivo</span>
           <span><i class="cor mascara"></i>contorno da máscara da IA</span>
+          <span><i class="cor verde"></i>marcador verde detectado</span>
         </footer>
       </section>
 
@@ -66,6 +67,18 @@
             <div><dt>Idade temporal</dt><dd id="idade">—</dd></div>
           </dl>
           <p class="regra">T = seguir reto · GAP = manter direção temporariamente</p>
+        </section>
+
+        <section class="bloco">
+          <p class="titulo-bloco">MARCADOR VERDE</p>
+          <dl>
+            <div><dt>Estado</dt><dd id="verde-estado">—</dd></div>
+            <div><dt>Decisão</dt><dd id="verde-decisao">—</dd></div>
+            <div><dt>Marcadores</dt><dd id="verde-marcadores">—</dd></div>
+            <div><dt>Confiança</dt><dd id="verde-confianca">—</dd></div>
+            <div><dt>Inferência</dt><dd id="verde-inferencia">—</dd></div>
+          </dl>
+          <p id="verde-motivo" class="regra">Sem verde = linha continua normalmente</p>
         </section>
       </aside>
     </main>

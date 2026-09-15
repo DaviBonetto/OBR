@@ -27,6 +27,17 @@ function atualizarEstado(dados) {
   $("#cobertura").textContent = percentual(diagnostico.cobertura_faixas);
   $("#area").textContent = percentual(diagnostico.area_mascara);
   $("#idade").textContent = numero(estimativa.idade_observacao_ms, 0, " ms");
+  const verde = dados.percepcao.verde;
+  $("#verde-estado").textContent = verde ? rotulo(verde.estado) : "INDISPONÍVEL";
+  $("#verde-decisao").textContent = verde ? rotulo(verde.decisao) : "—";
+  $("#verde-marcadores").textContent = verde ? String(verde.marcadores.length) : "—";
+  $("#verde-confianca").textContent = verde ? percentual(verde.confianca) : "—";
+  $("#verde-inferencia").textContent = verde
+    ? numero(verde.tempos.inferencia_ms, 2, " ms")
+    : "—";
+  $("#verde-motivo").textContent = verde
+    ? verde.motivo.replaceAll("_", " ")
+    : "Detector verde não iniciado";
 }
 
 async function consultar() {

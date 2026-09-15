@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from itertools import pairwise
 from threading import Condition, Event, Lock, Thread
 from time import monotonic
@@ -12,7 +12,16 @@ import cv2
 import numpy as np
 
 from obr_oficial.dispositivos.camera_base import FonteCamera, QuadroCamera
-from obr_oficial.nucleo.contratos import EstimativaLinha, PontoNormalizado
+from obr_oficial.nucleo.contratos import (
+    DecisaoVerde,
+    EstadoVerde,
+    EstimativaLinha,
+    EstimativaPista,
+    EstimativaVerde,
+    FonteEstimativa,
+    PontoNormalizado,
+    TemposProcessamento,
+)
 from obr_oficial.percepcao.linha.detector_neural import (
     ConfiguracaoDetectorNeural,
     DetectorNeuralLinha,
@@ -20,6 +29,12 @@ from obr_oficial.percepcao.linha.detector_neural import (
     ResultadoDetectorNeural,
 )
 from obr_oficial.percepcao.linha.rastreamento import RastreadorLinha
+from obr_oficial.percepcao.pista.verde import (
+    DetectorNeuralVerde,
+    InterpretadorGeometricoVerde,
+    RastreadorVerde,
+    referencial_da_linha,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +47,9 @@ class ResultadoQuadroLinha:
     mascara: np.ndarray
     estimativa: EstimativaLinha
     diagnostico: DiagnosticoGeometria
+    verde: EstimativaVerde | None = None
+    mascara_verde: np.ndarray | None = None
+    estimativa_pista: EstimativaPista | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,6 +95,33 @@ def estimativa_como_dict(estimativa: EstimativaLinha) -> dict[str, object]:
             "inferencia_ms": estimativa.tempos.inferencia_ms,
             "geometria_ms": estimativa.tempos.geometria_ms,
             "rastreamento_ms": estimativa.tempos.rastreamento_ms,
+            "total_ms": estimativa.tempos.total_ms,
+        },
+    }
+
+
+def estimativa_verde_como_dict(estimativa: EstimativaVerde) -> dict[str, object]:
+    """Serializa a evidencia verde sem publicar comandos de atuador."""
+
+    return {
+        "estado": estimativa.estado.value,
+        "decisao": estimativa.decisao.value,
+        "confianca": estimativa.confianca,
+        "marcadores": [
+            {
+                "centro": {"x": marcador.centro.x, "y": marcador.centro.y},
+                "confianca": marcador.confianca,
+                "area_normalizada": marcador.area_normalizada,
+                "posicao": marcador.posicao.value,
+            }
+            for marcador in estimativa.marcadores
+        ],
+        "fonte": estimativa.fonte.value,
+        "motivo": estimativa.motivo,
+        "tempos": {
+            "pre_processamento_ms": estimativa.tempos.pre_processamento_ms,
+            "inferencia_ms": estimativa.tempos.inferencia_ms,
+            "geometria_ms": estimativa.tempos.geometria_ms,
             "total_ms": estimativa.tempos.total_ms,
         },
     }
@@ -254,9 +299,7 @@ def _intervalo_ativo_proximo(
     zeros_antes = np.flatnonzero(vetor[:indice] == 0)
     inicio_intervalo = int(zeros_antes[-1] + 1) if len(zeros_antes) else 0
     zeros_depois = np.flatnonzero(vetor[indice + 1 :] == 0)
-    fim_intervalo = (
-        int(indice + zeros_depois[0]) if len(zeros_depois) else len(vetor) - 1
-    )
+    fim_intervalo = int(indice + zeros_depois[0]) if len(zeros_depois) else len(vetor) - 1
     return 0.5 * (inicio_intervalo + fim_intervalo), fim_intervalo - inicio_intervalo + 1
 
 
@@ -480,26 +523,21 @@ def _extrair_rota_visual(
             if len(xs_componente) < 2:
                 continue
             proximidade = float(
-                np.min(
-                    (xs_componente - largura / 2.0) ** 2
-                    + (ys_componente - altura * 1.18) ** 2
-                )
+                np.min((xs_componente - largura / 2.0) ** 2 + (ys_componente - altura * 1.18) ** 2)
             )
             if melhor is None or proximidade < melhor[0]:
                 melhor = (proximidade, ys_componente, xs_componente)
         if melhor is None:
             return None
         _, ys_componente, xs_componente = melhor
-        distancias_robo = (
-            (xs_componente - largura / 2.0) ** 2
-            + (ys_componente - altura * 1.18) ** 2
-        )
+        distancias_robo = (xs_componente - largura / 2.0) ** 2 + (
+            ys_componente - altura * 1.18
+        ) ** 2
         indice_inicio = int(np.argmin(distancias_robo))
         x_inicio = int(xs_componente[indice_inicio])
         y_inicio = int(ys_componente[indice_inicio])
-        pontuacoes = (
-            3.2 * np.maximum(0, y_inicio - ys_componente)
-            - 2.8 * np.abs(xs_componente - x_inicio)
+        pontuacoes = 3.2 * np.maximum(0, y_inicio - ys_componente) - 2.8 * np.abs(
+            xs_componente - x_inicio
         )
         indice_destino = int(np.argmax(pontuacoes))
         caminho_t = np.asarray(
@@ -529,9 +567,7 @@ def _extrair_rota_visual(
         return None
     # O afinamento pode deixar pequenos espinhos isolados nas bordas da
     # mascara. Eles nunca devem roubar as bolinhas da rota central principal.
-    rotulo_principal = 1 + int(
-        np.argmax(estatisticas[1:, cv2.CC_STAT_AREA])
-    )
+    rotulo_principal = 1 + int(np.argmax(estatisticas[1:, cv2.CC_STAT_AREA]))
     esqueleto = np.where(rotulos == rotulo_principal, 255, 0).astype(np.uint8)
     ys, xs = np.nonzero(esqueleto)
     if len(xs) < 2:
@@ -638,12 +674,10 @@ def _eh_cotovelo_ortogonal(rota: np.ndarray) -> bool:
     if len(rota) != 3:
         return False
     horizontal_vertical = (
-        abs(int(rota[0, 1]) - int(rota[1, 1])) <= 2
-        and abs(int(rota[1, 0]) - int(rota[2, 0])) <= 2
+        abs(int(rota[0, 1]) - int(rota[1, 1])) <= 2 and abs(int(rota[1, 0]) - int(rota[2, 0])) <= 2
     )
     vertical_horizontal = (
-        abs(int(rota[0, 0]) - int(rota[1, 0])) <= 2
-        and abs(int(rota[1, 1]) - int(rota[2, 1])) <= 2
+        abs(int(rota[0, 0]) - int(rota[1, 0])) <= 2 and abs(int(rota[1, 1]) - int(rota[2, 1])) <= 2
     )
     return horizontal_vertical or vertical_horizontal
 
@@ -684,10 +718,14 @@ def desenhar_sobreposicao(
         )
         if rota_visual is None:
             pontos = estimativa.centro_linha
-            indice_atual = min(
-                range(len(pontos)),
-                key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
-            ) if pontos else 0
+            indice_atual = (
+                min(
+                    range(len(pontos)),
+                    key=lambda indice: abs(pontos[indice].y - estimativa.ponto_atual.y),
+                )
+                if pontos
+                else 0
+            )
             indice_objetivo = (
                 min(
                     range(len(pontos)),
@@ -720,6 +758,26 @@ def desenhar_sobreposicao(
     return imagem
 
 
+def desenhar_sobreposicao_verde(
+    imagem_bgr: np.ndarray,
+    mascara_verde: np.ndarray,
+    estimativa: EstimativaVerde,
+) -> np.ndarray:
+    """Acrescenta apenas o contorno amarelo e as instancias verdes observadas."""
+
+    imagem = imagem_bgr.copy()
+    contornos, _ = cv2.findContours(mascara_verde, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(imagem, contornos, -1, (0, 220, 255), 2, cv2.LINE_AA)
+    altura, largura = imagem.shape[:2]
+    for marcador in estimativa.marcadores:
+        centro = (
+            round(marcador.centro.x * (largura - 1)),
+            round(marcador.centro.y * (altura - 1)),
+        )
+        cv2.circle(imagem, centro, 6, (0, 220, 255), 2, cv2.LINE_AA)
+    return imagem
+
+
 class ProcessadorContinuoLinha:
     """Thread independente que descarta quadros antigos e publica o ultimo resultado."""
 
@@ -728,10 +786,20 @@ class ProcessadorContinuoLinha:
         fonte_camera: FonteCamera,
         detector: DetectorNeuralLinha,
         rastreador: RastreadorLinha,
+        detector_verde: DetectorNeuralVerde | None = None,
+        interpretador_verde: InterpretadorGeometricoVerde | None = None,
+        rastreador_verde: RastreadorVerde | None = None,
     ) -> None:
+        if (detector_verde is None) != (interpretador_verde is None):
+            raise ValueError("detector e interpretador verde devem ser fornecidos juntos")
+        if rastreador_verde is not None and detector_verde is None:
+            raise ValueError("rastreador verde exige detector e interpretador verde")
         self._fonte = fonte_camera
         self._detector = detector
         self._rastreador = rastreador
+        self._detector_verde = detector_verde
+        self._interpretador_verde = interpretador_verde
+        self._rastreador_verde = rastreador_verde
         self._condicao = Condition()
         self._lock_estado = Lock()
         self._parar = Event()
@@ -825,6 +893,14 @@ class ProcessadorContinuoLinha:
             estimativa,
             self._detector.configuracao,
         )
+        verde, mascara_verde, estimativa_pista = self._processar_verde(
+            quadro,
+            estimativa,
+            intersecao_detectada=resultado.diagnostico.intersecao_detectada,
+            centro_intersecao=resultado.diagnostico.centro_intersecao,
+        )
+        if verde is not None and mascara_verde is not None:
+            sobreposta = desenhar_sobreposicao_verde(sobreposta, mascara_verde, verde)
         publicado = ResultadoQuadroLinha(
             id_quadro=quadro.id_quadro,
             instante_monotonico_s=quadro.instante_monotonico_s,
@@ -832,6 +908,9 @@ class ProcessadorContinuoLinha:
             mascara=resultado.mascara,
             estimativa=estimativa,
             diagnostico=resultado.diagnostico,
+            verde=verde,
+            mascara_verde=mascara_verde,
+            estimativa_pista=estimativa_pista,
         )
         with self._condicao:
             self._ultimo = publicado
@@ -840,3 +919,61 @@ class ProcessadorContinuoLinha:
             self._total_processados += 1
             self._ultimo_erro = ""
             self._instantes.append(monotonic())
+
+    def _processar_verde(
+        self,
+        quadro: QuadroCamera,
+        linha: EstimativaLinha,
+        *,
+        intersecao_detectada: bool,
+        centro_intersecao: PontoNormalizado | None,
+    ) -> tuple[EstimativaVerde | None, np.ndarray | None, EstimativaPista | None]:
+        if self._detector_verde is None or self._interpretador_verde is None:
+            return None, None, None
+        resultado = self._detector_verde.processar(quadro.imagem_bgr)
+        if linha.ponto_atual is None or linha.ponto_objetivo is None:
+            verde = EstimativaVerde(
+                id_quadro=quadro.id_quadro,
+                instante_monotonico_s=quadro.instante_monotonico_s,
+                estado=EstadoVerde.AUSENTE,
+                decisao=DecisaoVerde.NENHUMA,
+                confianca=0.0,
+                fonte=FonteEstimativa.NENHUMA,
+                motivo="linha_sem_referencial_para_interpretar_verde",
+                tempos=TemposProcessamento(
+                    pre_processamento_ms=resultado.pre_processamento_ms,
+                    inferencia_ms=resultado.inferencia_ms,
+                ),
+            )
+        else:
+            referencial = referencial_da_linha(
+                linha.ponto_atual,
+                linha.ponto_objetivo,
+                roi_y=self._detector.configuracao.roi_y,
+                centro_intersecao=centro_intersecao,
+            )
+            verde_base = self._interpretador_verde.interpretar(
+                resultado.candidatos,
+                referencial,
+                id_quadro=quadro.id_quadro,
+                instante_monotonico_s=quadro.instante_monotonico_s,
+            )
+            verde = replace(
+                verde_base,
+                tempos=replace(
+                    verde_base.tempos,
+                    pre_processamento_ms=resultado.pre_processamento_ms,
+                    inferencia_ms=resultado.inferencia_ms,
+                ),
+            )
+            if not intersecao_detectada:
+                verde = replace(
+                    verde,
+                    estado=EstadoVerde.AUSENTE,
+                    decisao=DecisaoVerde.NENHUMA,
+                    confianca=0.0,
+                    motivo="marcadores_verdes_aguardando_intersecao",
+                )
+            if self._rastreador_verde is not None:
+                verde = self._rastreador_verde.atualizar(verde)
+        return verde, resultado.mascara, EstimativaPista(linha=linha, verde=verde)

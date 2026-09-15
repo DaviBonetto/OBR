@@ -13,14 +13,13 @@ from obr_oficial.percepcao.pista.verde.configuracao import (
 def test_carrega_configuracao_oficial_com_linha_sempre_ativa() -> None:
     raiz = Path(__file__).resolve().parents[2]
 
-    configuracao = carregar_configuracao_verde(
-        raiz / "configuracoes" / "percepcao_verde.toml"
-    )
+    configuracao = carregar_configuracao_verde(raiz / "configuracoes" / "percepcao_verde.toml")
 
     assert configuracao.versao == 1
     assert configuracao.detector_linha_sempre_ativo is True
     assert configuracao.decisao_neutra_sem_verde is True
     assert configuracao.temporal.confirmacoes_minimas == 3
+    assert configuracao.geometria.area_normalizada_maxima == 0.30
 
 
 def test_rejeita_intervalo_de_area_invertido() -> None:
@@ -49,6 +48,12 @@ def test_rejeita_booleano_textual_no_arquivo(tmp_path: Path) -> None:
         """
 [verde]
 versao = 1
+[modelo]
+arquivo = "modelos/verde/lraspp_v1/modelo.onnx"
+sha256 = "3970535c47d9b599bdf730bd00559e4b91a6394ca66c7764c6c47017fdcbd451"
+largura = 320
+altura = 240
+limiar_mascara = 0.75
 [geometria]
 confianca_minima = 0.75
 area_normalizada_minima = 0.0001

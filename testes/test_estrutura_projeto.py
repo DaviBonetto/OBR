@@ -35,6 +35,7 @@ def test_arquivos_fundamentais_estao_presentes() -> None:
         "documentacao/fase_verde/MASCARAS_VERDES_V1.md",
         "documentacao/fase_verde/TREINAMENTO_VERDE_V1.md",
         "documentacao/fase_verde/AUDITORIA_T4_V1.md",
+        "documentacao/fase_verde/INTEGRACAO_FASE4.md",
         "codigo/obr_oficial/aplicacao/exportar_modelo_verde.py",
         "modelos/verde/lraspp_v1/manifesto.json",
         "modelos/verde/lraspp_v1/README.md",

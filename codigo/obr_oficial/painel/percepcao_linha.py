@@ -13,6 +13,7 @@ from obr_oficial.dispositivos.camera_base import FonteCamera
 from obr_oficial.percepcao.linha.execucao_continua import (
     ProcessadorContinuoLinha,
     estimativa_como_dict,
+    estimativa_verde_como_dict,
 )
 
 
@@ -60,6 +61,9 @@ def criar_painel_percepcao_linha(
             percepcao = {
                 "estimativa": estimativa_como_dict(resultado.estimativa),
                 "diagnostico": asdict(resultado.diagnostico),
+                "verde": (
+                    None if resultado.verde is None else estimativa_verde_como_dict(resultado.verde)
+                ),
             }
         return jsonify(
             {

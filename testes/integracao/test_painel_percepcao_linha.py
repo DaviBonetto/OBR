@@ -12,19 +12,32 @@ from obr_oficial.percepcao.linha import (
     ProcessadorContinuoLinha,
     RastreadorLinha,
 )
+from obr_oficial.percepcao.pista.verde import DetectorNeuralVerde, InterpretadorGeometricoVerde
+from obr_oficial.percepcao.pista.verde.configuracao import (
+    ConfiguracaoDetectorVerde,
+    ConfiguracaoGeometriaVerde,
+)
 
 
 class _SessaoLinhaReta:
     def __init__(self) -> None:
         probabilidade = np.full((192, 320), 0.02, dtype=np.float32)
         probabilidade[:, 150:170] = 0.97
-        self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(
-            np.float32
-        )
+        self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None].astype(np.float32)
         self.chamadas = 0
 
     def run(self, _saidas, _entradas):
         self.chamadas += 1
+        return [self.logits]
+
+
+class _SessaoVerdeEsquerda:
+    def __init__(self) -> None:
+        probabilidade = np.full((240, 320), 0.01, dtype=np.float32)
+        probabilidade[185:225, 65:115] = 0.98
+        self.logits = np.log(probabilidade / (1.0 - probabilidade))[None, None]
+
+    def run(self, _saidas, _entradas):
         return [self.logits]
 
 
@@ -78,7 +91,7 @@ def test_dashboard_observa_ultimo_resultado_sem_comandos(tmp_path: Path) -> None
 
         pagina = cliente.get("/")
         assert pagina.status_code == 200
-        assert "Percepção da linha" in pagina.get_data(as_text=True)
+        assert "Percepção da pista" in pagina.get_data(as_text=True)
 
         resposta = cliente.get("/api/estado")
         assert resposta.status_code == 200
@@ -95,6 +108,58 @@ def test_dashboard_observa_ultimo_resultado_sem_comandos(tmp_path: Path) -> None
         video.close()
 
         assert cliente.post("/api/comandos", json={}).status_code == 404
+    finally:
+        processador.parar()
+        camera.parar()
+
+
+def test_dashboard_publica_verde_no_mesmo_quadro_da_linha(tmp_path: Path) -> None:
+    camera = CameraSimulada(largura=160, altura=120, fps=20.0)
+    configuracao = _configuracao(tmp_path)
+    detector_linha = DetectorNeuralLinha(configuracao, sessao=_SessaoLinhaReta())
+    detector_verde = DetectorNeuralVerde(
+        ConfiguracaoDetectorVerde(
+            arquivo_modelo=tmp_path / "verde.onnx",
+            sha256_modelo="0" * 64,
+            largura=320,
+            altura=240,
+            limiar_mascara=0.75,
+        ),
+        sessao=_SessaoVerdeEsquerda(),
+    )
+    interpretador = InterpretadorGeometricoVerde(
+        ConfiguracaoGeometriaVerde(
+            confianca_minima=0.75,
+            area_normalizada_minima=0.0001,
+            area_normalizada_maxima=0.08,
+            margem_antes_depois=0.01,
+            margem_lateral=0.015,
+        )
+    )
+    processador = ProcessadorContinuoLinha(
+        camera,
+        detector_linha,
+        RastreadorLinha(configuracao),
+        detector_verde,
+        interpretador,
+    )
+    camera.iniciar()
+    processador.iniciar()
+    try:
+        resultado = processador.obter_ultimo_resultado(timeout_s=2.0)
+        assert resultado is not None
+        resultado = processador.obter_ultimo_resultado(depois_de=resultado.id_quadro, timeout_s=2.0)
+        assert resultado is not None
+        assert resultado.verde is not None
+        assert resultado.estimativa_pista is not None
+        assert resultado.estimativa_pista.id_quadro == resultado.id_quadro
+
+        cliente = criar_painel_percepcao_linha(camera, processador).test_client()
+        estado = cliente.get("/api/estado").get_json()
+        assert estado["somente_leitura"] is True
+        assert estado["atuadores_habilitados"] is False
+        assert estado["percepcao"]["verde"]["decisao"] == "nenhuma"
+        assert estado["percepcao"]["verde"]["marcadores"]
     finally:
         processador.parar()
         camera.parar()

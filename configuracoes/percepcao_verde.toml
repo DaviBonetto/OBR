@@ -1,11 +1,19 @@
 [verde]
 versao = 1
 
+[modelo]
+arquivo = "modelos/verde/lraspp_v1/modelo.onnx"
+sha256 = "3970535c47d9b599bdf730bd00559e4b91a6394ca66c7764c6c47017fdcbd451"
+largura = 320
+altura = 240
+limiar_mascara = 0.75
+
 [geometria]
 # Valores iniciais normalizados. Serao calibrados somente com dados reais, sem esconder falhas.
 confianca_minima = 0.75
 area_normalizada_minima = 0.0001
-area_normalizada_maxima = 0.08
+# A auditoria V2 mediu cartões válidos entre 6% e 26% do quadro da câmera USB.
+area_normalizada_maxima = 0.30
 margem_antes_depois = 0.01
 margem_lateral = 0.015
 

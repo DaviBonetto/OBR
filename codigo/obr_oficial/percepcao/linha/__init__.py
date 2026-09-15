@@ -21,7 +21,9 @@ from obr_oficial.percepcao.linha.execucao_continua import (
     ProcessadorContinuoLinha,
     ResultadoQuadroLinha,
     desenhar_sobreposicao,
+    desenhar_sobreposicao_verde,
     estimativa_como_dict,
+    estimativa_verde_como_dict,
 )
 from obr_oficial.percepcao.linha.rastreamento import RastreadorLinha
 
@@ -42,6 +44,8 @@ __all__ = [
     "carregar_configuracao_detector_classico",
     "carregar_configuracao_detector_neural",
     "desenhar_sobreposicao",
+    "desenhar_sobreposicao_verde",
     "estimativa_como_dict",
+    "estimativa_verde_como_dict",
     "preprocessar_quadro",
 ]

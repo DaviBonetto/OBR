@@ -27,10 +27,13 @@ class ConfiguracaoGeometriaVerde:
     def __post_init__(self) -> None:
         if not isfinite(self.confianca_minima) or not 0.0 <= self.confianca_minima <= 1.0:
             raise ErroConfiguracaoVerde("confianca_minima deve estar entre zero e um")
-        if not all(
-            isfinite(valor)
-            for valor in (self.area_normalizada_minima, self.area_normalizada_maxima)
-        ) or not 0.0 < self.area_normalizada_minima < self.area_normalizada_maxima <= 1.0:
+        if (
+            not all(
+                isfinite(valor)
+                for valor in (self.area_normalizada_minima, self.area_normalizada_maxima)
+            )
+            or not 0.0 < self.area_normalizada_minima < self.area_normalizada_maxima <= 1.0
+        ):
             raise ErroConfiguracaoVerde("intervalo de area normalizada invalido")
         if not isfinite(self.margem_antes_depois) or not 0.0 <= self.margem_antes_depois < 0.25:
             raise ErroConfiguracaoVerde("margem_antes_depois invalida")
@@ -56,10 +59,30 @@ class ConfiguracaoTemporalVerde:
 
 
 @dataclass(frozen=True, slots=True)
+class ConfiguracaoDetectorVerde:
+    """Contrato do ONNX verde, independente do detector neural da linha."""
+
+    arquivo_modelo: Path
+    sha256_modelo: str
+    largura: int
+    altura: int
+    limiar_mascara: float
+
+    def __post_init__(self) -> None:
+        if self.largura < 32 or self.altura < 32:
+            raise ErroConfiguracaoVerde("resolucao do verde deve ser ao menos 32x32")
+        if len(self.sha256_modelo) != 64:
+            raise ErroConfiguracaoVerde("sha256 do modelo verde deve ter 64 caracteres")
+        if not isfinite(self.limiar_mascara) or not 0.0 < self.limiar_mascara < 1.0:
+            raise ErroConfiguracaoVerde("limiar_mascara deve estar estritamente entre zero e um")
+
+
+@dataclass(frozen=True, slots=True)
 class ConfiguracaoVerde:
     """Configuracao completa congelada na Fase Verde 0."""
 
     versao: int
+    detector: ConfiguracaoDetectorVerde
     geometria: ConfiguracaoGeometriaVerde
     temporal: ConfiguracaoTemporalVerde
     detector_linha_sempre_ativo: bool
@@ -88,28 +111,35 @@ def _booleano(secao: dict[str, Any], nome: str) -> bool:
     return valor
 
 
-def carregar_configuracao_verde(caminho: Path) -> ConfiguracaoVerde:
+def carregar_configuracao_verde(
+    caminho: Path,
+    *,
+    raiz: Path | None = None,
+) -> ConfiguracaoVerde:
     """Carrega e valida o arquivo oficial da percepcao verde."""
 
     dados = carregar_toml(caminho)
+    base = caminho.resolve().parent.parent if raiz is None else raiz.resolve()
     projeto = exigir_secao(dados, "verde")
+    modelo = exigir_secao(dados, "modelo")
     geometria = exigir_secao(dados, "geometria")
     temporal = exigir_secao(dados, "temporal")
     integracao = exigir_secao(dados, "integracao")
     try:
         return ConfiguracaoVerde(
             versao=int(projeto["versao"]),
+            detector=ConfiguracaoDetectorVerde(
+                arquivo_modelo=(base / str(modelo["arquivo"])).resolve(),
+                sha256_modelo=str(modelo["sha256"]).lower(),
+                largura=int(_numero(modelo, "largura", int)),
+                altura=int(_numero(modelo, "altura", int)),
+                limiar_mascara=float(_numero(modelo, "limiar_mascara", float)),
+            ),
             geometria=ConfiguracaoGeometriaVerde(
                 confianca_minima=float(_numero(geometria, "confianca_minima", float)),
-                area_normalizada_minima=float(
-                    _numero(geometria, "area_normalizada_minima", float)
-                ),
-                area_normalizada_maxima=float(
-                    _numero(geometria, "area_normalizada_maxima", float)
-                ),
-                margem_antes_depois=float(
-                    _numero(geometria, "margem_antes_depois", float)
-                ),
+                area_normalizada_minima=float(_numero(geometria, "area_normalizada_minima", float)),
+                area_normalizada_maxima=float(_numero(geometria, "area_normalizada_maxima", float)),
+                margem_antes_depois=float(_numero(geometria, "margem_antes_depois", float)),
                 margem_lateral=float(_numero(geometria, "margem_lateral", float)),
             ),
             temporal=ConfiguracaoTemporalVerde(
@@ -117,9 +147,7 @@ def carregar_configuracao_verde(caminho: Path) -> ConfiguracaoVerde:
                 confirmacoes_minimas=int(_numero(temporal, "confirmacoes_minimas", int)),
                 memoria_maxima_ms=float(_numero(temporal, "memoria_maxima_ms", float)),
             ),
-            detector_linha_sempre_ativo=_booleano(
-                integracao, "detector_linha_sempre_ativo"
-            ),
+            detector_linha_sempre_ativo=_booleano(integracao, "detector_linha_sempre_ativo"),
             decisao_neutra_sem_verde=_booleano(integracao, "decisao_neutra_sem_verde"),
         )
     except (KeyError, TypeError, ValueError) as erro:

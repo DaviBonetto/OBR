@@ -63,6 +63,31 @@ class ReferencialIntersecao:
         return dy, -dx
 
 
+def referencial_da_linha(
+    ponto_atual: PontoNormalizado,
+    ponto_objetivo: PontoNormalizado,
+    *,
+    roi_y: float,
+    centro_intersecao: PontoNormalizado | None = None,
+) -> ReferencialIntersecao:
+    """Traduz a linha do recorte para o quadro inteiro e ancora no T quando conhecido."""
+
+    def quadro(ponto: PontoNormalizado) -> PontoNormalizado:
+        return PontoNormalizado(
+            x=ponto.x,
+            y=roi_y + (1.0 - roi_y) * ponto.y,
+        )
+
+    atual = quadro(ponto_atual)
+    objetivo = quadro(ponto_objetivo)
+    centro = centro_intersecao or objetivo
+    return ReferencialIntersecao(
+        centro=centro,
+        direcao_avanco_x=centro.x - atual.x,
+        direcao_avanco_y=centro.y - atual.y,
+    )
+
+
 class InterpretadorGeometricoVerde:
     """Converte candidatos em intencao sem controlar motores ou substituir a linha."""
 
@@ -115,9 +140,7 @@ class InterpretadorGeometricoVerde:
             estado = EstadoVerde.CANDIDATA
             confianca = max(marcador.confianca for marcador in direitas)
             motivo = "marcador_valido_antes_a_direita"
-        elif any(
-            marcador.posicao is PosicaoMarcadorVerde.AMBIGUA for marcador in marcadores
-        ):
+        elif any(marcador.posicao is PosicaoMarcadorVerde.AMBIGUA for marcador in marcadores):
             estado = EstadoVerde.AMBIGUA
             confianca = max((marcador.confianca for marcador in marcadores), default=0.0)
             motivo = "marcadores_sem_posicao_geometrica_valida"

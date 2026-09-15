@@ -11,6 +11,7 @@ from obr_oficial.percepcao.pista.verde.geometria import (
     CandidatoMarcadorVerde,
     InterpretadorGeometricoVerde,
     ReferencialIntersecao,
+    referencial_da_linha,
 )
 
 
@@ -175,6 +176,18 @@ def test_esquerda_e_relativa_ao_sentido_de_chegada(
 
     assert resultado.decisao is DecisaoVerde.VIRAR_ESQUERDA
     assert resultado.marcadores[0].posicao is PosicaoMarcadorVerde.ANTES_ESQUERDA
+
+
+def test_referencial_prefere_o_centro_real_do_t() -> None:
+    referencial = referencial_da_linha(
+        PontoNormalizado(0.5, 0.9),
+        PontoNormalizado(0.5, 0.5),
+        roi_y=0.2,
+        centro_intersecao=PontoNormalizado(0.5, 0.4),
+    )
+
+    assert referencial.centro == PontoNormalizado(0.5, 0.4)
+    assert referencial.direcao_unitaria == pytest.approx((0.0, -1.0))
 
 
 def test_rejeita_direcao_de_avanco_nao_finita() -> None:
